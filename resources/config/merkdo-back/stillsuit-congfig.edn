@@ -1,0 +1,348 @@
+{:catchpocket/generated-at "Sat Dec 28 20:15:42 CET 2019"
+ :catchpocket/version "0.1"
+ :enums {:account_type {:description "> Enum generated from datomic attribute `:account/type`."
+                        :values      ({:description             "> Datomic value: `:account-type/brand`"
+                                       :enum-value              :BRAND
+                                       :stillsuit/datomic-value :account-type/brand}
+                                      {:description             "> Datomic value: `:account-type/merkdo`"
+                                       :enum-value              :MERKDO
+                                       :stillsuit/datomic-value :account-type/merkdo}
+                                      {:description             "> Datomic value: `:account-type/receiver`"
+                                       :enum-value              :RECEIVER
+                                       :stillsuit/datomic-value :account-type/receiver}
+                                      {:description             "> Datomic value: `:account-type/retailer`"
+                                       :enum-value              :RETAILER
+                                       :stillsuit/datomic-value :account-type/retailer}
+                                      {:description             "> Datomic value: `:account-type/sender`"
+                                       :enum-value              :SENDER
+                                       :stillsuit/datomic-value :account-type/sender})}}
+ :interfaces {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
+ :mutations {}
+ :objects
+ {:Account
+  {:description "Entity containing fields with the namespace `:account`"
+   :fields
+   {:_contos       {:description "Back-reference for the `:conto/_account` datomic attribute"
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :conto/_account :lacinia-type (list (non-null :Conto))}]
+                    :type        (list (non-null :Conto))}
+    :_currencies   {:description "Back-reference for the `:currency/_account` datomic attribute"
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :currency/_account :lacinia-type (list (non-null :Currency))}]
+                    :type        (list (non-null :Currency))}
+    :_transactions {:description "Back-reference for the `:transaction/_account` datomic attribute"
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute    :transaction/_account
+                                   :lacinia-type (list (non-null :Transaction))}]
+                    :type        (list (non-null :Transaction))}
+    :brand_group   {:description "\n\n> datomic attribute: `:account/brand-group`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :account/brand-group :lacinia-type :BrandGroup}]
+                    :type        :BrandGroup}
+    :country       {:description "\n\n> datomic attribute: `:account/country`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :account/country :lacinia-type :Country}]
+                    :type        :Country}
+    :db_id         {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :name          {:description "\n\n> datomic attribute: `:account/name`. Type `:db.type/string`, unique."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :account/name :lacinia-type String}]
+                    :type        String}
+    :type          {:description "\n\n> datomic attribute: `:account/type`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/enum #:stillsuit{:attribute :account/type :lacinia-type :account_type}]
+                    :type        :account_type}}
+   :implements [:DatomicEntity]}
+  :BrandGroup
+  {:fields {:_accounts   {:description "Back-reference for the `:account/_brand-group` datomic attribute"
+                          :resolve     [:stillsuit/ref
+                                        #:stillsuit{:attribute    :account/_brand-group
+                                         :lacinia-type (list (non-null :Account))}]
+                          :type        (list (non-null :Account))}
+            :_currencies {:description "Back-reference for the `:currency/_brand-group` datomic attribute"
+                          :resolve     [:stillsuit/ref
+                                        #:stillsuit{:attribute    :currency/_brand-group
+                                         :lacinia-type (list (non-null :Currency))}]
+                          :type        (list (non-null :Currency))}}}
+  :Brand_Group
+  {:description "Entity containing fields with the namespace `:brand_group`"
+   :fields      {:db_id       {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :description {:description
+                               "\n\n> datomic attribute: `:brand-group/description`. Type `:db.type/string`."
+                               :resolve [:stillsuit/ref
+                                         #:stillsuit{:attribute :brand-group/description :lacinia-type String}]
+                               :type String}
+                 :name        {:description
+                               "\n\n> datomic attribute: `:brand-group/name`. Type `:db.type/string`, unique."
+                               :resolve [:stillsuit/ref #:stillsuit{:attribute :brand-group/name :lacinia-type String}]
+                               :type String}}
+   :implements  [:DatomicEntity]}
+  :Conto
+  {:description "Entity containing fields with the namespace `:conto`"
+   :fields
+   {:_transactions {:description "Back-reference for the `:transaction/_conto` datomic attribute"
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute    :transaction/_conto
+                                   :lacinia-type (list (non-null :Transaction))}]
+                    :type        (list (non-null :Transaction))}
+    :account       {:description "\n\n> datomic attribute: `:conto/account`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/account :lacinia-type :Account}]
+                    :type        :Account}
+    :at            {:description "\n\n> datomic attribute: `:conto/at`. Type `:db.type/long`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/at :lacinia-type :JavaLong}]
+                    :type        :JavaLong}
+    :balance       {:description "\n\n> datomic attribute: `:conto/balance`. Type `:db.type/double`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/balance :lacinia-type Float}]
+                    :type        Float}
+    :currency      {:description "\n\n> datomic attribute: `:conto/currency`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/currency :lacinia-type :Currency}]
+                    :type        :Currency}
+    :db_id         {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :exchange_rate {:description "\n\n> datomic attribute: `:conto/exchange-rate`. Type `:db.type/double`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/exchange-rate :lacinia-type Float}]
+                    :type        Float}
+    :from_account  {:description "\n\n> datomic attribute: `:conto/from-account`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/from-account :lacinia-type :FromAccount}]
+                    :type        :FromAccount}
+    :from_currency {:description "\n\n> datomic attribute: `:conto/from-currency`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :conto/from-currency :lacinia-type :FromCurrency}]
+                    :type        :FromCurrency}
+    :identifier    {:description "\n\n> datomic attribute: `:conto/identifier`. Type `:db.type/string`, unique."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/identifier :lacinia-type String}]
+                    :type        String}
+    :min_balance   {:description "\n\n> datomic attribute: `:conto/min-balance`. Type `:db.type/double`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/min-balance :lacinia-type Float}]
+                    :type        Float}
+    :tags          {:description "\n\n> datomic attribute: `:conto/tags`. Type `:db.type/keyword`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :conto/tags :lacinia-type :ClojureKeyword}]
+                    :type        (list (non-null :ClojureKeyword))}}
+   :implements [:DatomicEntity]}
+  :Country
+  {:description "Entity containing fields with the namespace `:country`"
+   :fields      {:_accounts   {:description "Back-reference for the `:account/_country` datomic attribute"
+                               :resolve     [:stillsuit/ref
+                                             #:stillsuit{:attribute    :account/_country
+                                              :lacinia-type (list (non-null :Account))}]
+                               :type        (list (non-null :Account))}
+                 :_currencies {:description "Back-reference for the `:currency/_country` datomic attribute"
+                               :resolve     [:stillsuit/ref
+                                             #:stillsuit{:attribute    :currency/_country
+                                              :lacinia-type (list (non-null :Currency))}]
+                               :type        (list (non-null :Currency))}
+                 :code        {:description "\n\n> datomic attribute: `:country/code`. Type `:db.type/string`, unique."
+                               :resolve     [:stillsuit/ref #:stillsuit{:attribute :country/code :lacinia-type String}]
+                               :type        String}
+                 :db_id       {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :name        {:description "\n\n> datomic attribute: `:country/name`. Type `:db.type/string`."
+                               :resolve     [:stillsuit/ref #:stillsuit{:attribute :country/name :lacinia-type String}]
+                               :type        String}}
+   :implements  [:DatomicEntity]}
+  :Currency
+  {:description "Entity containing fields with the namespace `:currency`"
+   :fields
+   {:_contos       {:description "Back-reference for the `:conto/_currency` datomic attribute"
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :conto/_currency :lacinia-type (list (non-null :Conto))}]
+                    :type        (list (non-null :Conto))}
+    :_transactions {:description "Back-reference for the `:transaction/_currency` datomic attribute"
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute    :transaction/_currency
+                                   :lacinia-type (list (non-null :Transaction))}]
+                    :type        (list (non-null :Transaction))}
+    :account       {:description "\n\n> datomic attribute: `:currency/account`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :currency/account :lacinia-type :Account}]
+                    :type        :Account}
+    :brand_group   {:description "\n\n> datomic attribute: `:currency/brand-group`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :currency/brand-group :lacinia-type :BrandGroup}]
+                    :type        :BrandGroup}
+    :code          {:description "\n\n> datomic attribute: `:currency/code`. Type `:db.type/string`, unique."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :currency/code :lacinia-type String}]
+                    :type        String}
+    :country       {:description "\n\n> datomic attribute: `:currency/country`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :currency/country :lacinia-type :Country}]
+                    :type        :Country}
+    :db_id         {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :specificity   {:description "\n\n> datomic attribute: `:currency/specificity`. Type `:db.type/long`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :currency/specificity :lacinia-type :JavaLong}]
+                    :type        :JavaLong}
+    :virtual       {:description "\n\n> datomic attribute: `:currency/virtual`. Type `:db.type/boolean`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :currency/virtual :lacinia-type Boolean}]
+                    :type        Boolean}}
+   :implements [:DatomicEntity]}
+  :Direction
+  {:fields {:_transfers {:description "Back-reference for the `:transfer/_direction` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :transfer/_direction
+                                        :lacinia-type (list (non-null :Transfer))}]
+                         :type        (list (non-null :Transfer))}}}
+  :Exchange_Rate
+  {:description "Entity containing fields with the namespace `:exchange_rate`"
+   :fields      {:active {:description "\n\n> datomic attribute: `:exchange-rate/active`. Type `:db.type/boolean`."
+                          :resolve     [:stillsuit/ref
+                                        #:stillsuit{:attribute :exchange-rate/active :lacinia-type Boolean}]
+                          :type        Boolean}
+                 :at     {:description "\n\n> datomic attribute: `:exchange-rate/at`. Type `:db.type/long`."
+                          :resolve     [:stillsuit/ref
+                                        #:stillsuit{:attribute :exchange-rate/at :lacinia-type :JavaLong}]
+                          :type        :JavaLong}
+                 :db_id  {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :from   {:description "\n\n> datomic attribute: `:exchange-rate/from`. Type `:db.type/ref`."
+                          :resolve     [:stillsuit/ref #:stillsuit{:attribute :exchange-rate/from :lacinia-type :From}]
+                          :type        :From}
+                 :rate   {:description "\n\n> datomic attribute: `:exchange-rate/rate`. Type `:db.type/double`."
+                          :resolve     [:stillsuit/ref #:stillsuit{:attribute :exchange-rate/rate :lacinia-type Float}]
+                          :type        Float}
+                 :to     {:description "\n\n> datomic attribute: `:exchange-rate/to`. Type `:db.type/ref`."
+                          :resolve     [:stillsuit/ref #:stillsuit{:attribute :exchange-rate/to :lacinia-type :To}]
+                          :type        :To}}
+   :implements  [:DatomicEntity]}
+  :From
+  {:fields {:_exchange_rates {:description "Back-reference for the `:exchange-rate/_from` datomic attribute"
+                              :resolve     [:stillsuit/ref
+                                            #:stillsuit{:attribute    :exchange-rate/_from
+                                             :lacinia-type (list (non-null :Exchange_Rate))}]
+                              :type        (list (non-null :Exchange_Rate))}}}
+  :FromAccount
+  {:fields {:_contos    {:description "Back-reference for the `:conto/_from-account` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :conto/_from-account
+                                        :lacinia-type (list (non-null :Conto))}]
+                         :type        (list (non-null :Conto))}
+            :_transfers {:description "Back-reference for the `:transfer/_from-account` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :transfer/_from-account
+                                        :lacinia-type (list (non-null :Transfer))}]
+                         :type        (list (non-null :Transfer))}}}
+  :FromCurrency
+  {:fields {:_contos    {:description "Back-reference for the `:conto/_from-currency` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :conto/_from-currency
+                                        :lacinia-type (list (non-null :Conto))}]
+                         :type        (list (non-null :Conto))}
+            :_transfers {:description "Back-reference for the `:transfer/_from-currency` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :transfer/_from-currency
+                                        :lacinia-type (list (non-null :Transfer))}]
+                         :type        (list (non-null :Transfer))}}}
+  :To
+  {:fields {:_exchange_rates {:description "Back-reference for the `:exchange-rate/_to` datomic attribute"
+                              :resolve     [:stillsuit/ref
+                                            #:stillsuit{:attribute    :exchange-rate/_to
+                                             :lacinia-type (list (non-null :Exchange_Rate))}]
+                              :type        (list (non-null :Exchange_Rate))}}}
+  :ToAccount
+  {:fields {:_transfers {:description "Back-reference for the `:transfer/_to-account` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :transfer/_to-account
+                                        :lacinia-type (list (non-null :Transfer))}]
+                         :type        (list (non-null :Transfer))}}}
+  :ToCurrency
+  {:fields {:_transfers {:description "Back-reference for the `:transfer/_to-currency` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :transfer/_to-currency
+                                        :lacinia-type (list (non-null :Transfer))}]
+                         :type        (list (non-null :Transfer))}}}
+  :Transaction
+  {:description "Entity containing fields with the namespace `:transaction`"
+   :fields
+   {:account {:description "\n\n> datomic attribute: `:transaction/account`. Type `:db.type/ref`."
+              :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/account :lacinia-type :Account}]
+              :type        :Account}
+    :at {:description "\n\n> datomic attribute: `:transaction/at`. Type `:db.type/long`."
+         :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/at :lacinia-type :JavaLong}]
+         :type        :JavaLong}
+    :conto {:description "\n\n> datomic attribute: `:transaction/conto`. Type `:db.type/ref`."
+            :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/conto :lacinia-type :Conto}]
+            :type        :Conto}
+    :currency {:description "\n\n> datomic attribute: `:transaction/currency`. Type `:db.type/ref`."
+               :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/currency :lacinia-type :Currency}]
+               :type        :Currency}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :exchange_rate_difference
+    {:description "\n\n> datomic attribute: `:transaction/exchange-rate-difference`. Type `:db.type/double`."
+     :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/exchange-rate-difference :lacinia-type Float}]
+     :type        Float}
+    :transfer {:description "\n\n> datomic attribute: `:transaction/transfer`. Type `:db.type/ref`."
+               :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/transfer :lacinia-type :Transfer}]
+               :type        :Transfer}
+    :type {:description "\n\n> datomic attribute: `:transaction/type`. Type `:db.type/ref`."
+           :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/type :lacinia-type :Type}]
+           :type        (list (non-null :Type))}
+    :value {:description "\n\n> datomic attribute: `:transaction/value`. Type `:db.type/double`."
+            :resolve     [:stillsuit/ref #:stillsuit{:attribute :transaction/value :lacinia-type Float}]
+            :type        Float}}
+   :implements [:DatomicEntity]}
+  :Transfer
+  {:description "Entity containing fields with the namespace `:transfer`"
+   :fields
+   {:_transactions {:description "Back-reference for the `:transaction/_transfer` datomic attribute"
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute    :transaction/_transfer
+                                   :lacinia-type (list (non-null :Transaction))}]
+                    :type        (list (non-null :Transaction))}
+    :at            {:description "\n\n> datomic attribute: `:transfer/at`. Type `:db.type/long`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :transfer/at :lacinia-type :JavaLong}]
+                    :type        :JavaLong}
+    :db_id         {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :direction     {:description "\n\n> datomic attribute: `:transfer/direction`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :transfer/direction :lacinia-type :Direction}]
+                    :type        (list (non-null :Direction))}
+    :from_account  {:description "\n\n> datomic attribute: `:transfer/from-account`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :transfer/from-account :lacinia-type :FromAccount}]
+                    :type        :FromAccount}
+    :from_currency {:description "\n\n> datomic attribute: `:transfer/from-currency`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :transfer/from-currency :lacinia-type :FromCurrency}]
+                    :type        :FromCurrency}
+    :rate          {:description "\n\n> datomic attribute: `:transfer/rate`. Type `:db.type/double`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :transfer/rate :lacinia-type Float}]
+                    :type        Float}
+    :to_account    {:description "\n\n> datomic attribute: `:transfer/to-account`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :transfer/to-account :lacinia-type :ToAccount}]
+                    :type        :ToAccount}
+    :to_currency   {:description "\n\n> datomic attribute: `:transfer/to-currency`. Type `:db.type/ref`."
+                    :resolve     [:stillsuit/ref
+                                  #:stillsuit{:attribute :transfer/to-currency :lacinia-type :ToCurrency}]
+                    :type        :ToCurrency}
+    :value         {:description "\n\n> datomic attribute: `:transfer/value`. Type `:db.type/double`."
+                    :resolve     [:stillsuit/ref #:stillsuit{:attribute :transfer/value :lacinia-type Float}]
+                    :type        Float}}
+   :implements [:DatomicEntity]}
+  :Type
+  {:fields {:_transactions {:description "Back-reference for the `:transaction/_type` datomic attribute"
+                            :resolve     [:stillsuit/ref
+                                          #:stillsuit{:attribute    :transaction/_type
+                                           :lacinia-type (list (non-null :Transaction))}]
+                            :type        (list (non-null :Transaction))}}}}
+ :queries
+ {:Account     {:args        {:name {:description "The `:account/name` value of the entity to find"
+                                     :type        (non-null String)}}
+                :description "Find a single :Account entity given its `:account/name` attribute."
+                :resolve     [:stillsuit/query-by-unique-id
+                              #:stillsuit{:attribute :account/name :datomic-type String :lacinia-type :Account}]
+                :type        :Account}
+  :Brand_Group {:args        {:name {:description "The `:brand-group/name` value of the entity to find"
+                                     :type        (non-null String)}}
+                :description "Find a single :Brand_Group entity given its `:brand-group/name` attribute."
+                :resolve     [:stillsuit/query-by-unique-id
+                              #:stillsuit{:attribute :brand-group/name :datomic-type String :lacinia-type :Brand_Group}]
+                :type        :Brand_Group}
+  :Conto       {:args        {:identifier {:description "The `:conto/identifier` value of the entity to find"
+                                           :type        (non-null String)}}
+                :description "Find a single :Conto entity given its `:conto/identifier` attribute."
+                :resolve     [:stillsuit/query-by-unique-id
+                              #:stillsuit{:attribute :conto/identifier :datomic-type String :lacinia-type :Conto}]
+                :type        :Conto}
+  :Country     {:args        {:code {:description "The `:country/code` value of the entity to find"
+                                     :type        (non-null String)}}
+                :description "Find a single :Country entity given its `:country/code` attribute."
+                :resolve     [:stillsuit/query-by-unique-id
+                              #:stillsuit{:attribute :country/code :datomic-type String :lacinia-type :Country}]
+                :type        :Country}
+  :Currency    {:args        {:code {:description "The `:currency/code` value of the entity to find"
+                                     :type        (non-null String)}}
+                :description "Find a single :Currency entity given its `:currency/code` attribute."
+                :resolve     [:stillsuit/query-by-unique-id
+                              #:stillsuit{:attribute :currency/code :datomic-type String :lacinia-type :Currency}]
+                :type        :Currency}}
+ :stillsuit/config #:stillsuit{:db-id-name :db_id}
+ :stillsuit/enum-map nil}

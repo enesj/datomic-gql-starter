@@ -1,0 +1,11 @@
+{:entities
+ ["exchange-rate"
+  "country"
+  "transfer"
+  "brand-group"
+  "conto"
+  "currency"
+  "transaction"
+  "account"],
+ :queries [],
+ :inserts []}
