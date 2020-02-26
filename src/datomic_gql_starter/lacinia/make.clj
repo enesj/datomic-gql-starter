@@ -176,7 +176,6 @@
         result (d/transact
                  conn
                  {:tx-data (into [] transaction-data)})]
-    ;#p transaction-data
     (mapv #(d/pull (:db-after result) '[*] (val %)) (:tempids result))))
 
 
@@ -194,10 +193,10 @@
             (vector `(def ~input-name#
                        {:fields (into {}
                                   (map (fn [[field# lacinia-type#]]
-                                         (hash-map (keyword (str/pascal (name field#)))
+                                         (hash-map (keyword (str/camel (name field#)))
                                            (hash-map :type (if (keyword? lacinia-type#) lacinia-type# (symbol lacinia-type#)))))
                                     (quote ~arg-types#)))})
-              `(defn ~resolver-name# [context# {data# (keyword ~entity-plural#)} ~_#]
+              `(defn ~resolver-name# [context# {data#  (keyword (str/capital ~entity-plural#))} ~_#]
                  (make-insert-resolver context# ~entity# (quote ~arg-types#) data#))
               `(def ~mutation-name#
                  (make-insert-mutation ~entity# ~name#)))))
@@ -216,6 +215,7 @@
   (->> (for [entity inserts]
          (let [input-key (keyword (str/pascal (str entity "-input")))
                input-name (symbol (str "add-" (inflections/plural entity) "-input"))]
+           #p input-name
            (hash-map input-key (resolve-symbol input-name))))
     (apply merge)))
 

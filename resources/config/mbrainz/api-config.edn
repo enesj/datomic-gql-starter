@@ -8,10 +8,5 @@
   "track"
   "abstractRelease"
   "script"],
- :queries ["label"
-           "abstractRelease"
-           "abstractRelease"
-           "script"
-           "medium"
-           "artist"],
- :inserts ["label"]}
+ :queries [],
+ :inserts []}
