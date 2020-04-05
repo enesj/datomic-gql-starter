@@ -12,9 +12,8 @@
   the namespace for the keyword. Return the keyword corresponding to the attribute in datomic."
   [entity graphql-field-name options connection]
   (cond
-    (= :dbId graphql-field-name)
+    ((set [:dbId :db_id]) graphql-field-name)
     :db/id
-
     :else
     (let [entity-ns (sd/guess-entity-ns entity connection)
           xform     (:stillsuit/ns-to-str options str/kebab)
@@ -28,6 +27,7 @@
   [entity graphql-field-name options connection]
   (let [attr-kw (graphql-field->datomic-attribute entity graphql-field-name options connection)
         value   (get entity attr-kw)]
+    #p [attr-kw graphql-field-name]
     (log/tracef "Resolved graphql field '%s' as %s, value %s" graphql-field-name attr-kw value)
     value))
 

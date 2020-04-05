@@ -19,7 +19,7 @@
   {:type        datomic-entity-type
    :args        {:eid {:type        '(non-null ID)
                        :description "The `:db/id` of the entity"}}
-   :resolve     :stillsuit/resolve-by-enitity-id
+   :resolve     :stillsuit/resolve-by-entity-id
    :description "Return the current time."})
 
 (def entity-id-query-resolver
@@ -47,7 +47,6 @@
 ;; TODO: specs - ensure only one arg
 (defn unique-attribute-query-resolver
   "Catchpocket interface to a generic query, expected to be referenced as a resolver:
-
   :resolve [:stillsuit/resolve-by-unique-id {:stillsuit/attribute :example/attribute
                                              :stillsuit/type      :LaciniaTypeName}]"
   [{:stillsuit/keys [attribute lacinia-type]}]
@@ -65,8 +64,8 @@
 
 (defn resolver-map
   [{:stillsuit/keys [entity-id-query-name query-by-unique-id-name]}]
-  {:stillsuit/resolve-by-enitity-id entity-id-query-resolver
-   :stillsuit/query-by-unique-id    unique-attribute-query-resolver})
+  {:stillsuit/resolve-by-entity-id entity-id-query-resolver
+   :stillsuit/query-by-unique-id   unique-attribute-query-resolver})
 
 (defn attach-queries [schema config]
   (let [{:stillsuit/keys [entity-id-query-name query-by-unique-id-name]} config]
