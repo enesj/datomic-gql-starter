@@ -1,9 +1,14 @@
 (ns stillsuit.datomic.core
   "Implementation functions for dealing with datomic interactions."
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log])
             ;[datomic.api :as d]) ;datomic.api
-            [datomic.client.api :as d]) ;datomic.client.api
+            ;[datomic.client.api :as d]) ;datomic.client.api
   (:import (java.util UUID)))
+
+(if (= (System/getenv "DATOMIC_API") "client")
+  (require '[datomic.client.api :as d])
+  (require '[datomic.api :as d]))
+
 
 (defn db [conn]
   (d/db conn))

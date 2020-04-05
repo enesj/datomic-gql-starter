@@ -1,17 +1,16 @@
 (ns catchpocket.generate.datomic
   (:require [clojure.tools.logging :as log]
             ;[datomic.api :as d] ;datomic.api
-            [datomic.client.api :as d] ;datomic.client.api
+            ;[datomic.client.api :as d] ;datomic.client.api
             [cuerdas.core :as str]
             [catchpocket.generate.names :as names]
             [catchpocket.lib.util :as util]
             [datomic-gql-starter.utils.fern :as f]))
             ;[datomic-gql-starter.utils.db :as db]))
 
-;(def conn (d/connect (f/fern-e 'db)))
-;
-;(def db (d/db conn))
-
+(if (= (System/getenv "DATOMIC_API") "client")
+  (require '[datomic.client.api :as d])
+  (require '[datomic.api :as d]))
 
 ;; TODO: move this into stillsuit, integrate
 (defn namespace-to-type [kw]

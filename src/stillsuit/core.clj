@@ -12,19 +12,15 @@
             [stillsuit.lacinia.enums :as se]
             [stillsuit.lib.util :as slu]
             ;[datomic.api :as d] ;datomic.api
-            [datomic.client.api :as d] ;datomic.client.api
+            ;[datomic.client.api :as d] ;datomic.client.api
             [com.walmartlabs.lacinia :as lacinia]
             [com.walmartlabs.lacinia.schema :as schema]
             [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia.util :as util]))
 
-;(defn- datomic-connect
-;  [db-uri]
-;  (if-not db-uri
-;    (log/error "No datomic URL defined in config or schema!")
-;    (let [conn (d/connect db-uri)]
-;      (log/infof "Connecting to datomic at %s..." db-uri)
-;      conn)))
+(if (= (System/getenv "DATOMIC_API") "client")
+  (require '[datomic.client.api :as d])
+  (require '[datomic.api :as d]))
 
 (defn- make-app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."

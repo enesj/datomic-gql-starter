@@ -1,12 +1,10 @@
 (ns datomic-gql-starter.utils.refs-enums
-  (:require [clojure.tools.logging :as log]
-            [clojure.edn :as edn]
-            [cuerdas.core :as str])
+  (:require [cuerdas.core :as str])
   (:use inflections.core))
 
 (def descriptions {:catchpocket-config
                    (str/collapse-whitespace
-                     "This file contains map with keys equal to idents of all entities from DB of type 'db.type/ref'.")})
+                     "This file contains map with keys equal to indents of all entities from DB of type 'db.type/ref'.")})
 
 (defn snake-keyword [kw]
   "converts keyword to 'snake case'"
@@ -33,11 +31,11 @@
   "Generates :catchpocket/references part of 'catchpocket-config.edn'"
   (->>
     (for [rel data]
-      (let [[backref-name referenece-to] (str/split (str rel) #"/")
-            referenece-to (check-reference-to referenece-to all-entities)]
+      (let [[backref-name reference-to] (str/split (str rel) #"/")
+            reference (check-reference-to reference-to all-entities)]
         {rel
          (zipmap [:catchpocket/reference-to :catchpocket/backref-name]
-           [(keyword (singular referenece-to))
+           [(keyword (singular reference))
             (snake-keyword (keyword  (plural (apply str (rest backref-name)))))])}))
     (into (sorted-map))))
 
@@ -62,30 +60,6 @@
                           (mapv #(when (= (second %) :enum) (first %)))
                           (remove nil?)))})
 
-(defn save-refs-config [res-cnf-file refs-map]
-  "prints content of 'refs-map' to 'refs-config.edn' and adds ':description' key"
-  (with-open
-    [w (clojure.java.io/writer res-cnf-file)]
-    (clojure.pprint/pprint
-      (assoc refs-map :description (:catchpocket-config descriptions))
-      w)))
 
 
-(defn check-refs-config [res-cnf-file refs-schema]
-  "checks existance and validity of 'res-config.edn' and makes modications to it when needed
-   creates this file if not exists"
-  (let [refs-cnf (dissoc (edn/read-string (slurp res-cnf-file)) :description)
-        refs-cnf-keys (set (keys refs-cnf))
-        refs-schema-keys (set (keys refs-schema))
-        cnf-refs-dif (clojure.set/difference refs-cnf-keys refs-schema-keys)
-        refs-cnf-dif (clojure.set/difference refs-schema-keys refs-cnf-keys)]
-    (if (every? #{:enum :ref :_missing :new}  (vals refs-cnf))
-      (if (every? empty? [cnf-refs-dif refs-cnf-dif])
-          "OK"
-          (let [refs-schema-new (into (sorted-map) (merge refs-cnf
-                                                          (zipmap cnf-refs-dif (repeat :_missing))
-                                                          (zipmap refs-cnf-dif (repeat :new))))]
-            (save-refs-config res-cnf-file refs-schema-new)
-            "Modified"))
-      "Error")))
 

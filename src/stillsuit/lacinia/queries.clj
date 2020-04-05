@@ -4,10 +4,15 @@
             [stillsuit.datomic.core :as datomic]
             [clojure.tools.logging :as log]
             ;[datomic.api :as d] ;datomic.api
-            [datomic.client.api :as d] ;datomic.client.api
+            ;[datomic.client.api :as d] ;datomic.client.api
             [stillsuit.lacinia.types :as types]
             [com.walmartlabs.lacinia.schema :as schema])
   (:import (com.walmartlabs.lacinia.resolve ResolverResult)))
+
+
+(if (= (System/getenv "DATOMIC_API") "client")
+  (require '[datomic.client.api :as d])
+  (require '[datomic.api :as d]))
 
 (defn stillsuit-entity-id-query
   [{:stillsuit/keys [entity-id-query-name datomic-entity-type]}]
