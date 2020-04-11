@@ -4,7 +4,9 @@
             [com.walmartlabs.lacinia.resolve :as resolve]
             [clojure.tools.logging :as log]
             [cuerdas.core :as str]
-            [com.walmartlabs.lacinia.schema :as schema]))
+            [datomic-gql-starter.utils.fern :as f :refer [max-results]]
+            [com.walmartlabs.lacinia.schema :as schema]
+            [datomic-gql-starter.utils.config :as config]))
 
 (defn graphql-field->datomic-attribute
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in
@@ -27,7 +29,7 @@
   [entity graphql-field-name options connection]
   (let [attr-kw (graphql-field->datomic-attribute entity graphql-field-name options connection)
         value   (get entity attr-kw)]
-    #p [attr-kw graphql-field-name]
+    ;#p [attr-kw graphql-field-name]
     (log/tracef "Resolved graphql field '%s' as %s, value %s" graphql-field-name attr-kw value)
     value))
 
@@ -76,7 +78,9 @@
   "Coerce the given datomic primitive value to be the same as the given lacinia type.
   Currently this just converts `nil` values to `false` for non-null Boolean fields."
   (fn [value lacinia-type] lacinia-type))
+
 (defmethod ensure-type :default [value _] value)
+
 (defmethod ensure-type '(non-null Boolean) [value _] (true? value))
 
 (defn- sort-and-filter-entities
@@ -102,16 +106,23 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value     (ensure-type (sd/get-ref-attribute entity attribute (sd/db (:stillsuit/connection context))) lacinia-type)
-          val-coll? (and (coll? value)
-                         (not (map? value))
-                         (not (:db/id value)))
-          val-list  (if val-coll? (set value) #{value})
-          filtered  (sort-and-filter-entities opts context val-list)
-          [sorted errs] (ensure-cardinality opts val-coll? filtered)]
-      (resolve/resolve-as
-       (schema/tag-with-type sorted lacinia-type)
-       errs))))
+      (let [val (sd/get-ref-attribute entity attribute
+                  lacinia-type args context)]
+           (if-not (:error val)
+             (let [value     (ensure-type val lacinia-type)
+                   val-coll? (and (coll? value)
+                                  (not (map? value))
+                                  (not (:db/id value)))
+                   val-list  (if val-coll? (set value) #{value})
+                   filtered  (sort-and-filter-entities opts context val-list)
+                   [sorted errs] (ensure-cardinality opts val-coll? filtered)
+                   limit (or(:_limit args) max-results)
+                   sorted-with-limit (if val-coll? (take limit (vec sorted)) sorted)]
+               (resolve/resolve-as
+                (schema/tag-with-type sorted-with-limit lacinia-type)
+                errs))
+             (resolve/resolve-as nil {:message (:error val)
+                                      :status  404})))))
 
 (defn enum-resolver
   "Resolver used to get an attribute value for a lacinia enum type. This uses the :stillsuit/enum-map
@@ -119,7 +130,7 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value    (sd/get-enum-attribute entity attribute (sd/db (:stillsuit/connection context)))
+    (let [value    (sd/get-enum-attribute entity attribute lacinia-type context)
           attr-map (get-in context [:stillsuit/enum-map lacinia-type :stillsuit/datomic-to-lacinia])
           mapped   (if (set? value)
                      (map #(get attr-map %) value)

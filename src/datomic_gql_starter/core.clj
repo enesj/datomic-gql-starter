@@ -6,6 +6,7 @@
               [io.pedestal.http :as http]
               [stillsuit.core :as stillsuit]
               [stillsuit.lib.util :as u]
+              [datomic-gql-starter.utils.refs-enums :as refs-enums]
               [datomic-gql-starter.lacinia.make :as make]
               [datomic-gql-starter.utils.fern :refer [refs-conf catchpocket-conf stillsuit-conf
                                                       db-link root-dir api-conf]]
@@ -24,7 +25,6 @@
     (catch Exception e
       (log/error e))))
 
-
 (defn- smap []
   (try
     (let [stillsuit-config (u/load-edn-file stillsuit-conf)
@@ -37,8 +37,7 @@
       (log/infof "Connecting to datomic at %s..." db-link)
       s-map)
     (catch Exception e
-      (log/error e))))
-
+           (log/error e))))
 
 (defn serve-gql
   []
@@ -48,6 +47,8 @@
   (load "lacinia/make")
   (-> (smap)
       http/create-server
+
+
       http/start))
 
 (defstate stillsuit-app
@@ -68,7 +69,7 @@
   (refresh :after 'datomic-gql-starter.core/go))
 
 (defn reset-config []
-  (config/update-config-files)
+  (refs-enums/update-config-files)
   (reset))
 
 (comment

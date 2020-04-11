@@ -30,16 +30,17 @@
                ((resolve 'd/list-databases) ((resolve 'd/client) cfg) {})
                ((resolve 'd/get-database-names) (str (subs db-uri 0 28) "/*"))))
 
-(when-not ((set db-list) (f/fern-e 'db-name))
-  (if (and (= (f/fern-e 'db-name) "seattle") (not= datomic-api "client"))
-    (do
-      (println "Installing seattle database.")
-      (install-seattle))
-    (do
-      (println "Database " (f/fern-e 'db-name) "doesn't exist!")
-      (System/exit 0))))
+(defn seattle-test []
+  (when-not ((set db-list) (f/fern-e 'db-name))
+    (if (and (= (f/fern-e 'db-name) "seattle") (not= datomic-api "client"))
+      (do
+        (println "Installing seattle database.")
+        (install-seattle))
+      (do
+        (println "Database " (f/fern-e 'db-name) "doesn't exist!")
+        (System/exit 0)))))
 
-
+(seattle-test)
 
 (def conn (if (= datomic-api "client")
             (d/connect ((resolve 'd/client) cfg) {:db-name (f/fern-e 'db-name)})

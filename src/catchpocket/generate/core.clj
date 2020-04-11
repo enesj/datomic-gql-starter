@@ -7,7 +7,8 @@
             [zprint.core :as zp]
             [catchpocket.lib.util :as util]
             [stillsuit.lib.util :as su]
-            [clojure.string :as str]
+            [cuerdas.core :as cstr]
+            [datomic-gql-starter.utils.config :as config]
             [catchpocket.generate.names :as names]))
 
 (def ^:private default-config "catchpocket/defaults.edn")
@@ -45,6 +46,7 @@
     instant-type
     :EpochMillisecs))
 
+
 (defn get-field-type [field config]
   (let [base-type        (:attribute/field-type field)
         datomic-override (:attribute/meta-lacinia-type field)
@@ -74,6 +76,7 @@
                    (:attribute/ident field) field-type)))))
 
 
+
 (defn- make-single-field [field config]
   (let [{:attribute/keys [cardinality doc]} field
         lacinia-type (get-field-type field config)
@@ -86,6 +89,8 @@
         :resolve [:stillsuit/ref
                   #:stillsuit{:attribute    (:attribute/ident field)
                               :lacinia-type lacinia-type}]}
+       (when (= cardinality :db.cardinality/many)
+         {:args (config/query-args (cstr/camel (name lacinia-type)) datomic-to-lacinia)})
        (when doc
          {:description doc})))))
 
@@ -129,7 +134,7 @@
 (defn- make-object [object enums field-defs config]
   (log/debugf "Found entity type %s" object)
   {:description (format "Entity containing fields with the namespace `%s`"
-                        (-> object str str/lower-case))
+                        (-> object str cstr/lower))
    :implements  [:DatomicEntity]
    :fields      (-> field-defs
                     (make-fields enums config)
@@ -170,11 +175,14 @@
     (log/tracef "Generating back-reference %s from type %s to type %s for attribute %s"
                 backref from-type plural-type datomic-ref)
     (assoc-in objects [from-type :fields backref]
-              {:type        plural-type
-               :resolve     [:stillsuit/ref
-                             #:stillsuit{:attribute    datomic-ref
-                                         :lacinia-type plural-type}]
-               :description (format "Back-reference for the `%s` datomic attribute" datomic-ref)})))
+              (merge {:type        plural-type
+                      :resolve     [:stillsuit/ref
+                                    #:stillsuit{:attribute    datomic-ref
+                                                :lacinia-type plural-type}]
+
+                      :description (format "Back-reference for the `%s` datomic attribute" datomic-ref)}
+                (if-not is-component?
+                  {:args (config/query-args (cstr/camel (name to-type)) datomic-to-lacinia)})))))
 
 (defn generate-edn [base-schema ent-map enums config]
   (log/infof "Generating lacinia schema for %d entity types..." (count ent-map))

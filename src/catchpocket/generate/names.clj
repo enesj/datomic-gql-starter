@@ -48,7 +48,6 @@
 
 (defn lacinia-field-name
   [attribute-kw {:keys [:catchpocket/names] :as config}]
-  ;(println "field" attribute-kw)
   (keyword-part->type
     (name attribute-kw)
     (get names :fields :snake_case)))
@@ -80,5 +79,4 @@
   "Return the lacinia name for the :db/id datomic field, which is used in the interface definition
   for entities."
   [config]
-  ;(println "config" config)
   (lacinia-field-name :db-id config))

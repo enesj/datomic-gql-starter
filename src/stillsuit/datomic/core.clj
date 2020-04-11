@@ -1,6 +1,8 @@
 (ns stillsuit.datomic.core
   "Implementation functions for dealing with datomic interactions."
-  (:require [clojure.tools.logging :as log])
+  (:require [clojure.tools.logging :as log]
+            [cuerdas.core :as str]
+            [datomic-gql-starter.utils.config :as config])
             ;[datomic.api :as d]) ;datomic.api
             ;[datomic.client.api :as d]) ;datomic.client.api
   (:import (java.util UUID)))
@@ -8,10 +10,6 @@
 (if (= (System/getenv "DATOMIC_API") "client")
   (require '[datomic.client.api :as d])
   (require '[datomic.api :as d]))
-
-
-(defn db [conn]
-  (d/db conn))
 
 (defn find-ident [attr db]
   (cond
@@ -21,12 +19,35 @@
     (into #{} (mapv #(:db/ident (d/pull db '[:db/ident] (val (first %)))) attr))
     :else attr))
 
-(defn get-ref-attribute [entity attribute db]
-    (attribute (d/pull db (vector attribute) (:db/id entity))))
+(defn reverse-to-direct [attribute]
+  (->>
+    (str/split (str attribute) "_")
+    str/join
+    rest
+    str/join
+    keyword))
 
-(defn get-enum-attribute [entity attribute db]
-    (-> (get-ref-attribute entity attribute db)
-        (find-ident db)))
+(defn get-ref-attribute [entity attribute lacinia-type args context]
+  (let [db (d/db (:stillsuit/connection context))
+        direct-attribute (reverse-to-direct attribute)
+        dbid (:db/id entity)
+        rule ['(any ?e) ['?e direct-attribute dbid]]
+        filter-entity (namespace attribute)
+        [test-values filter-rules] (when args (config/make-rules db context filter-entity args))
+        rules (if filter-rules (vector (into  rule filter-rules)) (vector rule))]
+    (if-not test-values
+      (if (and (= clojure.lang.PersistentList (type lacinia-type)) (= (first lacinia-type) 'list))
+        (->> (d/q '[:find ?e
+                    :in $ %
+                    :where (any ?e)]
+               db  rules)
+          (map #(hash-map :db/id (first %))))
+        (attribute (d/pull db (vector attribute) (:db/id entity))))
+      {:error (apply str test-values)})))
+
+(defn get-enum-attribute [entity attribute lacinia-type context]
+    (-> (get-ref-attribute entity attribute lacinia-type nil context)
+        (find-ident (d/db (:stillsuit/connection context)))))
 
 ;(defn entity? [thing]
 ;  (instance? datomic.Entity thing))

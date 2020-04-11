@@ -1,5 +1,13 @@
 (ns datomic-gql-starter.utils.refs-enums
-  (:require [cuerdas.core :as str])
+  (:require [datomic-gql-starter.utils.db :as db-utils :refer [db conn]]
+            [cuerdas.core :as str]
+            [catchpocket.generate.core :as cg]
+            [catchpocket.generate.core :as g]
+            [catchpocket.lib.config :as cf]
+            [datomic-gql-starter.utils.config :as config]
+            [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
+                                                          db-link root-dir api-conf]]
+            [clojure.java.io :as io])
   (:use inflections.core))
 
 (def descriptions {:catchpocket-config
@@ -7,7 +15,7 @@
                      "This file contains map with keys equal to indents of all entities from DB of type 'db.type/ref'.")})
 
 (defn snake-keyword [kw]
-  "converts keyword to 'snake case'"
+  "converts keyword to 'snake_case'"
   (keyword
     (str/join
       "_"
@@ -60,6 +68,58 @@
                           (mapv #(when (= (second %) :enum) (first %)))
                           (remove nil?)))})
 
+(defn make-catchpocket-config [refs-file-cfg catchpocket-conf stillsuit-conf entities db]
+  "Generates 'catchpocket-config.edn' file"
+  (with-open
+    [w (clojure.java.io/writer catchpocket-conf)]
+    (clojure.pprint/pprint
+      (merge
+        {:catchpocket/datomic-uri  db
+         :catchpocket/schema-file stillsuit-conf}
+        (get-refs-enums refs-file-cfg entities)
+        {:stillsuit/compile? true})
+      w)))
+
+(defn make-api-config [entities]
+  (let [apis-map
+        {:entities
+         entities
+         :queries
+         []
+         :inserts
+         []}]
+    (with-open
+      [w (clojure.java.io/writer api-conf)]
+      (clojure.pprint/pprint
+        apis-map
+        w))))
+
+(defn make-apis [] (make-api-config (config/find-all-entities)))
+(defn make-catchpocket [] (make-catchpocket-config (config/find-enums) catchpocket-conf stillsuit-conf (config/find-all-entities) db-link))
+(defn make-stillsuit [] (g/generate-and-write! (cf/construct-config catchpocket-conf) conn db))
+
+(defn update-config-files []
+  (let [root (io/as-file root-dir)]
+    (when-not (.exists root)
+      (.mkdirs root))
+    (make-apis)
+    (make-catchpocket)
+    (make-stillsuit)))
+
+(defn repair-config-files
+  ([]
+   (let [root (io/as-file root-dir)]
+     (when-not (.exists root)
+       (.mkdirs root))
+     (when-not (.exists (io/as-file api-conf))
+       (make-apis))
+     (when-not (.exists (io/as-file catchpocket-conf))
+       (make-catchpocket)
+       (make-stillsuit))
+     (when-not (.exists (io/as-file stillsuit-conf))
+       (make-stillsuit)))))
+
+(repair-config-files)
 
 
 

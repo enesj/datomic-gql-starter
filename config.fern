@@ -1,28 +1,30 @@
 {
- ;full paths
+;full paths
  api-conf               (fern/lit concat @root @api-conf-file)
  stillsuit-conf         (fern/lit concat @root @stillsuit-conf-file)
  catchpocket-conf       (fern/lit concat @root @catchpocket-conf-file)
  refs-conf              (fern/lit concat @root @refs-conf-file)
 
- ;root
+;root
 
  root                   (fern/lit concat @config-root @db-name "/")
 
- ; datomic db
-
- db                     (fern/lit concat @datomic-link @db-name)
-
- ;paths
-
- config-root            "resources/config/"
- datomic-link           "datomic:dev://localhost:4334/"
+; datomic db
  db-name                "mbrainz"
+ secret "enes"
+ access-key "enes"
+ db-dev                     (fern/lit concat "datomic:dev://localhost:4334/" @db-name)
+ db-free                    (fern/lit concat "datomic:free://localhost:4334/" @db-name)
+ max-results 1000
 
- ;files
+;files
  api-conf-file          "api-config.edn"
  refs-conf-file         "refs-config.edn"
  catchpocket-conf-file  "catchpocket-config.edn"
- stillsuit-conf-file    "stillsuit-congfig.edn"}
+ stillsuit-conf-file    "stillsuit-config.edn"
+
+;paths
+  config-root            "resources/config/"
+ }
 
 

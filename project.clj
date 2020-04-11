@@ -6,15 +6,10 @@
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [
-                 ;[org.eclipse.jetty/jetty-server "9.3.7.v20160115"] ;datomic.client.api HACK
                  [com.cognitect/fern "0.1.5"]
-                 ;[com.datomic/datomic-pro "0.9.5703" :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12]] ; ; datomic.api
-                 [com.datomic/client-pro "0.8.28" :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12
-                                                               org.eclipse.jetty/jetty-client
-                                                               org.eclipse.jetty/jetty-http
-                                                               org.eclipse.jetty/jetty-util]]
-                 [com.rpl/specter "1.1.2"]
-                 [com.walmartlabs/lacinia-pedestal "0.12.0" :exclusions [com.walmartlabs/lacinia org.flatland/ordered]]
+                 [org.clojure/core.rrb-vector "0.0.13"]     ; suppressing Boxed math warning, with  Clojure 1.10
+                 [com.walmartlabs/lacinia-pedestal "0.12.0"
+                  :exclusions [com.walmartlabs/lacinia org.flatland/ordered]]
                  [com.walmartlabs/lacinia "0.35.0"]
                  [org.clojure/tools.cli "0.4.2"]
                  [funcool/cuerdas "2.1.0"]
@@ -23,7 +18,7 @@
                  [mount "0.1.16"]
                  [org.apache.logging.log4j/log4j-core "2.11.1"]
                  [org.apache.logging.log4j/log4j-slf4j-impl "2.11.1"]
-                 [org.clojure/clojure "1.10.0"]
+                 [org.clojure/clojure "1.10.1"]
                  [org.clojure/tools.namespace "1.0.0"]
                  [org.clojure/tools.logging "0.4.1"]
                  [me.dryewo/mem-files "0.1.1"]
@@ -36,10 +31,11 @@
   :source-paths ["src"]
   :resource-paths ["resources"]
 
-  :profiles {:dev  {:plugins      [[lein-ancient "0.6.15"]
-                                   ;[venantius/ultra "0.6.0" :exclusions [org.clojure/clojure]]
-                                   [com.jakemccrary/lein-test-refresh "0.22.0"]]
-                    :dependencies [
-                                   [vvvvalvalval/datomock "0.2.2"]
-                                   [io.forward/yaml "1.0.9"]]}
+  :profiles {:client  {:dependencies [[com.datomic/client-pro "0.8.28" :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12
+                                                                                    org.eclipse.jetty/jetty-client
+                                                                                    org.eclipse.jetty/jetty-http
+                                                                                    org.eclipse.jetty/jetty-util]]]}
+             :peer {:dependencies [[com.datomic/datomic-pro "0.9.6045" :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12]]]}
+             :free {:dependencies [[com.datomic/datomic-free "0.9.5697" :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12]]]}
              :test {:resource-paths ["test/resources"]}})
+

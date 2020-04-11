@@ -27,7 +27,7 @@
 (def api-conf (fern-e 'api-conf))
 (def secret (fern-e 'secret))
 (def access-key (fern-e 'access-key))
-
+(def max-results (fern-e 'max-results))
 
 (def refresher
    (let [interval-ms 1000
