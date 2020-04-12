@@ -125,8 +125,9 @@
                              value)]
                 result)))
 
-(defn is-fulltext? [field db]
-  (let [fulltext? (d/q '[:find [?e ...]
+(defn is-fulltext? [k entity db]
+  (let [field (keyword (str/join "/" [entity (name k)]))
+        fulltext? (d/q '[:find [?e ...]
                          :in $ ?field
                          :where [?field :db/fulltext ?e]]
                     db field)]
@@ -142,7 +143,7 @@
                      (assoc-in m [:range k] v)))
                  (if (or (and (coll? v) (first v))
                        (and (not (coll? v))  v))
-                   (if (is-fulltext? (keyword (str/join "/" [entity (name k)])) db)
+                   (if (is-fulltext? k entity db)
                      (assoc-in m [:fulltext k] v)
                      (assoc-in m [:equal k] v))
                    (assoc-in m [:missing k] v))))
@@ -167,6 +168,7 @@
                    (when (second v) [[(list '<= attribute-val (second v))]])))))
 
 (defn get-has-filter [k entity]
+
   (let [attribute (keyword entity (name k))]
     (vector '?e attribute)))
 
@@ -187,21 +189,22 @@
      ['[?e _ _ _]]])
 
 (defn get-filter-type [filter entity context db]
+  ;#p filter
   (let [[k v] (first filter)]
+    ;#p [k v]
     (cond
-      (not (coll? v)) (if v (get-equal-filter k v entity context)
-                            (get-missing-filter k entity))
-      (= (count v) 1)
-      (let [v (first v)]
+      (or (not (coll? v)) (= (count v) 1))
+      (let [v (if (coll? v) (first v) v)]
+        #p (is-fulltext? k entity db)
         (if v
-          (if (is-fulltext? v db)
+          (if (is-fulltext? k entity db)
             (get-fulltext-filter k v entity)
-            (get-equal-filter k v entity context))
+            (get-equal-filter k (if (coll? v) (first v) v) entity context))
           (get-missing-filter k entity)))
 
       (= (count v) 2)
       (if (empty? (remove nil? v))
-        (get-has-filter (first filter) entity)
+        (get-has-filter k entity)
         (get-range-filter k v entity [] context))
 
       (> (count v) 2) (get-or-filter k v entity context)
@@ -247,13 +250,15 @@
         has-filters (get-has-filters (:has all-filters) entity)
         fulltext-filters (get-fulltext-filters (:fulltext all-filters) entity)
         ;_ #p equal-filters
-        _ #p  range-filters
+        ;_ #p  range-filters
         filter (-> equal-filters
                  (into range-filters)
                  (into missing-filters)
                  (into has-filters)
                  (into or-filters)
                  (into fulltext-filters))]
+    #p all-filters
+    #p filter
     (def context1 context)
     (def db1 db)
     filter))
