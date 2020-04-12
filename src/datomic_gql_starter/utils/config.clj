@@ -1,10 +1,6 @@
 (ns datomic-gql-starter.utils.config
   (:require [datomic-gql-starter.utils.db :as db-utils :refer [db conn]]
             [cuerdas.core :as str]
-    ;[catchpocket.generate.core :as cg]
-    ;[catchpocket.generate.core :as g]
-    ;[catchpocket.lib.config :as cf]
-    ;[datomic-gql-starter.utils.refs-enums :as refs-enums]
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
             [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
                                                           db-link root-dir api-conf max-results]]
@@ -14,7 +10,6 @@
 (def datomic-api (System/getenv "DATOMIC_API"))
 
 (defn query-ellipsis [x]
-  ;#p x
   (if (coll? (first x))
     (mapv first x)
     x))
@@ -113,12 +108,13 @@
 (defn query-args [entity datomic-to-lacinia]
   (let [arg-types (get-args-type  entity datomic-to-lacinia)]
     ;#p arg-types
-    (into {:_having   {:type '(list String)} :_missing {:type '(list String)} :_limit {:type :JavaLong}}
+    (into {:_limit {:type :JavaLong}}
       (for [[field lacinia-type] arg-types]
         {(keyword (str/camel (name field)))
-         (hash-map :type (if (string? lacinia-type)
-                           (symbol lacinia-type)
-                           (list (symbol "list") (symbol lacinia-type))))}))))
+         (hash-map :type (list (symbol "list") (symbol lacinia-type)))}))))
+           ;(if (string? lacinia-type)
+           ;  (symbol lacinia-type)
+           ;  (list (symbol "list") (symbol lacinia-type))))}))))
 
 (defn get-enum-value [context entity field value]
   (when value (let [enum (keyword (str/snake (str entity "_" field)))
@@ -129,13 +125,6 @@
                              value)]
                 result)))
 
-(defn test-arg-values [having-fields missing-fields  special-fields args]
-  (let [having-missing (set/intersection having-fields missing-fields)
-        nonexistent (set/difference special-fields (set (map (comp keyword name) args)))]
-    (cond-> []
-      (not-empty having-missing) (conj (str "Same fields in HAVING and MISSING: " (mapv symbol (into '() having-missing )) "! "))
-        (not-empty nonexistent) (conj (str "Nonexistent fields: " (mapv symbol (into '() nonexistent )) "! ")))))
-
 (defn is-fulltext? [field db]
   (let [fulltext? (d/q '[:find [?e ...]
                          :in $ ?field
@@ -143,78 +132,137 @@
                     db field)]
     (when (first fulltext?) (name field))))
 
-(defn split-map [values]
+(defn get-filter-types [values db entity]
   (reduce-kv (fn [m k v]
-                 (if (and (coll? v) (> (count v) 1))
-                   (assoc-in m [:double k] v)
-                   (assoc-in m [:single k] v)))
+               (if (and (coll? v) (> (count v) 1))
+                 (if (> (count v) 2)
+                   (assoc-in m [:or k] v)
+                   (if (empty? (remove nil? v))
+                     (assoc-in m [:has k] v)
+                     (assoc-in m [:range k] v)))
+                 (if (or (and (coll? v) (first v))
+                       (and (not (coll? v))  v))
+                   (if (is-fulltext? (keyword (str/join "/" [entity (name k)])) db)
+                     (assoc-in m [:fulltext k] v)
+                     (assoc-in m [:equal k] v))
+                   (assoc-in m [:missing k] v))))
     {} values))
 
-(defn update-vals [m f]
-  (reduce-kv (fn [m k v]
-               (assoc m k (if (coll? v) (f v) v))) {} m))
+(defn get-or-filter [k v entity context]
+  (let [val (mapv #(if (keyword? %)
+                     (get-enum-value context entity (name k) %)
+                     %) (remove nil? v))]
+    (let [attribute (keyword entity (name k))]
+      (vector (cons 'or (mapv #(vector '?e attribute %) val))))))
 
-(defn get-double-vales [vals entity]
-  (remove nil?
+(defn get-range-filter [k v entity m context]
+  (let [
+        v (if (keyword? v)
+            (get-enum-value context entity (name k) v)
+            v)
+        attribute-val (symbol (str "?" (name k)))
+        attribute (keyword entity (name k))]
+    (remove nil? (apply conj m ['?e attribute attribute-val]
+                   (when (first v) [(list '>= attribute-val (first v))])
+                   (when (second v) [[(list '<= attribute-val (second v))]])))))
+
+(defn get-has-filter [k entity]
+  (let [attribute (keyword entity (name k))]
+    (vector '?e attribute)))
+
+(defn get-missing-filter [k entity]
+  (let [attribute (keyword entity (name k))]
+    [(concat '(missing? $ ?e) [attribute])]))
+
+(defn get-equal-filter [k v entity context]
+  (let [v (if (keyword? v)
+            (get-enum-value context entity (name k) v)
+            v)]
+    (vector '?e
+      (keyword entity (name k))
+      v)))
+
+(defn get-fulltext-filter [k v entity]
+    [(concat '(fulltext $) [(keyword entity  (name k)) v])
+     ['[?e _ _ _]]])
+
+(defn get-filter-type [filter entity context db]
+  (let [[k v] (first filter)]
+    (cond
+      (not (coll? v)) (if v (get-equal-filter k v entity context)
+                            (get-missing-filter k entity))
+      (= (count v) 1)
+      (let [v (first v)]
+        (if v
+          (if (is-fulltext? v db)
+            (get-fulltext-filter k v entity)
+            (get-equal-filter k v entity context))
+          (get-missing-filter k entity)))
+
+      (= (count v) 2)
+      (if (empty? (remove nil? v))
+        (get-has-filter (first filter) entity)
+        (get-range-filter k v entity [] context))
+
+      (> (count v) 2) (get-or-filter k v entity context)
+      :else [k v])))
+
+(defn get-equal-filters [vals entity context]
+    (for [[k v] vals]
+      (get-equal-filter k (if (coll? v) (first v) v) entity context)))
+
+(defn get-range-filters [vals entity context]
     (reduce-kv
        (fn [m k v]
-         (let [attribute-val (symbol (str "?" (name k)))
-               attribute (keyword entity (name k))]
-           ( apply conj m ['?e attribute attribute-val] [(list '>= attribute-val (first v) )] [[(list '<= attribute-val (second v))]])))
-       [] vals)))
+         (get-range-filter k v entity m context))
+       [] vals))
+
+(defn get-or-filters [vals entity context]
+  (vec (remove nil?
+         (reduce-kv
+           (fn [m k v]
+             (get-or-filter k v entity context))
+           [] vals))))
+
+(defn get-has-filters [vals entity]
+  (for [val vals]
+    (get-has-filter (key val) entity)))
+
+(defn get-missing-filters [vals entity]
+  (for [val vals]
+    (get-missing-filter  (key val) entity)))
+
+(defn get-fulltext-filters [vals entity]
+  (mapv (fn [val]
+          (let [[k [v]]  val]
+            (get-fulltext-filter k v entity)))
+    vals))
 
 (defn make-rules [db context entity values]
-  (let [args (find-all-fields entity)
-        missing-fields (set (map keyword (:_missing values)))
-        having-fields (set (map keyword (:_having values)))
-        special-fields (reduce into [missing-fields having-fields])
-        test-values (test-arg-values having-fields missing-fields  special-fields args)]
-    (if (empty? test-values)
-      (let [remove-fields (into #{:_having :_missing :_limit} special-fields)
-            base-values (into {} (remove #(remove-fields (key %)) values))
-            split-values (split-map base-values)
-            single-values (update-vals (:single split-values) first)
-            double-values (get-double-vales (:double split-values) entity)
-
-            fulltext-fields (remove nil? (map (comp #(is-fulltext? % db) keyword
-                                                #(str/join "/" [(name entity) %]) name key) single-values))
-            base-no-fulltext (into {} (remove #((set (map keyword fulltext-fields)) (key %)) single-values))
-            all-values (apply merge base-no-fulltext (map #(hash-map (keyword %) '_) (:_having values)))
-            vals (reduce-kv (fn [m k v]
-                              (assoc m (keyword entity (name k))
-                                       (if (keyword? v) (get-enum-value context entity (name k) v)
-                                                        v)))
-                   {} all-values)
-            ;_ #p all-values
-            fulltext-vals (mapv (fn [value]
-                                  [(concat '(fulltext $) [(keyword entity value) (first ((keyword value) values))])
-                                   ['[?e _ _ _]]])
-                            fulltext-fields)
-            missing-vals (mapv (fn [value] [(concat '(missing? $ ?e) [(keyword entity value)])])
-                           (:_missing values))
-            filter (as-> vals $
-                     (mapv #(if (= (val %) '_)
-                              (vector '?e (key %))
-                              (vector '?e (key %) (val %)))
-                       $)
-                     (into $ double-values)
-                     #p $
-                     (into $ fulltext-vals)
-                     (into $ missing-vals))]
-
-        ;(when (not-empty vals) #p vals)
-        ;(when (not-empty fulltext-vals) #p fulltext-vals)
-        ;(when (not-empty filter) #p  filter)
-
-        [nil  filter])
-      [test-values nil])))
+  (let [all-filters (get-filter-types (into {} (remove #(= :_limit (key %)) values)) db entity)
+        equal-filters (get-equal-filters (:equal all-filters) entity context)
+        range-filters (get-range-filters (:range all-filters) entity context)
+        or-filters (get-or-filters (:or all-filters) entity context)
+        missing-filters (get-missing-filters (:missing all-filters) entity)
+        has-filters (get-has-filters (:has all-filters) entity)
+        fulltext-filters (get-fulltext-filters (:fulltext all-filters) entity)
+        ;_ #p equal-filters
+        _ #p  range-filters
+        filter (-> equal-filters
+                 (into range-filters)
+                 (into missing-filters)
+                 (into has-filters)
+                 (into or-filters)
+                 (into fulltext-filters))]
+    (def context1 context)
+    (def db1 db)
+    filter))
 
 
 (defn resolve-query [db context entity values]
-  (let [[test-values filter] (make-rules db context entity values)
+  (let [filter (make-rules db context entity values)
         rules (vector (into (vector '(any ?e)) filter))]
-    #p entity
-    (if-not test-values
+    ;#p rules
      (let [limit (or (:_limit values) max-results)
            results (if (= datomic-api "client")
                      (d/q {:query '[:find (pull ?e [*])
@@ -229,9 +277,8 @@
            modified-results (query-ellipsis results)]
        (if (coll? modified-results)
          (take limit modified-results)
-         modified-results))
-     (resolve-as nil {:message (apply str test-values)
-                      :status  404}))))
+         modified-results))))
+
 
 
 

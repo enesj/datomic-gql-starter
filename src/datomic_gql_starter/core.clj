@@ -47,8 +47,6 @@
   (load "lacinia/make")
   (-> (smap)
       http/create-server
-
-
       http/start))
 
 (defstate stillsuit-app
