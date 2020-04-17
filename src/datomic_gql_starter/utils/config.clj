@@ -4,6 +4,7 @@
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
             [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
                                                           db-link root-dir api-conf max-results]]
+            [clojure.zip :as zip]
             [clojure.java.io :as io]
             [clojure.set :as set]))
 
@@ -37,7 +38,7 @@
     [type (= type :catchpocket.generate.core/ref)]))
 
 (defn find-all-refs []
-  "gets all entities from DB of type ':dbex.type/ref' "
+  "gets all entities from DB of type ':db.type/ref' "
   (-> (d/q '[:find ?ident
              :in $ %
              :where
@@ -107,14 +108,10 @@
 
 (defn query-args [entity datomic-to-lacinia]
   (let [arg-types (get-args-type  entity datomic-to-lacinia)]
-    ;#p arg-types
-    (into {:_limit {:type :JavaLong}}
+    (into {:_limit {:type :JavaLong} :_composition {:type 'String}}
       (for [[field lacinia-type] arg-types]
         {(keyword (str/camel (name field)))
          (hash-map :type (list (symbol "list") (symbol lacinia-type)))}))))
-           ;(if (string? lacinia-type)
-           ;  (symbol lacinia-type)
-           ;  (list (symbol "list") (symbol lacinia-type))))}))))
 
 (defn get-enum-value [context entity field value]
   (when value (let [enum (keyword (str/snake (str entity "_" field)))
@@ -168,47 +165,122 @@
                    (when (second v) [[(list '<= attribute-val (second v))]])))))
 
 (defn get-has-filter [k entity]
-
   (let [attribute (keyword entity (name k))]
-    (vector '?e attribute)))
+    [ '?e attribute]))
 
 (defn get-missing-filter [k entity]
   (let [attribute (keyword entity (name k))]
-    [(concat '(missing? $ ?e) [attribute])]))
+    (concat '(missing? $ ?e) [attribute])))
 
 (defn get-equal-filter [k v entity context]
   (let [v (if (keyword? v)
             (get-enum-value context entity (name k) v)
             v)]
-    (vector '?e
-      (keyword entity (name k))
-      v)))
+    ['?e
+     (keyword entity (name k))
+     v]))
 
 (defn get-fulltext-filter [k v entity]
     [(concat '(fulltext $) [(keyword entity  (name k)) v])
      ['[?e _ _ _]]])
 
-(defn get-filter-type [filter entity context db]
-  ;#p filter
-  (let [[k v] (first filter)]
-    ;#p [k v]
+(defn get-filter-type [arg entity context db]
+  (let [[k v] (first arg)]
     (cond
       (or (not (coll? v)) (= (count v) 1))
       (let [v (if (coll? v) (first v) v)]
-        #p (is-fulltext? k entity db)
-        (if v
+        (if (or v (not-empty v))
           (if (is-fulltext? k entity db)
-            (get-fulltext-filter k v entity)
-            (get-equal-filter k (if (coll? v) (first v) v) entity context))
-          (get-missing-filter k entity)))
+            (vary-meta (get-fulltext-filter k v entity) assoc :type :full)
+            (vary-meta (get-equal-filter k (if (coll? v) (first v) v) entity context) assoc :type :equal))
+          (vary-meta (get-missing-filter k entity) assoc :type :missing)))
+
+      (empty? v)
+      (vary-meta (get-missing-filter k entity) assoc :type :missing)
 
       (= (count v) 2)
       (if (empty? (remove nil? v))
-        (get-has-filter k entity)
-        (get-range-filter k v entity [] context))
+        (vary-meta (get-has-filter k entity) assoc :type :has)
+        (vary-meta (get-range-filter k v entity [] context) assoc :type :range))
 
-      (> (count v) 2) (get-or-filter k v entity context)
+      (> (count v) 2) (vary-meta (get-or-filter k v entity context) assoc :type :or)
       :else [k v])))
+
+
+(defn make-simple-filter [arg values entity context db]
+  (if-let [val (select-keys values [(keyword arg)])]
+    (when-not (empty? val)
+      (get-filter-type val entity context db))))
+
+
+(defn update-operator [operator filters]
+  (with-meta filters {:operator operator}))
+
+(defn coerce-missing-filter [ filters result]
+      (meta (first (second result)))
+  (if (and (= (count result) 2)
+        (= (meta (first (second result))) {:type :missing}))
+      [(first result) '[?e] (second result)]
+      result))
+
+(defn apply-operator [operators filters]
+  (let [operator (first operators)
+        result (cons operator
+                 (for [filter filters]
+                   (let [type (or (:type (meta filter)) :subfilter)]
+                     (case type
+                       :range (reduce (fn [result val]
+                                        (into result (list 'or-join ['?e] (cons 'and val))))
+                                [] [filter])
+                       :or (first filter)
+                       :equal filter
+                       :has filter
+                       :missing [filter]
+                       :subfilter filter))))
+        missing-coerced (coerce-missing-filter filters result)]
+    (if (> (count operators) 1)
+      missing-coerced
+      [[missing-coerced]])))
+
+
+
+(defn make-composite-filter [operators arg values entity context db]
+  (let [[operator fields] (first arg)
+        operators (conj operators operator)
+        ;_ #p [arg "/" operator "/" operators]
+        filters   (for [field fields]
+                    (if (map? field)
+                        (make-composite-filter operators field values entity context db)
+                        (make-simple-filter field values entity context db)))
+        composite-filter (apply-operator operators filters)]
+    #p composite-filter
+    composite-filter))
+
+(defn compose-filters [composition-string values entity context db]
+  (let [composition-list (read-string composition-string)]
+    ;(def context1 context)
+    ;(def db1 db)
+    ;(def values1 values)
+    (remove nil? (reduce
+                   (fn [filters arg]
+                     (let [composite? (map? arg)
+                           filter
+                           (if composite?
+                             (reduce (fn [result val] (into result val))
+                               (make-composite-filter nil arg values entity context db))
+                             (let [simple-filter (make-simple-filter arg values entity context db)
+                                   type (:type (meta simple-filter))]
+                               (case type
+                                 :range
+                                 simple-filter
+                                 :or
+                                 simple-filter
+                                 :missing
+                                 [[simple-filter]]
+                                 [simple-filter])))]
+                       (into filters filter)))
+                   [] composition-list))))
+
 
 (defn get-equal-filters [vals entity context]
     (for [[k v] vals]
@@ -242,47 +314,46 @@
     vals))
 
 (defn make-rules [db context entity values]
-  (let [all-filters (get-filter-types (into {} (remove #(= :_limit (key %)) values)) db entity)
+  (let [all-filters (get-filter-types (into {} (remove #(#{:_limit :_composition} (key %)) values)) db entity)
         equal-filters (get-equal-filters (:equal all-filters) entity context)
         range-filters (get-range-filters (:range all-filters) entity context)
         or-filters (get-or-filters (:or all-filters) entity context)
         missing-filters (get-missing-filters (:missing all-filters) entity)
         has-filters (get-has-filters (:has all-filters) entity)
         fulltext-filters (get-fulltext-filters (:fulltext all-filters) entity)
-        ;_ #p equal-filters
-        ;_ #p  range-filters
         filter (-> equal-filters
                  (into range-filters)
                  (into missing-filters)
                  (into has-filters)
                  (into or-filters)
                  (into fulltext-filters))]
-    #p all-filters
-    #p filter
-    (def context1 context)
-    (def db1 db)
     filter))
 
 
+
 (defn resolve-query [db context entity values]
-  (let [filter (make-rules db context entity values)
+  (let [args (remove #{"_limit""_composition" } (mapv (comp name key) values))
+        composition (or (:_composition values) (str (mapv symbol args)))
+        filter (compose-filters composition values entity context db)
         rules (vector (into (vector '(any ?e)) filter))]
-    ;#p rules
-     (let [limit (or (:_limit values) max-results)
-           results (if (= datomic-api "client")
-                     (d/q {:query '[:find (pull ?e [*])
-                                    :in $ %
-                                    :where (any ?e)]
-                           :args  [db rules]
-                           :limit limit})
-                     (d/q '[:find (pull ?e [*])
-                            :in $ %
-                            :where (any ?e)]
-                       db rules))
-           modified-results (query-ellipsis results)]
-       (if (coll? modified-results)
-         (take limit modified-results)
-         modified-results))))
+    #p rules
+    (let [limit (or (:_limit values) max-results)
+          results (if (= datomic-api "client")
+                    (d/q {:query '[:find (pull ?e [*])
+                                   :in $ %
+                                   :where (any ?e)]
+                          :args  [db rules]
+                          :limit limit})
+                    (d/q '[:find (pull ?e [*])
+                           :in $ %
+                           :where (any ?e)]
+                      db rules))
+          modified-results (query-ellipsis results)]
+      (if (coll? modified-results)
+        (take limit modified-results)
+        modified-results))))
+;(resolve-as nil {:message "testing"
+  ;                 :status  404}))
 
 
 
