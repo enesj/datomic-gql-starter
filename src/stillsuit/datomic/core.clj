@@ -33,21 +33,22 @@
         dbid (:db/id entity)
         rule ['(any ?e) ['?e direct-attribute dbid]]
         filter-entity (namespace attribute)
-        [test-values filter-rules] (when args (config/make-rules db context filter-entity args))
-        rules (if filter-rules (vector (into  rule filter-rules)) (vector rule))]
-    (if-not test-values
-      (if (and (= clojure.lang.PersistentList (type lacinia-type)) (= (first lacinia-type) 'list))
-        (->> (d/q '[:find ?e
-                    :in $ %
-                    :where (any ?e)]
-               db  rules)
-          (map #(hash-map :db/id (first %))))
-        (attribute (d/pull db (vector attribute) (:db/id entity))))
-      {:error (apply str test-values)})))
+        [errors filter-rules] (when args (config/get-rules db context filter-entity args))]
+    (if-not errors
+      (let [rules  (vector (into  rule filter-rules))]
+        ;#p (when args [rules])
+        (if (and (= clojure.lang.PersistentList (type lacinia-type)) (= (first lacinia-type) 'list))
+          (->> (d/q '[:find ?e
+                      :in $ %
+                      :where (any ?e)]
+                 db  rules)
+            (map #(hash-map :db/id (first %))))
+          (attribute (d/pull db (vector attribute) (:db/id entity)))))
+      {:error errors})))
 
 (defn get-enum-attribute [entity attribute lacinia-type context]
-    (-> (get-ref-attribute entity attribute lacinia-type nil context)
-        (find-ident (d/db (:stillsuit/connection context)))))
+  (-> (get-ref-attribute entity attribute lacinia-type nil context)
+      (find-ident (d/db (:stillsuit/connection context)))))
 
 ;(defn entity? [thing]
 ;  (instance? datomic.Entity thing))

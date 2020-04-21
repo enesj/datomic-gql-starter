@@ -5,6 +5,7 @@
             [datomic-gql-starter.utils.config :as config]
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
             [cuerdas.core :as str]
+            [clojure.spec.alpha :as s]
             [catchpocket.generate.core :as cg]
             [datomic-gql-starter.utils.refs-enums :as refs-enums]
             [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
@@ -47,17 +48,53 @@
         result-type (list (symbol "list") (keyword (str/pascal entity)))]
     {query-name# {:args args :description description :resolve resolve :type result-type}}))
 
+(s/def :query/operator #{'or 'and 'not})
 
+(defn make-arg-spec [entity]
+  ;#p [entity (set (map (comp symbol name) (config/find-all-fields entity)))])
+  (set (map (comp symbol name) (config/find-all-fields entity))))
+
+(defn make-nested-spec [arg-spec]
+  (s/map-of :query/operator arg-spec))
+
+(defn make-query-spec [nested-spec-name arg-spec-name]
+  (s/+ (s/alt :arg arg-spec-name :nested nested-spec-name)))
+
+(defmacro make-specs []
+  (mapv (fn [entity#]
+          (let [arg-spec-name# (keyword (str entity# "/arg"))
+                arg-spec# (make-arg-spec entity#)
+                nested-spec-name# (keyword (str entity# "/nested"))
+                args-spec-name# (keyword (str entity# "/args"))
+                query-spec-name# (keyword (str entity# "/query"))]
+            `(s/def ~arg-spec-name# '~arg-spec#)
+            `(s/def ~args-spec-name# (s/coll-of ~arg-spec-name#))
+            `(s/def ~nested-spec-name# vector?)
+            `(s/def ~nested-spec-name# (make-nested-spec ~query-spec-name#))
+            `(s/def ~query-spec-name# (make-query-spec ~arg-spec-name# ~nested-spec-name#))))
+    (config/find-all-entities)))
+
+
+(comment (make-specs))
 
 (defmacro make-queries-resolvers []
   (mapv (fn [entity#]
           (let [base-name# (inflections/plural entity#)
                 query-name# (symbol (str/capital base-name#))
                 resolver-name# (symbol base-name#)
-                args# (config/find-all-fields entity#)
+                arg-spec-name# (keyword (str entity# "/arg"))
+                arg-spec# (make-arg-spec entity#)
+                nested-spec-name# (keyword (str entity# "/nested"))
+                args-spec-name# (keyword (str entity# "/args"))
+                query-spec-name# (keyword (str entity# "/query"))
                 _# (rmv-ns '_)]
             (vector
               `(def ~query-name# (make-query ~entity# ~base-name#))
+              ;`(s/def ~arg-spec-name# '~arg-spec#)
+              ;`(s/def ~args-spec-name# (s/coll-of ~arg-spec-name#))
+              ;`(s/def ~nested-spec-name# vector?)
+              ;`(s/def ~nested-spec-name# (make-nested-spec ~query-spec-name#))
+              ;`(s/def ~query-spec-name# (make-query-spec ~arg-spec-name# ~nested-spec-name#))
               `(defn ~resolver-name# [context# values# ~_#]
                  (config/resolve-query
                    (d/db (:stillsuit/connection context#))
@@ -123,6 +160,7 @@
     inserts))
 
 (when queries
+
   (make-queries-resolvers)
   (make-insert-inputs-mutations-resolvers))
 

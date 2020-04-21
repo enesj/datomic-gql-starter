@@ -106,23 +106,24 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-      (let [val (sd/get-ref-attribute entity attribute
-                  lacinia-type args context)]
-           (if-not (:error val)
-             (let [value     (ensure-type val lacinia-type)
-                   val-coll? (and (coll? value)
-                                  (not (map? value))
-                                  (not (:db/id value)))
-                   val-list  (if val-coll? (set value) #{value})
-                   filtered  (sort-and-filter-entities opts context val-list)
-                   [sorted errs] (ensure-cardinality opts val-coll? filtered)
-                   limit (or(:_limit args) max-results)
-                   sorted-with-limit (if val-coll? (take limit (vec sorted)) sorted)]
-               (resolve/resolve-as
-                (schema/tag-with-type sorted-with-limit lacinia-type)
-                errs))
-             (resolve/resolve-as nil {:message (:error val)
-                                      :status  404})))))
+    ;#p [args " / " entity]
+    (let [val (sd/get-ref-attribute entity attribute
+                lacinia-type args context)]
+         (if-not (:error val)
+           (let [value     (ensure-type val lacinia-type)
+                 val-coll? (and (coll? value)
+                                (not (map? value))
+                                (not (:db/id value)))
+                 val-list  (if val-coll? (set value) #{value})
+                 filtered  (sort-and-filter-entities opts context val-list)
+                 [sorted errs] (ensure-cardinality opts val-coll? filtered)
+                 limit (or(:_limit args) max-results)
+                 sorted-with-limit (if val-coll? (take limit (vec sorted)) sorted)]
+             (resolve/resolve-as
+              (schema/tag-with-type sorted-with-limit lacinia-type)
+              errs))
+           (resolve/resolve-as nil {:message (:error val)
+                                    :status  404})))))
 
 (defn enum-resolver
   "Resolver used to get an attribute value for a lacinia enum type. This uses the :stillsuit/enum-map

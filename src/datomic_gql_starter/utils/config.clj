@@ -4,9 +4,13 @@
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
             [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
                                                           db-link root-dir api-conf max-results]]
-            [clojure.zip :as zip]
+            [clojure.spec.alpha :as s]
+            [expound.alpha :as expound]
+            [clojure.zip :as z]
             [clojure.java.io :as io]
             [clojure.set :as set]))
+
+(set! s/*explain-out* expound/printer)
 
 (def datomic-api (System/getenv "DATOMIC_API"))
 
@@ -234,6 +238,7 @@
                                 [] [filter])
                        :or (first filter)
                        :equal filter
+                       :full filter
                        :has filter
                        :missing [filter]
                        :subfilter filter))))
@@ -253,14 +258,10 @@
                         (make-composite-filter operators field values entity context db)
                         (make-simple-filter field values entity context db)))
         composite-filter (apply-operator operators filters)]
-    #p composite-filter
+    ;#p composite-filter
     composite-filter))
 
-(defn compose-filters [composition-string values entity context db]
-  (let [composition-list (read-string composition-string)]
-    ;(def context1 context)
-    ;(def db1 db)
-    ;(def values1 values)
+(defn compose-filters [composition-list values entity context db]
     (remove nil? (reduce
                    (fn [filters arg]
                      (let [composite? (map? arg)
@@ -279,7 +280,7 @@
                                  [[simple-filter]]
                                  [simple-filter])))]
                        (into filters filter)))
-                   [] composition-list))))
+                   [] composition-list)))
 
 
 (defn get-equal-filters [vals entity context]
@@ -329,29 +330,53 @@
                  (into fulltext-filters))]
     filter))
 
+(defn find-symbols [coll]
+  (let [cc (z/zipper coll? seq nil coll)]
+    (loop [x cc
+           result []]
+      (if-not (z/end? x)
+        (recur (z/next x)
+          (if (= (type (z/node x)) clojure.lang.Symbol)
+            (conj result (z/node x))
+            (set result)))
+        result))))
 
+
+(defn get-rules [db context entity values]
+  ;#p (when (= entity "track") [values entity])
+  (let [query-spec (keyword (str entity "/query"))
+        args (remove #{'_limit '_composition} (mapv (comp symbol name key) values))
+        composition (try (read-string (or (:_composition values) (str args)))
+                         (catch Exception e (str "caught exception: " (.getMessage e))))
+        not-defined (set/difference (find-symbols composition) (into (set args) #{'or 'not 'and}))
+        arg-error (when (not-empty  not-defined)
+                    (str "Value is not defined for arguments: " not-defined))
+        query-error (when (= ::s/invalid (s/conform query-spec composition))
+                      (s/explain-str query-spec composition))
+        errors (or arg-error query-error)]
+    ;#p (when (= entity "track") [query-spec composition args])
+    [errors (compose-filters composition values entity context db)]))
 
 (defn resolve-query [db context entity values]
-  (let [args (remove #{"_limit""_composition" } (mapv (comp name key) values))
-        composition (or (:_composition values) (str (mapv symbol args)))
-        filter (compose-filters composition values entity context db)
-        rules (vector (into (vector '(any ?e)) filter))]
-    #p rules
-    (let [limit (or (:_limit values) max-results)
-          results (if (= datomic-api "client")
-                    (d/q {:query '[:find (pull ?e [*])
-                                   :in $ %
-                                   :where (any ?e)]
-                          :args  [db rules]
-                          :limit limit})
-                    (d/q '[:find (pull ?e [*])
-                           :in $ %
-                           :where (any ?e)]
-                      db rules))
-          modified-results (query-ellipsis results)]
-      (if (coll? modified-results)
-        (take limit modified-results)
-        modified-results))))
+  (let [[errors rules] (get-rules db context entity values)]
+    (if errors
+      (resolve-as nil {:message errors :status  404})
+      (let [rules (vector (into (vector '(any ?e)) rules))
+            limit (or (:_limit values) max-results)
+            results (if (= datomic-api "client")
+                      (d/q {:query '[:find (pull ?e [*])
+                                     :in $ %
+                                     :where (any ?e)]
+                            :args  [db rules]
+                            :limit limit})
+                      (d/q '[:find (pull ?e [*])
+                             :in $ %
+                             :where (any ?e)]
+                        db rules))
+            modified-results (query-ellipsis results)]
+        (if (coll? modified-results)
+          (take limit modified-results)
+          modified-results)))))
 ;(resolve-as nil {:message "testing"
   ;                 :status  404}))
 
