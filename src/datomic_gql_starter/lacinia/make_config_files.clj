@@ -1,10 +1,10 @@
-(ns datomic-gql-starter.utils.refs-enums
+(ns datomic-gql-starter.lacinia.make-config-files
   (:require [datomic-gql-starter.utils.db :as db-utils :refer [db conn]]
             [cuerdas.core :as str]
             [catchpocket.generate.core :as cg]
             [catchpocket.generate.core :as g]
             [catchpocket.lib.config :as cf]
-            [datomic-gql-starter.utils.config :as config]
+            [datomic-gql-starter.lacinia.make-rules :as rules]
             [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
                                                           db-link root-dir api-conf]]
             [clojure.java.io :as io])
@@ -94,8 +94,8 @@
         apis-map
         w))))
 
-(defn make-apis [] (make-api-config (config/find-all-entities)))
-(defn make-catchpocket [] (make-catchpocket-config (config/find-enums) catchpocket-conf stillsuit-conf (config/find-all-entities) db-link))
+(defn make-apis [] (make-api-config (rules/find-all-entities)))
+(defn make-catchpocket [] (make-catchpocket-config (rules/find-enums) catchpocket-conf stillsuit-conf (rules/find-all-entities) db-link))
 (defn make-stillsuit [] (g/generate-and-write! (cf/construct-config catchpocket-conf) conn db))
 
 (defn update-config-files []

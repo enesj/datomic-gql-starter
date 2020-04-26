@@ -6,7 +6,7 @@
             [cuerdas.core :as str]
             [datomic-gql-starter.utils.fern :as f :refer [max-results]]
             [com.walmartlabs.lacinia.schema :as schema]
-            [datomic-gql-starter.utils.config :as config]))
+            [datomic-gql-starter.lacinia.make-rules :as rules]))
 
 (defn graphql-field->datomic-attribute
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in
@@ -106,7 +106,6 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    ;#p [args " / " entity]
     (let [val (sd/get-ref-attribute entity attribute
                 lacinia-type args context)]
          (if-not (:error val)

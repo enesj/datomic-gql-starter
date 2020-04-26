@@ -2,7 +2,7 @@
   "Implementation functions for dealing with datomic interactions."
   (:require [clojure.tools.logging :as log]
             [cuerdas.core :as str]
-            [datomic-gql-starter.utils.config :as config])
+            [datomic-gql-starter.lacinia.make-rules :as rules])
             ;[datomic.api :as d]) ;datomic.api
             ;[datomic.client.api :as d]) ;datomic.client.api
   (:import (java.util UUID)))
@@ -33,7 +33,7 @@
         dbid (:db/id entity)
         rule ['(any ?e) ['?e direct-attribute dbid]]
         filter-entity (namespace attribute)
-        [errors filter-rules] (when args (config/get-rules db context filter-entity args))]
+        [errors filter-rules] (when args (rules/get-rules db context filter-entity args '?e))]
     (if-not errors
       (let [rules  (vector (into  rule filter-rules))]
         ;#p (when args [rules])

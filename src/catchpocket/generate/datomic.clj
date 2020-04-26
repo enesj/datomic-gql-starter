@@ -2,6 +2,7 @@
   (:require [clojure.tools.logging :as log]
             ;[datomic.api :as d] ;datomic.api
             ;[datomic.client.api :as d] ;datomic.client.api
+            [datomic-gql-starter.utils.transformations :refer [query-ellipsis]]
             [cuerdas.core :as str]
             [catchpocket.generate.names :as names]
             [catchpocket.lib.util :as util]
@@ -23,12 +24,6 @@
 
 (defn pull-to-entity [db result]
   (reduce-kv (fn [m k v] (merge m {k (if (:db/id v) (ident-from-id db (:db/id v)) v)})) {} result))
-
-(defn query-ellipsis [x]
-  (if (vector? (first x))
-    (mapv first x)
-    x))
-
 
 (defn- attr-entities
   "Scan a database for metadata about its attributes. Return a seq of entities for the attributes.

@@ -6,12 +6,12 @@
               [io.pedestal.http :as http]
               [stillsuit.core :as stillsuit]
               [stillsuit.lib.util :as u]
-              [datomic-gql-starter.utils.refs-enums :as refs-enums]
-              [datomic-gql-starter.lacinia.make :as make]
+              [datomic-gql-starter.lacinia.make-config-files :as refs-enums]
+              [datomic-gql-starter.lacinia.generate :as make]
               [datomic-gql-starter.utils.fern :refer [refs-conf catchpocket-conf stillsuit-conf
                                                       db-link root-dir api-conf]]
               [datomic-gql-starter.utils.db :as db-utils]
-              [datomic-gql-starter.utils.config :as config]))
+              [datomic-gql-starter.lacinia.make-rules :as rules]))
 
 (defn service-map
   [schema connection]
@@ -29,7 +29,7 @@
   (try
     (let [stillsuit-config (u/load-edn-file stillsuit-conf)
           custom-config (-> stillsuit-config
-                          (assoc-in [:queries] make/query-maps)
+                          (update-in [:queries] #(merge % make/query-maps))
                           (assoc-in [:input-objects] make/mutation-inputs)
                           (assoc-in [:mutations] make/mutation-maps))
           s-map (-> (service-map custom-config db-utils/conn)
@@ -44,7 +44,7 @@
   (log/info {:serve "Serving graphiql at: http://localhost:8888/graphiql/index.html"})
   (log/infof "GraphQL Voyager:     http://localhost:8888/voyager/index.html")
   (log/infof "Ready.")
-  (load "lacinia/make")
+  (load "lacinia/generate")
   (-> (smap)
       http/create-server
       http/start))
