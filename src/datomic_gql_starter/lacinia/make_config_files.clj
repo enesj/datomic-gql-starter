@@ -94,8 +94,8 @@
         apis-map
         w))))
 
-(defn make-apis [] (make-api-config (rules/find-all-entities)))
-(defn make-catchpocket [] (make-catchpocket-config (rules/find-enums) catchpocket-conf stillsuit-conf (rules/find-all-entities) db-link))
+(defn make-apis [] (make-api-config (rules/all-entities)))
+(defn make-catchpocket [] (make-catchpocket-config (rules/enums) catchpocket-conf stillsuit-conf (rules/all-entities) db-link))
 (defn make-stillsuit [] (g/generate-and-write! (cf/construct-config catchpocket-conf) conn db))
 
 (defn update-config-files []

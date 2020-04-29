@@ -2,11 +2,11 @@
   (:require [datomic-gql-starter.utils.db :as db-utils :refer [db conn]]
             [inflections.core :as inflections :refer [plural singular]]
             [cuerdas.core :as str]
-            [datomic-gql-starter.utils.transformations :refer [pascal-keyword camel-keyword
-                                                               make-input-key
-                                                               make-input-name make-list
-                                                               rmv-ns resolve-symbol
-                                                               query-ellipsis add-namespace remove-ns-rules]]
+            [datomic-gql-starter.utils.make-names :refer [pascal-keyword camel-keyword
+                                                          make-input-key
+                                                          make-input-name make-list
+                                                          rmv-ns resolve-symbol
+                                                          query-ellipsis add-namespace remove-ns-rules]]
 
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
             [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
@@ -32,20 +32,21 @@
               [?e :db/ident ?ident]
               [?e :db/unique]
               [(namespace ?ident) ?ns]]
-         db entity)
+          db entity)
     ffirst))
 
-(defn get-attr-type [attr datomic-to-lacinia]
-  (let [type (-> (d/q '[:find ?t
-                        :in $ ?v
-                        :where
-                        [?e :db/ident ?v]
-                        [?e :db/valueType ?type-id]
-                        [?type-id :db/ident ?t]]
-                   db attr)
-               ffirst
-               datomic-to-lacinia)]
-    [type (= type :catchpocket.generate.core/ref)]))
+
+(defn dbid-to-ns [dbid]
+  (->> (d/q '[:find   ?ns
+              :in $ ?e
+              :where
+              [?e ?a]
+              [?a :db/unique]
+              [?a :db/ident ?v]
+              [(namespace ?v) ?ns]]
+          db dbid)
+    ffirst))
+
 
 (defn find-all-refs []
   "gets all entities from DB of type ':db.type/ref' "
@@ -59,19 +60,36 @@
         db remove-ns-rules)
     query-ellipsis))
 
+(def all-refs (find-all-refs))
+
 (defn find-enums []
-  (let [refs (find-all-refs)]
-    (into (sorted-map)
-      (for [ref refs]
-        (vector ref
-          (->>
-            (d/q '[:find (first ?a)
-                   :in $ ?ref
-                   :where
-                   [_ ?ref ?w]
-                   [?w :db/ident ?a]]
-              db ref)
-            (#(if (not-empty %) :enum :ref))))))))
+  (into (sorted-map)
+    (for [ref all-refs]
+      (vector ref
+        (->>
+          (d/q '[:find (first ?a)
+                 :in $ ?ref
+                 :where
+                 [_ ?ref ?w]
+                 [?w :db/ident ?a]]
+            db ref)
+          (#(if (not-empty %) :enum :ref)))))))
+
+(def enums (find-enums))
+
+(defn get-attr-type [attr datomic-to-lacinia]
+  (let [type (-> (d/q '[:find ?t
+                        :in $ ?v
+                        :where
+                        [?e :db/ident ?v]
+                        [?e :db/valueType ?type-id]
+                        [?type-id :db/ident ?t]]
+                   db attr)
+               ffirst
+               datomic-to-lacinia)]
+    [type (when  (= type :catchpocket.generate.core/ref) (attr enums))]))
+
+(def attr-type (memoize get-attr-type))
 
 (defn find-all-entities []
   (->>
@@ -82,10 +100,13 @@
            [?e :db/valueType]
            [(namespace ?ident) ?ns]
            (remove-ns ?ns)]
-      db remove-ns-rules)
+       db remove-ns-rules)
     query-ellipsis
     (remove #(str/includes? % "."))
     vec))
+
+(def all-entities (find-all-entities))
+
 
 (defn find-all-fields [entity]
   (->>
@@ -99,32 +120,47 @@
       db entity)
     query-ellipsis))
 
+(def all-fields (memoize find-all-fields))
+
+
 (defn get-args-type [entity datomic-to-lacinia]
-  (let [args (find-all-fields entity)
-        enums (find-enums)]
-       (mapv
-         (fn [arg]
-           (let [[type ref?] (get-attr-type arg datomic-to-lacinia)
-                 type-modified (if ref?
-                                 (if (= (arg enums) :ref)
-                                   {:ref (name arg)}
-                                   (str/snake (str arg)))
-                                 type)]
-             [arg type-modified]))
-         args)))
+  (let [args (all-fields entity)]
+    (mapv
+      (fn [arg]
+        (let [[type ref?] (attr-type arg datomic-to-lacinia)
+              type-modified (case ref?
+                              :ref
+                               {:ref (name arg)}
+                               :enum
+                               (str/snake (str arg))
+                              type)]
+          [arg type-modified]))
+      args)))
+
+(def args-type (memoize get-args-type))
 
 
-(defn query-args [entity datomic-to-lacinia]
-  (let [arg-types (get-args-type entity datomic-to-lacinia)]
-    (into {:_limit {:type :JavaLong} :_composition {:type 'String}}
+(defn make-args [default entity datomic-to-lacinia]
+  (let [arg-types (args-type entity datomic-to-lacinia)]
+    (into default
       (for [[field lacinia-type] arg-types]
         {(camel-keyword (name field))
          (hash-map :type
-                           (cond
-                             (keyword? lacinia-type) (list (symbol "list") lacinia-type)
-                             (map? lacinia-type)
-                             (keyword (str/pascal (str (singular (:ref lacinia-type)) "-input")))
-                             :else (list (symbol "list") (symbol lacinia-type))))}))))
+           (cond
+             (keyword? lacinia-type) (list (symbol "list") lacinia-type)
+             (map? lacinia-type)
+             (keyword (str/pascal (str (singular (:ref lacinia-type)) "-input")))
+             :else (list (symbol "list") (symbol lacinia-type))))}))))
+
+(defn query-args
+  [entity datomic-to-lacinia]
+  (make-args {:_limit {:type :JavaLong} :_composition {:type 'String}} entity datomic-to-lacinia))
+
+
+(defn update-args
+  [entity datomic-to-lacinia]
+  (make-args {:_limit {:type :JavaLong} :_update {:type (make-input-key entity)} :_preview {:type 'Boolean}
+              :_composition {:type 'String}} entity datomic-to-lacinia))
 
 
 (defn get-enum-value [context entity field value]
@@ -141,7 +177,7 @@
         fulltext? (d/q '[:find [?e ...]
                          :in $ ?field
                          :where [?field :db/fulltext ?e]]
-                    db field)]
+                     db field)]
     (when (first fulltext?) (name field))))
 
 (defn get-or-filter [k v entity context e]
@@ -291,10 +327,9 @@
         result))))
 
 (defn get-rules [db context entity values e]
-  ;#p values
   (let [entity (singular entity)
         query-spec (keyword (str entity "/query"))
-        args (into [] (remove #{'_limit '_composition} (mapv (comp symbol name key) values)))
+        args (into [] (remove #{'_limit '_composition '_update '_preview } (mapv (comp symbol name key) values)))
         composition (try (read-string (or (:_composition values) (str args)))
                          (catch Exception e (str "caught exception: " (.getMessage e))))
         not-defined (set/difference (find-symbols composition) (into (set args) #{'or 'not 'and}))
@@ -307,7 +342,7 @@
 
 
 
-(defn make-resolver [db context entity values]
+(defn make-query-resolver [db context entity values]
   (let [[errors rules] (get-rules db context entity values '?e)]
     (if errors
       (resolve-as nil {:message errors :status 404})
@@ -328,6 +363,26 @@
         (if (coll? modified-results)
           (take limit modified-results)
           modified-results)))))
+
+(defn make-update-resolver
+  [db context entity values]
+  (let [updates (:_update values)
+        preview (:_preview values)
+        query-result (make-query-resolver db context entity values)
+        tx-data   (for [id (map :db/id query-result)]
+                      (merge {:db/id id} (reduce-kv (fn [m k v ] (assoc m (add-namespace entity k) v))
+                                           {} updates)))
+        ;_    #p tx-data
+        db-after  (:db-after (if (= datomic-api "client")
+                               (d/with
+                                  db
+                                 {:tx-data (into [] tx-data)})
+                               (d/with
+                                  db
+                                 (into [] tx-data))))
+        result  (make-query-resolver db-after context entity values)]
+    ;#p result
+    result))
 
 
 

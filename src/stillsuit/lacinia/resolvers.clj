@@ -106,8 +106,7 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [val (sd/get-ref-attribute entity attribute
-                lacinia-type args context)]
+    (let [val (sd/get-ref-attribute entity attribute args context)]
          (if-not (:error val)
            (let [value     (ensure-type val lacinia-type)
                  val-coll? (and (coll? value)
@@ -130,11 +129,12 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value    (sd/get-enum-attribute entity attribute lacinia-type context)
+    (let [value    (sd/get-enum-attribute entity attribute  context)
           attr-map (get-in context [:stillsuit/enum-map lacinia-type :stillsuit/datomic-to-lacinia])
           mapped   (if (set? value)
                      (map #(get attr-map %) value)
                      (get attr-map value))]
+      ;(println [value mapped attr-map])
       (when (and (some? value) (nil? mapped))
         (log/warnf "Unable to find mapping for datomic enum value %s for type %s, attribute %s!"
                    value lacinia-type attribute))

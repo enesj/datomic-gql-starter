@@ -2,19 +2,22 @@
   (:require [inflections.core :as inflections :refer [plural singular]]
            ;[datomic.api :as d] ;datomic.api
            ; [datomic.client.api :as d]                      ;datomic.client.api
-            [datomic-gql-starter.lacinia.make-rules :as rules :refer [find-all-entities get-args-type]]
-            [datomic-gql-starter.utils.transformations :refer [pascal-keyword camel-keyword
-                                                               rmv-ns resolve-symbol make-list
-                                                               make-input-name make-input-key make-query-name]]
-
+            [datomic-gql-starter.lacinia.make-rules :as rules :refer [all-entities args-type]]
+            [datomic-gql-starter.utils.make-names :refer [pascal-keyword camel-keyword
+                                                          rmv-ns resolve-symbol make-list
+                                                          make-result-type make-args-name
+                                                          make-input-name make-input-key
+                                                          make-query-key make-query-name
+                                                          make-query-resolver-key make-query-resolver-name
+                                                          make-insert-key make-insert-name
+                                                          make-insert-resolver-key make-insert-resolver-name
+                                                          make-update-key make-update-name
+                                                          make-update-resolver-name make-update-resolver-key]]
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
-            [cuerdas.core :as str]
             [clojure.spec.alpha :as s]
             [catchpocket.generate.core :as cg]
-            [datomic-gql-starter.lacinia.make-config-files :as refs-enums]
             [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
-                                                          api-conf max-results]]
-            [clojure.set :as set]))
+                                                          api-conf max-results]]))
 
 (def datomic-api (System/getenv "DATOMIC_API"))
 
@@ -24,7 +27,7 @@
 
 (def apis
   (let [api-conf (f/get-conf :api-conf)
-        all-entities (find-all-entities)
+        all-entities all-entities
         apis (when api-conf (read-string api-conf))]
     (reduce-kv (fn [m k v] (assoc m k (if (empty? v) all-entities v)))
                {} apis)))
@@ -35,16 +38,15 @@
 (def inserts
   (:inserts apis))
 
-;______________________________________________________________________________________
-;                   queries
-;______________________________________________________________________________________
 
-
+;______________________________________________________________________________________
+;                   specs
+;______________________________________________________________________________________
 
 (s/def :query/operator #{'or 'and 'not})
 
 (defn make-arg-spec [entity]
-  (set (map rmv-ns (rules/find-all-fields entity))))
+  (set (map rmv-ns (rules/all-fields entity))))
 
 (defn make-nested-spec [arg-spec]
   (s/map-of :query/operator arg-spec))
@@ -53,8 +55,8 @@
   (s/+ (s/alt :arg arg-spec-name :nested nested-spec-name)))
 
 (defmacro make-specs []
-  "[:country/arg :country/args :country/nested :country/nested :country/query]
-   [:artist/arg :artist/args :artist/nested :artist/nested :artist/query]"
+  "[:country/arg :country/args :country/nested :country/query]
+   [:artist/arg :artist/args :artist/nested :artist/query]"
   (mapv (fn [entity#]
           (let [arg-spec-name# (keyword (str entity# "/arg"))
                 arg-spec# (make-arg-spec entity#)
@@ -67,16 +69,19 @@
               `(s/def ~nested-spec-name# vector?)
               `(s/def ~nested-spec-name# (make-nested-spec ~query-spec-name#))
               `(s/def ~query-spec-name# (make-query-spec ~arg-spec-name# ~nested-spec-name#)))))
-    (find-all-entities)))
+    all-entities))
 
+;______________________________________________________________________________________
+;                   inputs
+;______________________________________________________________________________________
 
 (defmacro make-inputs []
-  "add-countries-input
-   add-artists-input
-   add-languages-input"
+  "country-input
+   artist-input
+   language-input"
   (mapv (fn [entity#]
           (let [input-name# (make-input-name entity#)
-                arg-types# (get-args-type  entity# cg/datomic-to-lacinia)
+                arg-types# (args-type  entity# cg/datomic-to-lacinia)
                 _# (rmv-ns '_)]
             (vector `(def ~input-name#
                        {:fields (into {}
@@ -85,38 +90,66 @@
                                            (hash-map :type (cond
                                                              (keyword? lacinia-type#) lacinia-type#
                                                              (map? lacinia-type#)
-                                                             (let [ref-name# (str (singular (:ref lacinia-type#)))]
+                                                             (let [ref-name# (singular (:ref lacinia-type#))]
                                                                (make-list
                                                                  (make-input-key ref-name#)))
                                                              :else (symbol lacinia-type#)))))
                                     (quote ~arg-types#)))}))))
-    (find-all-entities)))
+    all-entities))
 
+;______________________________________________________________________________________
+;                   queries
+;______________________________________________________________________________________
 
-(defn make-query [entity base-name]
-  (let [query-name# (pascal-keyword base-name)
+(defn make-query [entity]
+  (let [query-key# (make-query-key entity)
         args (rules/query-args entity cg/datomic-to-lacinia)
-        resolver (keyword (plural entity))
+        resolver (make-query-resolver-key entity)
         description ""
-        result-type (make-query-name entity)]
-    {query-name# {:args args :description description :resolve resolver :type result-type}}))
+        result-type (make-result-type entity)]
+    {query-key# {:args args :description description :resolve resolver :type result-type}}))
 
 
 (defmacro make-queries-resolvers []
- "[[Countries countries]
- [Artists artists]
- [Languages languages]
- [Releases releases]
+ "Countries countries
+  Artists artists
+  Languages languages
+  Releases releases
  ...."
   (mapv (fn [entity#]
-          (let [base-name# (plural entity#)
-                query-name# (symbol (str/capital base-name#))
-                resolver-name# (symbol base-name#)
+          (let [query-name# (make-query-name entity#)
+                resolver-name# (make-query-resolver-name entity#)
                 _# (rmv-ns '_)]
             (vector
-              `(def ~query-name# (make-query ~entity# ~base-name#))
+              `(def ~query-name# (make-query ~entity#))
               `(defn ~resolver-name# [context# values# ~_#]
-                 (rules/make-resolver
+                 (rules/make-query-resolver
+                   (d/db (:stillsuit/connection context#))
+                   context#
+                   ~entity#
+                   values#)))))
+    queries))
+
+;______________________________________________________________________________________
+;                   updates
+;______________________________________________________________________________________
+
+(defn make-update [entity]
+  (let [update-key# (make-update-key entity)
+        args (rules/update-args entity cg/datomic-to-lacinia)
+        resolver (make-update-resolver-key entity)
+        result-type (make-result-type entity)]
+    {update-key# {:args args :description "" :resolve resolver :type result-type}}))
+
+(defmacro make-update-mutations-resolvers []
+  (mapv (fn [entity#]
+          (let [update-name# (make-update-name entity#)
+                resolver-name# (make-update-resolver-name entity#)
+                _# (rmv-ns '_)]
+            (vector
+              `(def ~update-name# (make-update ~entity#))
+              `(defn ~resolver-name# [context# values# ~_#]
+                 (rules/make-update-resolver
                    (d/db (:stillsuit/connection context#))
                    context#
                    ~entity#
@@ -124,19 +157,20 @@
     queries))
 
 
-
 ;______________________________________________________________________________________
-;                   mutations
+;                   inserts
 ;______________________________________________________________________________________
 
-(defn make-insert-mutation [entity name]
-  (let [mutation-name# (keyword (str/camel name))
+(defn make-insert-mutation [entity]
+  (let [mutation-key# (make-insert-key entity)
         input-name (make-input-key entity)
-        args {(pascal-keyword (plural entity))
+        args {(make-args-name entity)
               {:type (make-list input-name)}}
-        resolve (keyword name)
-        type (make-query-name entity)]
-    {mutation-name# {:args args :description "" :resolve resolve :type type}}))
+        resolver-key (make-insert-resolver-key entity)
+        result-type (make-result-type entity)]
+    {mutation-key# {:args args :description "" :resolve resolver-key :type result-type}}))
+
+
 
 (defn make-transaction-data [context entity arg-types data]
   (for [values data]
@@ -155,12 +189,11 @@
                 (map? lacinia-type)
                 (let [entity (singular arg-name)]
                   (make-transaction-data context entity
-                    (get-args-type  entity cg/datomic-to-lacinia)
+                    (args-type  entity cg/datomic-to-lacinia)
                     value))
                 :else value))
             (when (= lacinia-type :JavaUUID)
               (vector field  (java.util.UUID/randomUUID)))))))))
-
 
 (defn make-insert-resolver [context entity arg-types data]
   (let [conn (:stillsuit/connection context)
@@ -172,79 +205,98 @@
                  @(d/transact
                     conn
                     (into [] transaction-data)))]
-    (mapv #(d/pull (:db-after result) '[*] (val %)) (:tempids result))))
+    ;#p transaction-data
+    (mapv #(d/pull (:db-after result) '[*] (val %))
+      (remove #(not= entity (rules/dbid-to-ns (val %))) (:tempids result)))))
 
 
-(defmacro make-insert-inputs-mutations-resolvers []
-  "add-countries-resolver
-   add-countries-mutation
-   add-artists-resolver
-   add-artists-mutation]"
+(defmacro make-insert-mutations-resolvers []
+  "insert-countries-resolver
+   insert-countries-mutation
+   insert-artists-resolver
+   insert-artists-mutation]"
   (mapv (fn [entity#]
-          (let [entity-plural# (plural entity#)
-                name# (str "add-" entity-plural#)
-                resolver-name# (symbol (str name# "-resolver"))
-                mutation-name# (symbol (str name# "-mutation"))
-                arg-types# (get-args-type  entity# cg/datomic-to-lacinia)
+          (let [
+                resolver-name# (make-insert-resolver-name entity#)
+                mutation-name# (make-insert-name entity#)
+                arg-types# (args-type  entity# cg/datomic-to-lacinia)
                 _# (rmv-ns '_)]
             (vector
-              `(defn ~resolver-name# [context# {data#  (keyword (str/capital ~entity-plural#))} ~_#]
+              `(defn ~resolver-name# [context# {data#  (make-args-name ~entity#)} ~_#]
                  (make-insert-resolver context# ~entity# (quote ~arg-types#) data#))
               `(def ~mutation-name#
-                 (make-insert-mutation ~entity# ~name#)))))
+                 (make-insert-mutation ~entity#)))))
     inserts))
 
-(when queries
+;______________________________________________________________________________________
+;                   make all
+;______________________________________________________________________________________
+
+(when apis
   (make-specs)
   (make-inputs)
   (make-queries-resolvers)
-  (make-insert-inputs-mutations-resolvers))
+  (make-queries-resolvers)
+  (make-update-mutations-resolvers)
+  (make-insert-mutations-resolvers))
 
 ;______________________________________________________________________________________
 ;                   maps
 ;______________________________________________________________________________________
 
-
-(def mutation-inputs
-  (->> (for [entity (find-all-entities)]
-         (let [input-key (make-input-key entity)
-               input-name (make-input-name entity)]
+(def inputs
+  (->> (for [entity all-entities]
+         (let [input-name (make-input-name entity)
+               input-key (make-input-key entity)]
            (hash-map input-key (resolve-symbol input-name))))
     (apply merge)))
 
-(def mutation-resolvers
+(def insert-resolvers
   (->> (for [entity inserts]
-         (let [resolver-name (str "add-" (plural entity) "-resolver")
-               resolver-key (keyword (str "add-" (plural entity)))]
+         (let [resolver-name (make-insert-resolver-name entity)
+               resolver-key (make-insert-resolver-key entity)]
            (hash-map resolver-key (resolve-symbol  resolver-name))))
     (apply merge)))
 
-(def mutation-maps
+(def insert-maps
   (->> (for [entity inserts]
-         (let [mutation-name (str "add-" (plural entity) "-mutation")]
+         (let [mutation-name (make-insert-name entity)]
            (resolve-symbol mutation-name)))
     (apply merge)))
 
+(def update-resolvers
+  (->> (for [entity inserts]
+         (let [resolver-name (make-update-resolver-name entity)
+               resolver-key (make-update-resolver-key entity)]
+           (hash-map resolver-key (resolve-symbol  resolver-name))))
+    (apply merge)))
+
+(def update-maps
+  (->> (for [entity inserts]
+         (let [mutation-name (make-update-name entity)]
+           (resolve-symbol mutation-name)))
+    (apply merge)))
+
+(def mutation-maps (merge insert-maps update-maps))
+
 (def query-resolvers
-  (into {}
-    (map
-      (fn [entity]
-        (let [resolver-name (plural entity)]
-          (hash-map (keyword resolver-name) (resolve-symbol resolver-name))))
-      queries)))
+  (->> (for [entity queries]
+         (let [resolver-name (plural entity)
+               resolver-key (make-query-resolver-key entity)]
+           (hash-map resolver-key (resolve-symbol  resolver-name))))
+    (apply merge)))
 
 (def query-maps
-  (apply merge
-    (map
-      (fn [entity]
-        (let [query-name (str/capital (plural entity))]
-          (resolve-symbol query-name)))
-      queries)))
-
+  (->> (for [entity queries]
+         (let [query-name (make-query-name entity)]
+           (resolve-symbol query-name)))
+    (apply merge)))
 
 (def resolver-maps
   (->> query-resolvers
-    (merge mutation-resolvers)))
+    (merge insert-resolvers)
+    (merge update-resolvers)))
+
 
 
 

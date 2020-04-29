@@ -2,6 +2,8 @@
   "Implementation functions for dealing with datomic interactions."
   (:require [clojure.tools.logging :as log]
             [cuerdas.core :as str]
+            [inflections.core :as inflections :refer [plural singular]]
+            [catchpocket.generate.core :as cg]
             [datomic-gql-starter.lacinia.make-rules :as rules])
             ;[datomic.api :as d]) ;datomic.api
             ;[datomic.client.api :as d]) ;datomic.client.api
@@ -27,27 +29,39 @@
     str/join
     keyword))
 
-(defn get-ref-attribute [entity attribute lacinia-type args context]
+
+(defn get-filter-entity
+  [attribute]
+  (if (second (rules/get-attr-type attribute cg/datomic-to-lacinia))
+      (singular (name attribute))
+      (namespace attribute)))
+
+
+(defn get-ref-attribute [entity attribute args context]
   (let [db (d/db (:stillsuit/connection context))
         direct-attribute (reverse-to-direct attribute)
+        filter-entity (get-filter-entity attribute)
         dbid (:db/id entity)
-        rule ['(any ?e) ['?e direct-attribute dbid]]
-        filter-entity (namespace attribute)
-        [errors filter-rules] (when args (rules/get-rules db context filter-entity args '?e))]
+        rule ['(any ?e) (if (= direct-attribute attribute)
+                          [dbid direct-attribute '?e]
+                          ['?e direct-attribute dbid])]
+        [errors filter-rules] (when args (rules/get-rules db context filter-entity args '?e))
+        rules (vector (into  rule filter-rules))
+        type (rules/get-attr-type direct-attribute cg/datomic-to-lacinia)]
     (if-not errors
-      (let [rules  (vector (into  rule filter-rules))]
-        ;#p (when args [rules])
-        (if (and (= clojure.lang.PersistentList (type lacinia-type)) (= (first lacinia-type) 'list))
-          (->> (d/q '[:find ?e
-                      :in $ %
-                      :where (any ?e)]
-                 db  rules)
-            (map #(hash-map :db/id (first %))))
-          (attribute (d/pull db (vector attribute) (:db/id entity)))))
+        (if (= :ref (second type))
+            (->> (d/q '[:find ?e
+                        :in $ %
+                        :where (any ?e)]
+                   db  rules)
+              (map #(hash-map :db/id (first %))))
+            (if (attribute entity)
+              (attribute entity)
+              (attribute (d/pull db (vector attribute) (:db/id entity)))))
       {:error errors})))
 
-(defn get-enum-attribute [entity attribute lacinia-type context]
-  (-> (get-ref-attribute entity attribute lacinia-type nil context)
+(defn get-enum-attribute [entity attribute  context]
+  (-> (get-ref-attribute entity attribute  nil context)
       (find-ident (d/db (:stillsuit/connection context)))))
 
 ;(defn entity? [thing]

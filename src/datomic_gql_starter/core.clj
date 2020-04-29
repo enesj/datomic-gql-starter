@@ -1,25 +1,24 @@
   (ns datomic-gql-starter.core
     (:require [clojure.tools.logging :as log]
               [clojure.tools.namespace.repl :refer [refresh refresh-all]]
-              [com.walmartlabs.lacinia.pedestal :as lacinia]
+              [com.walmartlabs.lacinia.pedestal :as lacinia-pedestal]
               [mount.core :refer [defstate] :as mount]
               [io.pedestal.http :as http]
               [stillsuit.core :as stillsuit]
               [stillsuit.lib.util :as u]
               [datomic-gql-starter.lacinia.make-config-files :as refs-enums]
-              [datomic-gql-starter.lacinia.generate :as make]
+              [datomic-gql-starter.lacinia.generate :as generate]
               [datomic-gql-starter.utils.fern :refer [refs-conf catchpocket-conf stillsuit-conf
                                                       db-link root-dir api-conf]]
-              [datomic-gql-starter.utils.db :as db-utils]
-              [datomic-gql-starter.lacinia.make-rules :as rules]))
+              [datomic-gql-starter.utils.db :as db-utils]))
 
 (defn service-map
   [schema connection]
   (try
     (let [decorated (stillsuit/decorate #:stillsuit{:schema     schema
                                                     :connection connection
-                                                    :resolvers  make/resolver-maps})]
-      (lacinia/service-map (:stillsuit/schema decorated)
+                                                    :resolvers  generate/resolver-maps})]
+      (lacinia-pedestal/service-map (:stillsuit/schema decorated)
                            {:graphiql    true
                             :app-context (:stillsuit/app-context decorated)}))
     (catch Exception e
@@ -27,11 +26,14 @@
 
 (defn- smap []
   (try
-    (let [stillsuit-config (u/load-edn-file stillsuit-conf)
+    (let [test-schema (u/load-edn-file "resources/dev/test-schema.edn")
+          stillsuit-config (u/load-edn-file stillsuit-conf)
           custom-config (-> stillsuit-config
-                          (update-in [:queries] #(merge % make/query-maps))
-                          (assoc-in [:input-objects] make/mutation-inputs)
-                          (assoc-in [:mutations] make/mutation-maps))
+                          (update-in [:queries] #(merge % generate/query-maps))
+                          (assoc-in [:input-objects] generate/inputs)
+                          (assoc-in [:mutations] generate/mutation-maps))
+          config-wth-test-queries (merge-with (comp #(into {} %) concat)
+                                    custom-config test-schema)
           s-map (-> (service-map custom-config db-utils/conn)
                   (assoc ::http/resource-path "/public"))]
       (log/infof "Connecting to datomic at %s..." db-link)

@@ -2,7 +2,7 @@
   (:require [clojure.tools.logging :as log]
             ;[datomic.api :as d] ;datomic.api
             ;[datomic.client.api :as d] ;datomic.client.api
-            [datomic-gql-starter.utils.transformations :refer [query-ellipsis]]
+            [datomic-gql-starter.utils.make-names :refer [query-ellipsis]]
             [cuerdas.core :as str]
             [catchpocket.generate.names :as names]
             [catchpocket.lib.util :as util]
