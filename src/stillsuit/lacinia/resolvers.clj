@@ -5,8 +5,7 @@
             [clojure.tools.logging :as log]
             [cuerdas.core :as str]
             [datomic-gql-starter.utils.fern :as f :refer [max-results]]
-            [com.walmartlabs.lacinia.schema :as schema]
-            [datomic-gql-starter.lacinia.make-rules :as rules]))
+            [com.walmartlabs.lacinia.schema :as schema]))
 
 (defn graphql-field->datomic-attribute
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in

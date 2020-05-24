@@ -11,16 +11,11 @@
             [stillsuit.lacinia.resolvers :as sr]
             [stillsuit.lacinia.enums :as se]
             [stillsuit.lib.util :as slu]
-            ;[datomic.api :as d] ;datomic.api
-            ;[datomic.client.api :as d] ;datomic.client.api
             [com.walmartlabs.lacinia :as lacinia]
             [com.walmartlabs.lacinia.schema :as schema]
             [clojure.tools.logging :as log]
+            [db :refer [d-db]]
             [com.walmartlabs.lacinia.util :as util]))
-
-(if (= (System/getenv "DATOMIC_API") "client")
-  (require '[datomic.client.api :as d])
-  (require '[datomic.api :as d]))
 
 (defn- make-app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."
@@ -84,7 +79,7 @@
 
   For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/#_stillsuit_enums)."
   [app-context]
-  (some-> app-context :stillsuit/connection d/db))
+  (some-> app-context :stillsuit/connection d-db))
 
 (defn decorate
   "Main interface to stillsuit. Accepts a map containing various parameters as input; returns

@@ -3,16 +3,10 @@
   (:require [com.walmartlabs.lacinia.resolve :as resolve]
             [stillsuit.datomic.core :as datomic]
             [clojure.tools.logging :as log]
-            ;[datomic.api :as d] ;datomic.api
-            ;[datomic.client.api :as d] ;datomic.client.api
+            [db :refer [d-db]]
             [stillsuit.lacinia.types :as types]
             [com.walmartlabs.lacinia.schema :as schema])
   (:import (com.walmartlabs.lacinia.resolve ResolverResult)))
-
-
-(if (= (System/getenv "DATOMIC_API") "client")
-  (require '[datomic.client.api :as d])
-  (require '[datomic.api :as d]))
 
 (defn stillsuit-entity-id-query
   [{:stillsuit/keys [entity-id-query-name datomic-entity-type]}]
@@ -26,7 +20,7 @@
   ^ResolverResult
   (fn entity-id-query-resolver-fn
     [{:stillsuit/keys [config connection] :as context} {:keys [eid] :as args} value]
-    (if-let [db (some-> connection d/db)]
+    (if-let [db (some-> connection d-db)]
       (let [ent      (datomic/get-entity-by-eid db eid)
             ent-type (types/lacinia-type ent config connection)]
         (log/infof "Entity" ent)
@@ -53,10 +47,10 @@
   ^resolve/ResolverResult
   (fn unique-attribute-query-resolver-fn
     [{:stillsuit/keys [connection] :as ctx} args value]
-    (if-let [db (some-> connection d/db)]
+    (if-let [db (some-> connection d-db)]
       (let [arg (some-> args vals first)
             result-raw (datomic/get-entity-by-unique-attribute db attribute arg)
-            result (if (:db/id result-raw) result-raw nil)]
+            result (when (:db/id result-raw) result-raw)]
         (resolve/resolve-as
          (schema/tag-with-type result lacinia-type)))
       ;; Else no db

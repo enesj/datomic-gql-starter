@@ -1,6 +1,5 @@
 (ns catchpocket.generate.queries
   (:require [clojure.tools.logging :as log]
-            [cuerdas.core :as str]
             [catchpocket.generate.names :as names]))
 
 (defn- query-definition

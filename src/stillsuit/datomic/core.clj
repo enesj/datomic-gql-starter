@@ -3,22 +3,18 @@
   (:require [clojure.tools.logging :as log]
             [cuerdas.core :as str]
             [inflections.core :as inflections :refer [plural singular]]
-            [catchpocket.generate.core :as cg]
-            [datomic-gql-starter.lacinia.make-rules :as rules])
-            ;[datomic.api :as d]) ;datomic.api
-            ;[datomic.client.api :as d]) ;datomic.client.api
+            [catchpocket.generate.core :as cgc]
+            [catchpocket.generate.datomic :as cgd]
+            [db :refer [pull d-db q]]
+            [datomic-gql-starter.lacinia.resolvers :as resolvers])
   (:import (java.util UUID)))
-
-(if (= (System/getenv "DATOMIC_API") "client")
-  (require '[datomic.client.api :as d])
-  (require '[datomic.api :as d]))
 
 (defn find-ident [attr db]
   (cond
     (map? attr)
-    (:db/ident (d/pull db '[:db/ident] (val (first attr))))
+    (:db/ident (pull db '[:db/ident] (val (first attr))))
     (vector? attr)
-    (into #{} (mapv #(:db/ident (d/pull db '[:db/ident] (val (first %)))) attr))
+    (set (mapv #(:db/ident (pull db '[:db/ident] (val (first %)))) attr))
     :else attr))
 
 (defn reverse-to-direct [attribute]
@@ -29,40 +25,54 @@
     str/join
     keyword))
 
-
-(defn get-filter-entity
+(defn get-sub-entity
   [attribute]
-  (if (second (rules/get-attr-type attribute cg/datomic-to-lacinia))
+  (if (second (resolvers/get-attr-type attribute cgc/datomic-to-lacinia))
       (singular (name attribute))
       (namespace attribute)))
 
+(def attr-entities (cgd/attr-entities db/db))
+
+(defn get-cardinality
+  [field]
+  (->> (first (filter #(= field (:db/ident %)) attr-entities))
+    :db/cardinality))
 
 (defn get-ref-attribute [entity attribute args context]
-  (let [db (d/db (:stillsuit/connection context))
+  (let [db (d-db (:stillsuit/connection context))
         direct-attribute (reverse-to-direct attribute)
-        filter-entity (get-filter-entity attribute)
+        sub-entity (get-sub-entity attribute)
         dbid (:db/id entity)
         rule ['(any ?e) (if (= direct-attribute attribute)
                           [dbid direct-attribute '?e]
                           ['?e direct-attribute dbid])]
-        [errors filter-rules] (when args (rules/get-rules db context filter-entity args '?e))
-        rules (vector (into  rule filter-rules))
-        type (rules/get-attr-type direct-attribute cg/datomic-to-lacinia)]
+        [errors filter-rules] (when args (resolvers/get-rules db context sub-entity args '?e))
+        rules (vector (into rule filter-rules))
+        cardinality (get-cardinality attribute)
+        type (resolvers/get-attr-type direct-attribute cgc/datomic-to-lacinia)]
     (if-not errors
         (if (= :ref (second type))
-            (->> (d/q '[:find ?e
-                        :in $ %
-                        :where (any ?e)]
+          (if (= cardinality :db.cardinality/one)
+            (->> (q '[:find ?e
+                      :in $ %
+                      :where (any ?e)]
                    db  rules)
-              (map #(hash-map :db/id (first %))))
-            (if (attribute entity)
-              (attribute entity)
-              (attribute (d/pull db (vector attribute) (:db/id entity)))))
+              ffirst
+              (hash-map :db/id))
+            (->> (q '[:find ?e
+                      :in $ %
+                      :where (any ?e)]
+                   db  rules)
+              (map #(hash-map :db/id (first %)))))
+          (or
+            (attribute entity)
+            (when-not (and (= (namespace attribute) (resolvers/dbid-to-ns db (:db/id entity))) (> (count entity) 1))
+                      (attribute (pull db (vector attribute) (:db/id entity))))))
       {:error errors})))
 
 (defn get-enum-attribute [entity attribute  context]
   (-> (get-ref-attribute entity attribute  nil context)
-      (find-ident (d/db (:stillsuit/connection context)))))
+      (find-ident (d-db (:stillsuit/connection context)))))
 
 ;(defn entity? [thing]
 ;  (instance? datomic.Entity thing))
@@ -93,16 +103,16 @@
 
 (defn get-entity-by-eid
   [db eid]
-  (d/pull db '[*]
-          (Long/parseLong eid)))
+  pull db '[*]
+          (Long/parseLong eid))
 
 (defn get-entity-by-unique-attribute
   [db attribute-ident value]
-  (if-let [attr-ent (d/pull db '[{:db/valueType [:db/ident]}] attribute-ident)]
+  (if-let [attr-ent (pull db '[{:db/valueType [:db/ident]}] attribute-ident)]
     (if-let [coerced (if (string? value)
                        (coerce-to-datomic-type value (:db/ident (:db/valueType attr-ent)))
                        value)]
-      (d/pull db '[*] [attribute-ident coerced])
+      (pull db '[*] [attribute-ident coerced])
       ;; Else coercion failed
       (log/warnf "Unable to coerce input '%s' to type %s in (get-entity-by-unique-attribute %s)"
                  value attr-ent attribute-ident))
@@ -114,9 +124,9 @@
   as :db.unique/identity. Return the namespace of that attribute as a string."
   [entity connection]
   (let [
-        db               (d/db connection)
+        db               (d-db connection)
         unique           (fn [attr-kw]
-                           (let [attr-ent (d/pull db '[*] attr-kw)]
+                           (let [attr-ent (pull db '[*] attr-kw)]
                              (when (some? (:db/unique attr-ent))
                                attr-kw)))
         unique-attribute (some->> entity

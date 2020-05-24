@@ -6,11 +6,10 @@
               [io.pedestal.http :as http]
               [stillsuit.core :as stillsuit]
               [stillsuit.lib.util :as u]
-              [datomic-gql-starter.lacinia.make-config-files :as refs-enums]
+              [db :refer [conn]]
+              [datomic-gql-starter.lacinia.make-config-files :as config-files]
               [datomic-gql-starter.lacinia.generate :as generate]
-              [datomic-gql-starter.utils.fern :refer [refs-conf catchpocket-conf stillsuit-conf
-                                                      db-link root-dir api-conf]]
-              [datomic-gql-starter.utils.db :as db-utils]))
+              [datomic-gql-starter.utils.fern :refer [ stillsuit-conf]]))
 
 (defn service-map
   [schema connection]
@@ -26,17 +25,14 @@
 
 (defn- smap []
   (try
-    (let [test-schema (u/load-edn-file "resources/dev/test-schema.edn")
-          stillsuit-config (u/load-edn-file stillsuit-conf)
+    (let [stillsuit-config (u/load-edn-file stillsuit-conf)
           custom-config (-> stillsuit-config
                           (update-in [:queries] #(merge % generate/query-maps))
                           (assoc-in [:input-objects] generate/inputs)
                           (assoc-in [:mutations] generate/mutation-maps))
-          config-wth-test-queries (merge-with (comp #(into {} %) concat)
-                                    custom-config test-schema)
-          s-map (-> (service-map custom-config db-utils/conn)
+          s-map (-> (service-map custom-config conn)
                   (assoc ::http/resource-path "/public"))]
-      (log/infof "Connecting to datomic at %s..." db-link)
+      ;(log/infof "Connecting to datomic at %s..." db-link-peer)
       s-map)
     (catch Exception e
            (log/error e))))
@@ -46,6 +42,7 @@
   (log/info {:serve "Serving graphiql at: http://localhost:8888/graphiql/index.html"})
   (log/infof "GraphQL Voyager:     http://localhost:8888/voyager/index.html")
   (log/infof "Ready.")
+  (config-files/repair-config-files)
   (load "lacinia/generate")
   (-> (smap)
       http/create-server
@@ -62,21 +59,21 @@
 
 (defn stop []
   (mount/stop)
-  :stoped)
+  :stopped)
 
 (defn reset []
   (mount/stop)
-  (refresh :after 'datomic-gql-starter.core/go))
+  (refresh-all :after 'datomic-gql-starter.core/go))
 
 (defn reset-config []
-  (refs-enums/update-config-files)
+  (refresh-all)
+  (config-files/update-config-files)
   (reset))
 
 (comment
   (go)
   (reset)
   (stop))
-
 
 (defn -main []
   (mount/start))

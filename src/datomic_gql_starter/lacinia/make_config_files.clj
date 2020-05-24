@@ -1,21 +1,17 @@
 (ns datomic-gql-starter.lacinia.make-config-files
-  (:require [datomic-gql-starter.utils.db :as db-utils :refer [db conn]]
+  (:require [db :refer [db conn]]
             [cuerdas.core :as str]
-            [catchpocket.generate.core :as cg]
             [catchpocket.generate.core :as g]
             [catchpocket.lib.config :as cf]
-            [datomic-gql-starter.lacinia.make-rules :as rules]
-            [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
-                                                          db-link root-dir api-conf]]
+            [datomic-gql-starter.lacinia.resolvers :as resolvers :refer [all-entities enums]]
+            [datomic-gql-starter.utils.fern :as f :refer [ catchpocket-conf stillsuit-conf
+                                                          db-link-peer root-dir api-conf]]
             [clojure.java.io :as io])
-  (:use inflections.core))
+  (:refer inflections.core))
 
-(def descriptions {:catchpocket-config
-                   (str/collapse-whitespace
-                     "This file contains map with keys equal to indents of all entities from DB of type 'db.type/ref'.")})
-
-(defn snake-keyword [kw]
+(defn snake-keyword
   "converts keyword to 'snake_case'"
+  [kw]
   (keyword
     (str/join
       "_"
@@ -35,8 +31,9 @@
       (all-entities ref3) ref3
       :default nil)))
 
-(defn make-refs [data all-entities]
+(defn make-refs
   "Generates :catchpocket/references part of 'catchpocket-config.edn'"
+  [data all-entities]
   (->>
     (for [rel data]
       (let [[backref-name reference-to] (str/split (str rel) #"/")
@@ -47,16 +44,18 @@
             (snake-keyword (keyword  (plural (apply str (rest backref-name)))))])}))
     (into (sorted-map))))
 
-(defn make-enums [enums]
+(defn make-enums
   "Generates :catchpocket/enums part of 'catchpocket-config.edn'"
-  (let [enum-keys (mapv #(snake-keyword %) enums)
+  [enums]
+  (let [enum-keys (mapv snake-keyword enums)
         enum-vals  (mapv #(hash-map :catchpocket.enum/attributes (hash-set %)
                             :catchpocket.enum/scan? true) enums)]
     (into (sorted-map)
       (zipmap enum-keys enum-vals))))
 
-(defn get-refs-enums [res-cnf all-entities]
+(defn get-refs-enums
   "takes only enums or refs from 'catchpocket-config.edn' depending of 'type' argument"
+  [res-cnf all-entities]
   ;(let [res-cnf (dissoc (edn/read-string (slurp res-cnf-file)) :description)]
   {:catchpocket/references (make-refs
                              (->> res-cnf
@@ -68,8 +67,9 @@
                           (mapv #(when (= (second %) :enum) (first %)))
                           (remove nil?)))})
 
-(defn make-catchpocket-config [refs-file-cfg catchpocket-conf stillsuit-conf entities db]
+(defn make-catchpocket-config
   "Generates 'catchpocket-config.edn' file"
+  [refs-file-cfg catchpocket-conf stillsuit-conf entities db]
   (with-open
     [w (clojure.java.io/writer catchpocket-conf)]
     (clojure.pprint/pprint
@@ -87,6 +87,10 @@
          :queries
          []
          :inserts
+         []
+         :updates
+         []
+         :deletions
          []}]
     (with-open
       [w (clojure.java.io/writer api-conf)]
@@ -94,8 +98,8 @@
         apis-map
         w))))
 
-(defn make-apis [] (make-api-config (rules/all-entities)))
-(defn make-catchpocket [] (make-catchpocket-config (rules/enums) catchpocket-conf stillsuit-conf (rules/all-entities) db-link))
+(defn make-apis [] (make-api-config all-entities))
+(defn make-catchpocket [] (make-catchpocket-config enums catchpocket-conf stillsuit-conf all-entities db-link-peer))
 (defn make-stillsuit [] (g/generate-and-write! (cf/construct-config catchpocket-conf) conn db))
 
 (defn update-config-files []

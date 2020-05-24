@@ -1,7 +1,5 @@
 (ns catchpocket.lib.util
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [cuerdas.core :as str])
+  (:require  [cuerdas.core :as str])
   (:import (java.io IOException PushbackReader)))
 
 (defn timestamp []

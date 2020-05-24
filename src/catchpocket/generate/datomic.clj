@@ -1,43 +1,35 @@
 (ns catchpocket.generate.datomic
   (:require [clojure.tools.logging :as log]
-            ;[datomic.api :as d] ;datomic.api
-            ;[datomic.client.api :as d] ;datomic.client.api
+            [db :refer [q pull]]
             [datomic-gql-starter.utils.make-names :refer [query-ellipsis]]
             [cuerdas.core :as str]
             [catchpocket.generate.names :as names]
-            [catchpocket.lib.util :as util]
-            [datomic-gql-starter.utils.fern :as f]))
-            ;[datomic-gql-starter.utils.db :as db]))
+            [catchpocket.lib.util :as util]))
 
-(if (= (System/getenv "DATOMIC_API") "client")
-  (require '[datomic.client.api :as d])
-  (require '[datomic.api :as d]))
-
-;; TODO: move this into stillsuit, integrate
 (defn namespace-to-type [kw]
   (-> kw str/camel str/capital keyword))
 
 (defn ident-from-id [db x]
-  (if-let [ident (d/pull db '[:db/ident] x)]
+  (if-let [ident (pull db '[:db/ident] x)]
     (:db/ident ident)
     x))
 
 (defn pull-to-entity [db result]
   (reduce-kv (fn [m k v] (merge m {k (if (:db/id v) (ident-from-id db (:db/id v)) v)})) {} result))
 
-(defn- attr-entities
+(defn attr-entities
   "Scan a database for metadata about its attributes. Return a seq of entities for the attributes.
   Skip attributes with `deprecated` or `fressian` in their namespaces."
   [db]
-  (->> (d/q '[:find (pull ?a [*])
-              :where
-              [?a :db/valueType]
-              [?a :db/ident ?ident]
-              [(namespace ?ident) ?ns]
-              (not [(clojure.string/starts-with? ?ns "db")])
-              (not [(clojure.string/starts-with? ?ns "sys")])
-              (not [(clojure.string/starts-with? ?ns "fressian")])
-              (not [(clojure.string/starts-with? ?ns "deprecated")])]
+  (->> (q '[:find (pull ?a [*])
+            :where
+            [?a :db/valueType]
+            [?a :db/ident ?ident]
+            [(namespace ?ident) ?ns]
+            (not [(clojure.string/starts-with? ?ns "db")])
+            (not [(clojure.string/starts-with? ?ns "sys")])
+            (not [(clojure.string/starts-with? ?ns "fressian")])
+            (not [(clojure.string/starts-with? ?ns "deprecated")])]
          db)
        query-ellipsis
        (map (partial pull-to-entity db))))
@@ -118,22 +110,22 @@
   Return a seq of {::datomic-value :foo/bar ::attribute :x/foo ::description \"docstring\"}
   maps, where :description is the docstring for enum references."
   [db attributes]
-  (let [vals (d/q '[:find ?value ?doc
-                    :in $ [?attribute ...]
-                    :where
-                    [_ ?attribute ?v]
-                    (or-join [?v ?doc ?value]
-                             ;; Ident enum
-                             (and
-                              [(datomic.api/pull $ '[:db/id] ?v) ?entid]
-                              [(:db/id ?entid) ?v-id]
-                              [?v-id :db/ident ?value]
-                              [(get-else $ ?v-id :db/doc :none) ?doc])
-                             (and
-                              [(keyword? ?v)]
-                              [(identity ?v) ?value]
-                              [(ground :none) ?doc]))]
-                  db attributes)]
+  (let [vals (q '[:find ?value ?doc
+                  :in $ [?attribute ...]
+                  :where
+                  [_ ?attribute ?v]
+                  (or-join [?v ?doc ?value]
+                           ;; Ident enum
+                           (and
+                            [(datomic.api/pull $ '[:db/id] ?v) ?entid]
+                            [(:db/id ?entid) ?v-id]
+                            [?v-id :db/ident ?value]
+                            [(get-else $ ?v-id :db/doc :none) ?doc])
+                           (and
+                            [(keyword? ?v)]
+                            [(identity ?v) ?value]
+                            [(ground :none) ?doc]))]
+                 db attributes)]
     (log/infof "Found %d possible enum values for attribute%s %s."
                (count vals)
                (if (> (count attributes) 1) "s" "")

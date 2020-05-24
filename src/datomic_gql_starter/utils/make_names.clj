@@ -1,6 +1,6 @@
 (ns datomic-gql-starter.utils.make-names
   (:require [cuerdas.core :as str]
-            [inflections.core :as inflections :refer [plural singular]]))
+            [inflections.core :as inflections :refer [plural]]))
 
 (defn rmv-ns [param]
   (symbol (name param)))
@@ -30,7 +30,7 @@
     (mapv first x)
     x))
 
-(defn add-namespace
+(defn namespaced-keyword
   [entity field]
   (keyword entity (name field)))
 
@@ -86,6 +86,23 @@
 (defn make-update-resolver-key
   [entity]
   (keyword (str/camel (str "update-" (str (plural entity))))))
+
+
+(defn make-deletion-key
+  [entity]
+  (keyword (str/camel (str "delete-" (plural entity)))))
+
+(defn make-deletion-name
+  [entity]
+  (symbol (str "delete-" (str/capital (plural entity)))))
+
+(defn make-deletion-resolver-name
+  [entity]
+  (symbol (str "delete-" (plural entity))))
+
+(defn make-deletion-resolver-key
+  [entity]
+  (keyword (str/camel (str "delete-" (str (plural entity))))))
 
 
 (defn make-insert-key

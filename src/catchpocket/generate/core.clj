@@ -8,7 +8,9 @@
             [catchpocket.lib.util :as util]
             [stillsuit.lib.util :as su]
             [cuerdas.core :as cstr]
-            [datomic-gql-starter.lacinia.make-rules :as rules]
+            [datomic-gql-starter.lacinia.resolvers :as resolvers]
+            [datomic-gql-starter.utils.fern :as f :refer [ catchpocket-conf stillsuit-conf
+                                                          db-link-peer root-dir api-conf]]
             [catchpocket.generate.names :as names]))
 
 (def ^:private default-config "catchpocket/defaults.edn")
@@ -90,7 +92,7 @@
                   #:stillsuit{:attribute    (:attribute/ident field)
                               :lacinia-type lacinia-type}]}
        (when (= cardinality :db.cardinality/many)
-         {:args (rules/query-args (cstr/camel (name lacinia-type)) datomic-to-lacinia)})
+         {:args (resolvers/query-args (cstr/camel (name lacinia-type)) datomic-to-lacinia)})
        (when doc
          {:description doc})))))
 
@@ -182,7 +184,7 @@
 
                       :description (format "Back-reference for the `%s` datomic attribute" datomic-ref)}
                 (if-not is-component?
-                  {:args (rules/query-args (cstr/camel (name to-type)) datomic-to-lacinia)})))))
+                  {:args (resolvers/query-args (cstr/camel (name to-type)) datomic-to-lacinia)})))))
 
 (defn generate-edn [base-schema ent-map enums config]
   (log/infof "Generating lacinia schema for %d entity types..." (count ent-map))

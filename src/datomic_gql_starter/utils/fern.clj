@@ -1,7 +1,6 @@
 (ns datomic-gql-starter.utils.fern
   (:require [fern.easy :as fe]
             [fern :as f]
-            [mount.core :refer [defstate] :as mount]
             [mem-files.core :as mem-files]))
 
 (defmethod fern/literal 'concat
@@ -19,10 +18,9 @@
 (def catchpocket-conf (fern-e 'catchpocket-conf))
 (def stillsuit-conf (fern-e 'stillsuit-conf))
 
-(def db-link
-  (if (= (System/getenv "DATOMIC_API") "peer")
-    (fern-e 'db-dev)
-    (fern-e 'db-free)))
+(def db-name (fern-e 'db-name))
+(def db-link-peer (fern-e 'db-dev))
+(def db-link-free (fern-e 'db-free))
 
 (def api-conf (fern-e 'api-conf))
 (def secret (fern-e 'secret))

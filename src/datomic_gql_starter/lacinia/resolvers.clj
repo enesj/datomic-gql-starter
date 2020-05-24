@@ -1,16 +1,13 @@
-(ns datomic-gql-starter.lacinia.make-rules
-  (:require [datomic-gql-starter.utils.db :as db-utils :refer [db conn]]
-            [inflections.core :as inflections :refer [plural singular]]
+(ns datomic-gql-starter.lacinia.resolvers
+  (:require [db :refer [db conn d-with transact! q]]
+            [inflections.core :as inflections :refer [singular]]
             [cuerdas.core :as str]
-            [datomic-gql-starter.utils.make-names :refer [pascal-keyword camel-keyword
+            [datomic-gql-starter.utils.make-names :refer [camel-keyword
                                                           make-input-key
-                                                          make-input-name make-list
-                                                          rmv-ns resolve-symbol
-                                                          query-ellipsis add-namespace remove-ns-rules]]
-
+                                                          query-ellipsis namespaced-keyword remove-ns-rules]]
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
-            [datomic-gql-starter.utils.fern :as f :refer [refs-conf catchpocket-conf stillsuit-conf
-                                                          db-link root-dir api-conf max-results]]
+            [datomic-gql-starter.utils.fern :as f :refer [max-results catchpocket-conf]]
+            [catchpocket.lib.config :as config]
             [clojure.spec.alpha :as s]
             [expound.alpha :as expound]
             [clojure.zip :as z]
@@ -18,45 +15,47 @@
 
 (set! s/*explain-out* expound/printer)
 
-(def datomic-api (System/getenv "DATOMIC_API"))
+(def config (config/construct-config catchpocket-conf))
 
-(if (= (System/getenv "DATOMIC_API") "client")
-  (require '[datomic.client.api :as d])
-  (require '[datomic.api :as d]))
-
+(defn ref-type [attr]
+  (->> config
+    :catchpocket/references
+    attr
+    :catchpocket/reference-to))
 
 (defn get-unique [entity]
-  (->> (d/q '[:find ?ident
-              :in $ ?ns
-              :where
-              [?e :db/ident ?ident]
-              [?e :db/unique]
-              [(namespace ?ident) ?ns]]
+  (->> (q '[:find ?ident
+            :in $ ?ns
+            :where
+            [?e :db/ident ?ident]
+            [?e :db/unique]
+            [(namespace ?ident) ?ns]]
           db entity)
     ffirst))
 
 
-(defn dbid-to-ns [dbid]
-  (->> (d/q '[:find   ?ns
-              :in $ ?e
-              :where
-              [?e ?a]
-              [?a :db/unique]
-              [?a :db/ident ?v]
-              [(namespace ?v) ?ns]]
+(defn dbid-to-ns [db dbid]
+  (->> (q '[:find   ?ns
+            :in $ ?e
+            :where
+            [?e ?a]
+            [?a :db/unique]
+            [?a :db/ident ?v]
+            [(namespace ?v) ?ns]]
           db dbid)
     ffirst))
 
 
-(defn find-all-refs []
+(defn find-all-refs
   "gets all entities from DB of type ':db.type/ref' "
-  (-> (d/q '[:find ?ident
-             :in $ %
-             :where
-             [?e :db/ident ?ident]
-             [?e :db/valueType :db.type/ref]
-             [(namespace ?ident) ?ns]
-             (remove-ns ?ns)]
+  []
+  (-> (q '[:find ?ident
+           :in $ %
+           :where
+           [?e :db/ident ?ident]
+           [?e :db/valueType :db.type/ref]
+           [(namespace ?ident) ?ns]
+           (remove-ns ?ns)]
         db remove-ns-rules)
     query-ellipsis))
 
@@ -67,39 +66,40 @@
     (for [ref all-refs]
       (vector ref
         (->>
-          (d/q '[:find (first ?a)
-                 :in $ ?ref
-                 :where
-                 [_ ?ref ?w]
-                 [?w :db/ident ?a]]
+          (q '[:find (first ?a)
+               :in $ ?ref
+               :where
+               [_ ?ref ?w]
+               [?w :db/ident ?a]]
             db ref)
           (#(if (not-empty %) :enum :ref)))))))
 
 (def enums (find-enums))
 
 (defn get-attr-type [attr datomic-to-lacinia]
-  (let [type (-> (d/q '[:find ?t
-                        :in $ ?v
-                        :where
-                        [?e :db/ident ?v]
-                        [?e :db/valueType ?type-id]
-                        [?type-id :db/ident ?t]]
+  (let [type (-> (q '[:find ?t
+                      :in $ ?v
+                      :where
+                      [?e :db/ident ?v]
+                      [?e :db/valueType ?type-id]
+                      [?type-id :db/ident ?t]]
                    db attr)
                ffirst
                datomic-to-lacinia)]
-    [type (when  (= type :catchpocket.generate.core/ref) (attr enums))]))
+    [(if  (= (name type) "ref") (ref-type attr) type)
+     (when  (= (name type) "ref") (attr enums))]))
 
 (def attr-type (memoize get-attr-type))
 
 (defn find-all-entities []
   (->>
-    (d/q '[:find ?ns
-           :in $ %
-           :where
-           [?e :db/ident ?ident]
-           [?e :db/valueType]
-           [(namespace ?ident) ?ns]
-           (remove-ns ?ns)]
+    (q '[:find ?ns
+         :in $ %
+         :where
+         [?e :db/ident ?ident]
+         [?e :db/valueType]
+         [(namespace ?ident) ?ns]
+         (remove-ns ?ns)]
        db remove-ns-rules)
     query-ellipsis
     (remove #(str/includes? % "."))
@@ -110,13 +110,13 @@
 
 (defn find-all-fields [entity]
   (->>
-    (d/q '[:find ?ident
-           :in $ ?entity
-           :where
-           [?e :db/ident ?ident]
-           [?e :db/valueType]
-           [(namespace ?ident) ?ns]
-           [(= ?ns ?entity)]]
+    (q '[:find ?ident
+         :in $ ?entity
+         :where
+         [?e :db/ident ?ident]
+         [?e :db/valueType]
+         [(namespace ?ident) ?ns]
+         [(= ?ns ?entity)]]
       db entity)
     query-ellipsis))
 
@@ -130,14 +130,25 @@
         (let [[type ref?] (attr-type arg datomic-to-lacinia)
               type-modified (case ref?
                               :ref
-                               {:ref (name arg)}
-                               :enum
+                               {:ref (name type)}
+                              :enum
                                (str/snake (str arg))
                               type)]
           [arg type-modified]))
       args)))
 
 (def args-type (memoize get-args-type))
+
+(defn get-enum-value [context entity field value]
+  (when value (let [enum (keyword (str/snake (str entity "_" field)))
+                    result (->> context
+                             :stillsuit/enum-map
+                             enum
+                             :stillsuit/lacinia-to-datomic
+                             value)]
+                result)))
+
+(def enum-value (memoize get-enum-value))
 
 
 (defn make-args [default entity datomic-to-lacinia]
@@ -149,7 +160,7 @@
            (cond
              (keyword? lacinia-type) (list (symbol "list") lacinia-type)
              (map? lacinia-type)
-             (keyword (str/pascal (str (singular (:ref lacinia-type)) "-input")))
+             (make-input-key (singular (:ref lacinia-type)))
              :else (list (symbol "list") (symbol lacinia-type))))}))))
 
 (defn query-args
@@ -162,75 +173,75 @@
   (make-args {:_limit {:type :JavaLong} :_update {:type (make-input-key entity)} :_preview {:type 'Boolean}
               :_composition {:type 'String}} entity datomic-to-lacinia))
 
+(defn delete-args
+  [entity datomic-to-lacinia]
+  (make-args {:_limit {:type :JavaLong} :_delete {:type (make-input-key entity)} :_preview {:type 'Boolean}
+              :_composition {:type 'String}} entity datomic-to-lacinia))
 
-(defn get-enum-value [context entity field value]
-  (when value (let [enum (keyword (str/snake (str entity "_" field)))
-                    result (->> context
-                             :stillsuit/enum-map
-                             enum
-                             :stillsuit/lacinia-to-datomic
-                             value)]
-                result)))
+
+
 
 (defn is-fulltext? [k entity db]
   (let [field (keyword (str/join "/" [entity (name k)]))
-        fulltext? (d/q '[:find [?e ...]
-                         :in $ ?field
-                         :where [?field :db/fulltext ?e]]
+        fulltext? (q '[:find ?e
+                       :in $ ?field
+                       :where [?field :db/fulltext ?e]]
                      db field)]
-    (when (first fulltext?) (name field))))
+    (when (seq fulltext?) (name field))))
 
 (defn get-or-filter [k v entity context e]
   (let [val (mapv #(if (keyword? %)
-                     (get-enum-value context entity (name k) %)
-                     %) (remove nil? v))]
-    (let [attribute (add-namespace entity k)]
-      (vector (cons 'or (mapv #(vector e attribute %) val))))))
+                     (enum-value context entity (name k) %)
+                     %) (remove nil? v))
+        attribute (namespaced-keyword entity k)]
+      (vector (cons 'or (mapv #(vector e attribute %) val)))))
 
 (defn get-range-filter [k v entity m context e]
   (let [v (if (keyword? v)
-            (get-enum-value context entity (name k) v)
+            (enum-value context entity (name k) v)
             v)
         attribute-val (symbol (str "?" (name k)))
-        attribute (add-namespace entity k)]
+        attribute (namespaced-keyword entity k)]
     (remove nil? (apply conj m [e attribute attribute-val]
                    (when (first v) [(list '>= attribute-val (first v))])
                    (when (second v) [[(list '<= attribute-val (second v))]])))))
 
 (defn get-has-filter [k entity e]
-  (let [attribute (add-namespace entity k)]
+  (let [attribute (namespaced-keyword entity k)]
     [e attribute]))
 
 (defn get-missing-filter [k entity e]
-  (let [attribute (add-namespace entity k)]
+  (let [attribute (namespaced-keyword entity k)]
     (concat '(missing? $) [e] [attribute])))
 
 (defn get-equal-filter [k v entity context e]
   (let [v (if (keyword? v)
-            (get-enum-value context entity (name k) v)
+            (enum-value context entity (name k) v)
             v)]
-    [e
-     (add-namespace entity k)
-     v]))
+    [e (namespaced-keyword entity k) v]))
 
 (defn get-fulltext-filter [k v entity e]
-  [(concat '(fulltext $) [(add-namespace entity k) v])
+  [(concat '(fulltext $) [(namespaced-keyword entity k) v])
    [`[~e _ _ _]]])
 
 (declare get-rules)
 
+(defn get-input-filter
+  [k v entity e context param]
+  ['or-join [e]
+   (reduce (fn [result val]
+             (into result [val]))
+     ['and ['?e (namespaced-keyword entity k) param]]
+     (second (let [sub-entity (name k)
+                   values v]
+               (get-rules db context sub-entity values param))))])
+
 (defn get-filter-type [arg entity context db e]
-  (let [[k v] (first arg)]
-    ;#p [k v]
+  (let [[k v] (first arg)
+        param (symbol (str "?" (name k)))]
     (cond
       (map? v)
-      ['or-join [e]
-       (reduce (fn [result val]
-                 (into result [val]))
-         '[and [?e :release/artists ?artists]]
-         (second (let [entity (name k)
-                       values v]
-                   (get-rules db context entity values (symbol (str "?"(name k)))))))]
+      (vary-meta (get-input-filter k v entity e context param) assoc :type :input)
       (or (not (coll? v)) (= (count v) 1))
       (let [v (if (coll? v) (first v) v)]
         (if (or v (not-empty v))
@@ -251,11 +262,11 @@
       :else [k v])))
 
 (defn make-simple-filter [arg values entity context db e]
-  (if-let [val (select-keys values [(keyword arg)])]
-    (when-not (empty? val)
+  (when-let [val (select-keys values [(keyword arg)])]
+    (when (seq val)
       (get-filter-type val entity context db e))))
 
-(defn coerce-missing-filter [filters result]
+(defn coerce-missing-filter [result]
   (meta (first (second result)))
   (if (and (= (count result) 2)
         (= (meta (first (second result))) {:type :missing}))
@@ -275,9 +286,10 @@
                        :equal filter
                        :full filter
                        :has filter
+                       :input filter
                        :missing [filter]
                        :subfilter filter))))
-        missing-coerced (coerce-missing-filter filters result)]
+        missing-coerced (coerce-missing-filter result)]
     (if (> (count operators) 1)
       missing-coerced
       [[missing-coerced]])))
@@ -293,13 +305,12 @@
     composite-filter))
 
 (defn compose-filters [composition-list values entity context db e]
-  ;#p composition-list
   (remove nil? (reduce
                  (fn [filters arg]
                    (let [composite? (map? arg)
                          filter
                          (if composite?
-                           (reduce (fn [result val] (into result val))
+                           (reduce into
                              (make-composite-filter nil arg values entity context db e))
                            (let [simple-filter (make-simple-filter arg values entity context db e)
                                  type (:type (meta simple-filter))]
@@ -329,7 +340,7 @@
 (defn get-rules [db context entity values e]
   (let [entity (singular entity)
         query-spec (keyword (str entity "/query"))
-        args (into [] (remove #{'_limit '_composition '_update '_preview } (mapv (comp symbol name key) values)))
+        args (vec (remove #{'_limit '_composition '_update '_preview } (mapv (comp symbol name key) values)))
         composition (try (read-string (or (:_composition values) (str args)))
                          (catch Exception e (str "caught exception: " (.getMessage e))))
         not-defined (set/difference (find-symbols composition) (into (set args) #{'or 'not 'and}))
@@ -341,48 +352,59 @@
     [errors (compose-filters composition values entity context db e)]))
 
 
-
 (defn make-query-resolver [db context entity values]
   (let [[errors rules] (get-rules db context entity values '?e)]
     (if errors
       (resolve-as nil {:message errors :status 404})
       (let [rules (vector (into (vector '(any ?e)) rules))
-            ;_ #p rules
             limit (or (:_limit values) max-results)
-            results (if (= datomic-api "client")
-                      (d/q {:query '[:find (pull ?e [*])
-                                     :in $ %
-                                     :where (any ?e)]
-                            :args  [db rules]
-                            :limit limit})
-                      (d/q '[:find (pull ?e [*])
-                             :in $ %
-                             :where (any ?e)]
-                        db rules))
+            results (q '[:find (pull ?e [*])
+                         :in $ %
+                         :where (any ?e)]
+                      db rules)
             modified-results (query-ellipsis results)]
-        (if (coll? modified-results)
-          (take limit modified-results)
-          modified-results)))))
+        (take limit modified-results)))))
+
+(defn make-update-tx-data
+  [query-result updates entity]
+  (let [update (into {} (filter val updates))
+        remove (vec (remove val updates))
+        db-ids (map :db/id query-result)
+        namespaced-update  (reduce-kv (fn [m k v] (assoc m (namespaced-keyword entity k) v))
+                             {} update)
+        remove-data
+        (when (seq remove) (first (mapv (fn [v]
+                                          (let [field (namespaced-keyword entity (first v))]
+                                            (for [query-result query-result]
+                                              [:db/retract (:db/id query-result) field (field query-result)])))
+                                    remove)))
+        update-data (when (seq update) (for [id db-ids]
+                                         (merge {:db/id id} namespaced-update)))]
+    (concat update-data (filter last remove-data))))
 
 (defn make-update-resolver
   [db context entity values]
   (let [updates (:_update values)
         preview (:_preview values)
+        query-result (make-query-resolver db context entity values)]
+    (if updates
+      (let [tx-data  (make-update-tx-data query-result updates entity)]
+        (if preview
+          (let [db-after  (:db-after (d-with tx-data db))]
+            (make-query-resolver db-after context entity values))
+          (let [db-after  (:db-after (transact! tx-data))]
+            (make-query-resolver db-after context entity values))))
+      query-result)))
+
+
+(defn make-deletion-resolver
+  [db context entity values]
+  (let [preview (:_preview values)
         query-result (make-query-resolver db context entity values)
-        tx-data   (for [id (map :db/id query-result)]
-                      (merge {:db/id id} (reduce-kv (fn [m k v ] (assoc m (add-namespace entity k) v))
-                                           {} updates)))
-        ;_    #p tx-data
-        db-after  (:db-after (if (= datomic-api "client")
-                               (d/with
-                                  db
-                                 {:tx-data (into [] tx-data)})
-                               (d/with
-                                  db
-                                 (into [] tx-data))))
-        result  (make-query-resolver db-after context entity values)]
-    ;#p result
-    result))
-
-
-
+        db-ids (map :db/id query-result)
+        tx-data  (mapv  #(vector :db/retractEntity %)   db-ids)]
+       (if preview
+         (let [db-after  (:db-after (d-with tx-data db))]
+              (make-query-resolver db-after context entity values))
+         (let [db-after  (:db-after (transact! tx-data))]
+              (make-query-resolver db-after context entity values)))))
