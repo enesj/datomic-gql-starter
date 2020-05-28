@@ -1,4 +1,4 @@
-(ns stillsuit.lacinia.scalars
+(ns datomic-gql-starter.stillsuit.lacinia.scalars
   "Implementation functions for stillsuit scalar transformers.
 
   The intent here is to provide transformers for all of datomic's primitive values,
@@ -11,8 +11,9 @@
            (java.time.format DateTimeFormatter)
            (clojure.lang Keyword)))
 
-(defn parse-edn [value-str]
+(defn parse-edn
   "Parse the incoming string as EDN."
+  [value-str]
   (edn/read-string value-str))
 
 (def serialize-str

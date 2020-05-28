@@ -1,15 +1,17 @@
-  (ns datomic-gql-starter.core
-    (:require [clojure.tools.logging :as log]
-              [clojure.tools.namespace.repl :refer [refresh refresh-all]]
-              [com.walmartlabs.lacinia.pedestal :as lacinia-pedestal]
-              [mount.core :refer [defstate] :as mount]
-              [io.pedestal.http :as http]
-              [stillsuit.core :as stillsuit]
-              [stillsuit.lib.util :as u]
-              [db :refer [conn]]
-              [datomic-gql-starter.lacinia.make-config-files :as config-files]
-              [datomic-gql-starter.lacinia.generate :as generate]
-              [datomic-gql-starter.utils.fern :refer [ stillsuit-conf]]))
+(ns datomic-gql-starter.core
+  (:require [clojure.tools.logging :as log]
+            [datomic-gql-starter.lacinia.make-config-files :as config-files]
+            [clojure.tools.namespace.repl :refer [refresh-all]]
+            [com.walmartlabs.lacinia.pedestal :as lacinia-pedestal]
+            [mount.core :refer [defstate] :as mount]
+            [io.pedestal.http :as http]
+            [datomic-gql-starter.stillsuit.core :as stillsuit]
+            [datomic-gql-starter.stillsuit.lib.util :as u]
+            [db :refer [conn]]
+            [datomic-gql-starter.lacinia.generate :as generate]
+            [datomic-gql-starter.utils.fern :refer [ stillsuit-conf]]))
+
+
 
 (defn service-map
   [schema connection]
@@ -42,7 +44,6 @@
   (log/info {:serve "Serving graphiql at: http://localhost:8888/graphiql/index.html"})
   (log/infof "GraphQL Voyager:     http://localhost:8888/voyager/index.html")
   (log/infof "Ready.")
-  (config-files/repair-config-files)
   (load "lacinia/generate")
   (-> (smap)
       http/create-server

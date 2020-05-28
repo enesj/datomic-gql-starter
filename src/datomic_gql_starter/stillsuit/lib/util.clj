@@ -1,4 +1,4 @@
-(ns stillsuit.lib.util
+(ns datomic-gql-starter.stillsuit.lib.util
   "A collection of utility functions."
   (:require [clojure.walk :as walk]
             [clojure.tools.logging :as log]

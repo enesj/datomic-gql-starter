@@ -1,6 +1,6 @@
-(ns stillsuit.lacinia.types
+(ns datomic-gql-starter.stillsuit.lacinia.types
   "Implementation functions relating to lacinia types."
-  (:require [stillsuit.datomic.core :as datomic]
+  (:require [datomic-gql-starter.stillsuit.datomic.core :as datomic]
             [cuerdas.core :as str]
             [clojure.tools.logging :as log]))
 

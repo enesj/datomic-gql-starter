@@ -1,4 +1,4 @@
-(ns catchpocket.generate.names
+(ns datomic-gql-starter.catchpocket.generate.names
   (:require [cuerdas.core :as str]
             [clojure.tools.logging :as log]))
 
@@ -40,14 +40,14 @@
 (defn lacinia-type-name
   "Given a datomic attribute keyword such as `:my-thing/attribute-name` and a catchpocket config
   map, convert the keyword's namespace to a lacinia type name suchs as `:MyThing`."
-  [attribute-kw {:keys [:catchpocket/names] :as config}]
+  [attribute-kw {:keys [:catchpocket/names]}]
   ;(println "attr" attribute-kw)
   (keyword-part->type
     (namespace attribute-kw)
     (get names :objects :CamelCase)))
 
 (defn lacinia-field-name
-  [attribute-kw {:keys [:catchpocket/names] :as config}]
+  [attribute-kw {:keys [:catchpocket/names]}]
   (keyword-part->type
     (name attribute-kw)
     (get names :fields :snake_case)))
@@ -60,7 +60,7 @@
 
 (defn query-name
   "Given a "
-  [kw {:keys [:catchpocket/names] :as config}]
+  [kw {:keys [:catchpocket/names]}]
   (let [obj-style (get names :objects :CamelCase)
         query-cf  (get names :queries obj-style)]
     (cond
@@ -70,7 +70,7 @@
       (ifn? query-cf)
       (query-cf kw)
 
-      :default
+      :else
       (do
         (log/errorf "Unknown query-name parameter %s, returning original value %s" query-cf kw)
         kw))))

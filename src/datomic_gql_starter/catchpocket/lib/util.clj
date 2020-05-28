@@ -1,6 +1,5 @@
-(ns catchpocket.lib.util
-  (:require  [cuerdas.core :as str])
-  (:import (java.io IOException PushbackReader)))
+(ns datomic-gql-starter.catchpocket.lib.util
+  (:require  [cuerdas.core :as str]))
 
 (defn timestamp []
   (str (java.util.Date.)))

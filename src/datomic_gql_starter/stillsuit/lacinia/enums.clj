@@ -1,4 +1,4 @@
-(ns stillsuit.lacinia.enums
+(ns datomic-gql-starter.stillsuit.lacinia.enums
   "Implementation functions related to translating enum values between lacinia and stillsuit."
   (:require [clojure.tools.logging :as log]))
 

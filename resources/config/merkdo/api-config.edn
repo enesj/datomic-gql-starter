@@ -8,4 +8,6 @@
   "transaction"
   "account"],
  :queries [],
- :inserts []}
+ :inserts [],
+ :updates [],
+ :deletions []}

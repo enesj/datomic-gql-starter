@@ -1,10 +1,10 @@
-(ns stillsuit.lacinia.resolvers
+(ns datomic-gql-starter.stillsuit.lacinia.resolvers
   "Implementation functions for stillsuit resolvers."
-  (:require [stillsuit.datomic.core :as sd]
+  (:require [datomic-gql-starter.stillsuit.datomic.core :as sd]
             [com.walmartlabs.lacinia.resolve :as resolve]
             [clojure.tools.logging :as log]
             [cuerdas.core :as str]
-            [datomic-gql-starter.utils.fern :as f :refer [max-results]]
+            [datomic-gql-starter.utils.fern :refer [max-results]]
             [com.walmartlabs.lacinia.schema :as schema]))
 
 (defn graphql-field->datomic-attribute
@@ -33,7 +33,7 @@
     value))
 
 (defn- entity-sort
-  [{:stillsuit/keys [sort-key sort-order] :as opts} entity-set]
+  [{:stillsuit/keys [sort-key sort-order] } entity-set]
   (let [comparator (if (= sort-order :ascending) compare #(compare %2 %1))
         keyfn      (or sort-key :db/id)]
     (sort-by keyfn comparator entity-set)))

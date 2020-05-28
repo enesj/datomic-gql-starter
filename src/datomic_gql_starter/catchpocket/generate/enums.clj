@@ -1,10 +1,9 @@
-(ns catchpocket.generate.enums
-  (:require [clojure.tools.logging :as log]
-            [catchpocket.generate.datomic :as dt]
+(ns datomic-gql-starter.catchpocket.generate.enums
+  (:require [datomic-gql-starter.catchpocket.generate.datomic :as dt]
             [clojure.set :as set]
-            [catchpocket.lib.util :as util]
+            [datomic-gql-starter.catchpocket.lib.util :as util]
             [cuerdas.core :as str]
-            [catchpocket.generate.names :as names]))
+            [datomic-gql-starter.catchpocket.generate.names :as names]))
 
 ;; http://lacinia.readthedocs.io/en/latest/enums.html
 
@@ -47,14 +46,14 @@
      :description             (enum-value-description description datomic-value)}))
 
 (defn generate-enum
-  [enum-name enum-data]
+  [enum-data]
   {:description (enum-type-description enum-data)
    :values      (lacinia-value-defs enum-data)})
 
 (defn lacinia-enum-def
   [enum-info]
   (reduce-kv (fn [accum enum-name enum-data]
-               (assoc accum enum-name (generate-enum enum-name enum-data)))
+               (assoc accum enum-name (generate-enum enum-data)))
              {} enum-info))
 
 (defn- decompose-manual-values
@@ -74,7 +73,7 @@
 (defn- decompose-scanned-values
   "Normalize the results of scanning datomic for all possible enum values."
   [enum-name attributes scanned-values config]
-  (map (fn [{::dt/keys [datomic-value description] :as value}]
+  (map (fn [{::dt/keys [datomic-value description]}]
          (merge
           {::datomic-value datomic-value
            ::attributes    attributes
@@ -106,7 +105,7 @@
   "Given a db value and the :catchpocket/enum entry of the config file, scan the
   db for any enums that are marked as `:catchpocket.enum/scan?`. Return a structure
   can be turned into a lacinia `:enum` structure via the `(generate-enum)` function."
-  [db ent-map enums config]
+  [db enums config]
   (->> (for [[enum-name enum-config] enums
              :let [{:catchpocket.enum/keys [attributes values scan?]} enum-config
                    manual  (decompose-manual-values enum-name attributes values)
@@ -131,7 +130,7 @@
 (defn generate-enums
   "Given an entity-map and config file, generate an enums list"
   [db ent-map {:catchpocket/keys [enums] :as config}]
-  (let [enum-info   (unpack-enums db ent-map enums config)
+  (let [enum-info   (unpack-enums db enums config)
         enum-defs   (lacinia-enum-def enum-info)
         attr-map    (attribute-to-enum-type enum-info)]
     {:catchpocket.enums/lacinia-defs       enum-defs

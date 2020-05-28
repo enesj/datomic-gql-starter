@@ -1,45 +1,7 @@
 (ns datomic-gql-starter.utils.make-names
   (:require [cuerdas.core :as str]
-            [inflections.core :as inflections :refer [plural]]))
-
-(defn rmv-ns [param]
-  (symbol (name param)))
-
-(defn resolve-symbol [symbol-name]
-  (let [symbol (if (symbol? symbol-name)
-                 symbol-name
-                 (symbol symbol-name))]
-    (->>
-      (ns-resolve *ns* symbol)
-      deref)))
-
-(defn pascal-keyword
-  [arg]
-  (keyword (str/pascal arg)))
-
-(defn camel-keyword
-  [field]
-  (keyword (str/camel (name field))))
-
-(defn make-list
-  [body]
-  (list (symbol "list") body))
-
-(defn query-ellipsis [x]
-  (if (coll? (first x))
-    (mapv first x)
-    x))
-
-(defn namespaced-keyword
-  [entity field]
-  (keyword entity (name field)))
-
-
-(def remove-ns-rules '[[(remove-ns ?ns)
-                        (not [(clojure.string/starts-with? ?ns "db")])
-                        (not [(clojure.string/starts-with? ?ns "sys")])
-                        (not [(clojure.string/starts-with? ?ns "fressian")])
-                        (not [(clojure.string/starts-with? ?ns "deprecated")])]])
+            [datomic-gql-starter.lacinia.utils :refer [pascal-keyword make-list]]
+            [inflections.core :refer [plural]]))
 
 (defn make-input-key
   [entity]
@@ -68,8 +30,6 @@
 (defn make-query-resolver-key
   [entity]
   (keyword (plural entity)))
-
-
 
 (defn make-update-key
   [entity]

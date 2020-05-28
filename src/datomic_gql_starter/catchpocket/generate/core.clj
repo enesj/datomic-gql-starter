@@ -1,19 +1,26 @@
-(ns catchpocket.generate.core
-  (:require [catchpocket.generate.datomic :as datomic]
-            [catchpocket.generate.queries :as queries]
-            [catchpocket.generate.enums :as enums]
+(ns datomic-gql-starter.catchpocket.generate.core
+  (:require [datomic-gql-starter.catchpocket.generate.datomic :as datomic]
+            [datomic-gql-starter.catchpocket.generate.enums :as enums]
+            [datomic-gql-starter.catchpocket.lib.config :refer [default-config]]
             [clojure.tools.logging :as log]
             [clojure.java.io :as io]
             [zprint.core :as zp]
-            [catchpocket.lib.util :as util]
-            [stillsuit.lib.util :as su]
+            [datomic-gql-starter.catchpocket.lib.util :as util]
+            [datomic-gql-starter.stillsuit.lib.util :as su]
             [cuerdas.core :as cstr]
-            [datomic-gql-starter.lacinia.resolvers :as resolvers]
-            [datomic-gql-starter.utils.fern :as f :refer [ catchpocket-conf stillsuit-conf
-                                                          db-link-peer root-dir api-conf]]
-            [catchpocket.generate.names :as names]))
+            [datomic-gql-starter.catchpocket.generate.names :as names]
+            [datomic-gql-starter.lacinia.resolvers :as resolvers]))
 
-(def ^:private default-config "catchpocket/defaults.edn")
+(def lacinia-base {:interfaces
+                   {:DatomicEntity
+                    {:fields {:dbId {:type        'ID
+                                     :description "Base type for datomic entities"}}}}
+                   :objects
+                   {}
+                   :queries
+                   {}
+                   :mutations
+                   {}})
 
 (def datomic-to-lacinia
   {:db.type/string  'String
@@ -32,7 +39,7 @@
    ;; These types are usable as :catchpocket/lacinia-field-type values
    :Int             'Int})
 
-(defn- get-ref-type [field {:keys [:stillsuit/datomic-entity-type] :as config}]
+(defn- get-ref-type [field {:keys [:stillsuit/datomic-entity-type]}]
   (if-let [override-type (-> field :catchpocket/reference-to datomic/namespace-to-type)]
     (do
       (log/tracef "Using type %s as return type for field %s" override-type (:attribute/ident field))
@@ -43,7 +50,7 @@
                  datomic-entity-type)
       datomic-entity-type)))
 
-(defn- get-instant-type [field config]
+(defn- get-instant-type [config]
   (if-let [instant-type (:catchpocket/instant-type config)]
     instant-type
     :EpochMillisecs))
@@ -61,7 +68,7 @@
         primitive        (get datomic-to-lacinia field-type)]
     (cond
       (= primitive ::instant)
-      (get-instant-type field config)
+      (get-instant-type config)
 
       (= primitive ::ref)
       (get-ref-type field config)
@@ -73,9 +80,8 @@
       datomic-override
 
       :else
-      (do
-        (log/warnf "Skipping unknown field %s with type %s."
-                   (:attribute/ident field) field-type)))))
+      (log/warnf "Skipping unknown field %s with type %s."
+                 (:attribute/ident field) field-type))))
 
 
 
@@ -96,7 +102,7 @@
        (when doc
          {:description doc})))))
 
-(defn- make-enum-field [field enum-type enums config]
+(defn- make-enum-field [field enum-type]
   (let [{:attribute/keys [cardinality doc ident]} field
         full-type (if (= cardinality :db.cardinality/many)
                     (list 'list (list 'non-null enum-type))
@@ -121,7 +127,7 @@
              field-defs
              :let [enum-type  (get-in enums [:catchpocket.enums/attribute-map ident])
                    field-def  (if enum-type
-                                (make-enum-field field enum-type enums config)
+                                (make-enum-field field enum-type)
                                 (make-single-field field config))
                    final-name (if meta-lacinia-name
                                 (do
@@ -152,7 +158,7 @@
 (defn find-backrefs
   "Given an entity map, scan it looking for datomic back-references. Return a seq of tuples
   [from-type field-name to-type datomic-attribute is-component?]."
-  [ent-map config]
+  [ent-map]
   (for [[to-type field-defs] ent-map
         field-def field-defs
         :let [datomic-override (:attribute/meta-backref-name field-def)
@@ -170,7 +176,7 @@
     [from-type backref to-type datomic-ref (:attribute/component? field-def)]))
 
 (defn- add-backref
-  [config objects [from-type backref to-type datomic-ref is-component?]]
+  [objects [from-type backref to-type datomic-ref is-component?]]
   (let [plural-type (if is-component?
                       to-type
                       (list 'list (list 'non-null to-type)))]
@@ -183,14 +189,14 @@
                                                 :lacinia-type plural-type}]
 
                       :description (format "Back-reference for the `%s` datomic attribute" datomic-ref)}
-                (if-not is-component?
+                (when-not is-component?
                   {:args (resolvers/query-args (cstr/camel (name to-type)) datomic-to-lacinia)})))))
 
 (defn generate-edn [base-schema ent-map enums config]
   (log/infof "Generating lacinia schema for %d entity types..." (count ent-map))
   (let [objects   (create-objects ent-map enums config)
-        backrefs  (find-backrefs ent-map config)
-        decorated (reduce (partial add-backref config) objects backrefs)]
+        backrefs  (find-backrefs ent-map)
+        decorated (reduce add-backref objects backrefs)]
     (su/deep-map-merge
      base-schema
      {:objects                  decorated
@@ -204,19 +210,18 @@
   ([config]
    (construct-config config nil))
   ([config override]
-   (let [defaults (su/load-edn-resource default-config)
+   (let [defaults default-config
          merged   (su/deep-map-merge config defaults override)]
      merged)))
 
-(defn generate [conn base-config db]
+
+
+(defn generate [base-config db]
   (let [config   (construct-config base-config)
-        base-edn (su/load-edn-resource "catchpocket/lacinia-base.edn")
         ent-map  (datomic/scan db config)
         enums    (enums/generate-enums db ent-map config)
-        objects  (generate-edn base-edn ent-map enums config)
-        schema   (queries/attach-queries objects ent-map config)]
-    ;#p ent-map
-    schema))
+        objects  (generate-edn lacinia-base ent-map enums config)]
+    objects))
 
 (def default-zprint-config {:map {:comma?   false
                                   :sort?    true
@@ -234,6 +239,6 @@
 
 (defn generate-and-write! [{:keys [:catchpocket/datomic-uri] :as config} conn db]
   (log/infof "Connecting to %s..." datomic-uri)
-  (let [generated (generate conn config db)]
+  (let [generated (generate config db)]
     (write-file! generated config))
   (log/info "Finished generation."))

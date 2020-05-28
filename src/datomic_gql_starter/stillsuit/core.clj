@@ -1,4 +1,4 @@
-(ns stillsuit.core
+(ns datomic-gql-starter.stillsuit.core
   "Main public API for stillsuit.
 
   For more details, see the [user manual](http://docs.workframe.com/stillsuit/current/manual/).
@@ -6,11 +6,11 @@
   Note that this namespace constitutes the entirety of the public API; all the other
   namespaces in stillsuit can be considered to be implementation details and may change
   over time."
-  (:require [stillsuit.lacinia.queries :as sq]
-            [stillsuit.lacinia.scalars :as ss]
-            [stillsuit.lacinia.resolvers :as sr]
-            [stillsuit.lacinia.enums :as se]
-            [stillsuit.lib.util :as slu]
+  (:require [datomic-gql-starter.stillsuit.lacinia.queries :as sq]
+            [datomic-gql-starter.stillsuit.lacinia.scalars :as ss]
+            [datomic-gql-starter.stillsuit.lacinia.resolvers :as sr]
+            [datomic-gql-starter.stillsuit.lacinia.enums :as se]
+            [datomic-gql-starter.stillsuit.lib.util :as slu]
             [com.walmartlabs.lacinia :as lacinia]
             [com.walmartlabs.lacinia.schema :as schema]
             [clojure.tools.logging :as log]

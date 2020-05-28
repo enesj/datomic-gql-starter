@@ -1,10 +1,11 @@
-(ns stillsuit.datomic.core
+(ns datomic-gql-starter.stillsuit.datomic.core
   "Implementation functions for dealing with datomic interactions."
   (:require [clojure.tools.logging :as log]
             [cuerdas.core :as str]
-            [inflections.core :as inflections :refer [plural singular]]
-            [catchpocket.generate.core :as cgc]
-            [catchpocket.generate.datomic :as cgd]
+            [inflections.core :refer [singular]]
+            [datomic-gql-starter.lacinia.utils :as utils]
+            [datomic-gql-starter.catchpocket.generate.core :as cgc]
+            [datomic-gql-starter.catchpocket.generate.datomic :as cgd]
             [db :refer [pull d-db q]]
             [datomic-gql-starter.lacinia.resolvers :as resolvers])
   (:import (java.util UUID)))
@@ -27,7 +28,7 @@
 
 (defn get-sub-entity
   [attribute]
-  (if (second (resolvers/get-attr-type attribute cgc/datomic-to-lacinia))
+  (if (second (utils/get-attr-type attribute cgc/datomic-to-lacinia))
       (singular (name attribute))
       (namespace attribute)))
 
@@ -49,7 +50,7 @@
         [errors filter-rules] (when args (resolvers/get-rules db context sub-entity args '?e))
         rules (vector (into rule filter-rules))
         cardinality (get-cardinality attribute)
-        type (resolvers/get-attr-type direct-attribute cgc/datomic-to-lacinia)]
+        type (utils/get-attr-type direct-attribute cgc/datomic-to-lacinia)]
     (if-not errors
         (if (= :ref (second type))
           (if (= cardinality :db.cardinality/one)
@@ -66,7 +67,7 @@
               (map #(hash-map :db/id (first %)))))
           (or
             (attribute entity)
-            (when-not (and (= (namespace attribute) (resolvers/dbid-to-ns db (:db/id entity))) (> (count entity) 1))
+            (when-not (and (= (namespace attribute) (utils/dbid-to-ns db (:db/id entity))) (> (count entity) 1))
                       (attribute (pull db (vector attribute) (:db/id entity))))))
       {:error errors})))
 

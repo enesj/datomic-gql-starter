@@ -1,155 +1,17 @@
 (ns datomic-gql-starter.lacinia.resolvers
-  (:require [db :refer [db conn d-with transact! q]]
-            [inflections.core :as inflections :refer [singular]]
+  (:require [db :refer [db d-with transact! q]]
+            [inflections.core :refer [singular]]
             [cuerdas.core :as str]
-            [datomic-gql-starter.utils.make-names :refer [camel-keyword
-                                                          make-input-key
-                                                          query-ellipsis namespaced-keyword remove-ns-rules]]
+            [datomic-gql-starter.lacinia.utils :refer  [enum-value query-ellipsis camel-keyword namespaced-keyword args-type]]
+            [datomic-gql-starter.utils.make-names :refer [make-input-key]]
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
-            [datomic-gql-starter.utils.fern :as f :refer [max-results catchpocket-conf]]
-            [catchpocket.lib.config :as config]
+            [datomic-gql-starter.utils.fern :refer [max-results]]
             [clojure.spec.alpha :as s]
             [expound.alpha :as expound]
             [clojure.zip :as z]
             [clojure.set :as set]))
 
 (set! s/*explain-out* expound/printer)
-
-(def config (config/construct-config catchpocket-conf))
-
-(defn ref-type [attr]
-  (->> config
-    :catchpocket/references
-    attr
-    :catchpocket/reference-to))
-
-(defn get-unique [entity]
-  (->> (q '[:find ?ident
-            :in $ ?ns
-            :where
-            [?e :db/ident ?ident]
-            [?e :db/unique]
-            [(namespace ?ident) ?ns]]
-          db entity)
-    ffirst))
-
-
-(defn dbid-to-ns [db dbid]
-  (->> (q '[:find   ?ns
-            :in $ ?e
-            :where
-            [?e ?a]
-            [?a :db/unique]
-            [?a :db/ident ?v]
-            [(namespace ?v) ?ns]]
-          db dbid)
-    ffirst))
-
-
-(defn find-all-refs
-  "gets all entities from DB of type ':db.type/ref' "
-  []
-  (-> (q '[:find ?ident
-           :in $ %
-           :where
-           [?e :db/ident ?ident]
-           [?e :db/valueType :db.type/ref]
-           [(namespace ?ident) ?ns]
-           (remove-ns ?ns)]
-        db remove-ns-rules)
-    query-ellipsis))
-
-(def all-refs (find-all-refs))
-
-(defn find-enums []
-  (into (sorted-map)
-    (for [ref all-refs]
-      (vector ref
-        (->>
-          (q '[:find (first ?a)
-               :in $ ?ref
-               :where
-               [_ ?ref ?w]
-               [?w :db/ident ?a]]
-            db ref)
-          (#(if (not-empty %) :enum :ref)))))))
-
-(def enums (find-enums))
-
-(defn get-attr-type [attr datomic-to-lacinia]
-  (let [type (-> (q '[:find ?t
-                      :in $ ?v
-                      :where
-                      [?e :db/ident ?v]
-                      [?e :db/valueType ?type-id]
-                      [?type-id :db/ident ?t]]
-                   db attr)
-               ffirst
-               datomic-to-lacinia)]
-    [(if  (= (name type) "ref") (ref-type attr) type)
-     (when  (= (name type) "ref") (attr enums))]))
-
-(def attr-type (memoize get-attr-type))
-
-(defn find-all-entities []
-  (->>
-    (q '[:find ?ns
-         :in $ %
-         :where
-         [?e :db/ident ?ident]
-         [?e :db/valueType]
-         [(namespace ?ident) ?ns]
-         (remove-ns ?ns)]
-       db remove-ns-rules)
-    query-ellipsis
-    (remove #(str/includes? % "."))
-    vec))
-
-(def all-entities (find-all-entities))
-
-
-(defn find-all-fields [entity]
-  (->>
-    (q '[:find ?ident
-         :in $ ?entity
-         :where
-         [?e :db/ident ?ident]
-         [?e :db/valueType]
-         [(namespace ?ident) ?ns]
-         [(= ?ns ?entity)]]
-      db entity)
-    query-ellipsis))
-
-(def all-fields (memoize find-all-fields))
-
-
-(defn get-args-type [entity datomic-to-lacinia]
-  (let [args (all-fields entity)]
-    (mapv
-      (fn [arg]
-        (let [[type ref?] (attr-type arg datomic-to-lacinia)
-              type-modified (case ref?
-                              :ref
-                               {:ref (name type)}
-                              :enum
-                               (str/snake (str arg))
-                              type)]
-          [arg type-modified]))
-      args)))
-
-(def args-type (memoize get-args-type))
-
-(defn get-enum-value [context entity field value]
-  (when value (let [enum (keyword (str/snake (str entity "_" field)))
-                    result (->> context
-                             :stillsuit/enum-map
-                             enum
-                             :stillsuit/lacinia-to-datomic
-                             value)]
-                result)))
-
-(def enum-value (memoize get-enum-value))
-
 
 (defn make-args [default entity datomic-to-lacinia]
   (let [arg-types (args-type entity datomic-to-lacinia)]

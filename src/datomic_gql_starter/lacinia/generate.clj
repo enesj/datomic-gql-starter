@@ -1,10 +1,9 @@
 (ns datomic-gql-starter.lacinia.generate
   (:require [inflections.core :as inflections :refer [plural singular]]
             [db :refer [d-with transact! pull d-db]]
-            [datomic-gql-starter.lacinia.resolvers :as resolvers :refer [all-entities args-type]]
-            [datomic-gql-starter.utils.make-names :refer [pascal-keyword camel-keyword
-                                                          rmv-ns resolve-symbol make-list
-                                                          make-result-type make-args-name
+            [datomic-gql-starter.lacinia.utils :refer [camel-keyword rmv-ns resolve-symbol make-list all-entities all-fields get-enum-value dbid-to-ns args-type]]
+            [datomic-gql-starter.lacinia.resolvers :as resolvers]
+            [datomic-gql-starter.utils.make-names :refer [make-result-type make-args-name
                                                           make-input-name make-input-key
                                                           make-query-key make-query-name
                                                           make-query-resolver-key make-query-resolver-name
@@ -15,7 +14,7 @@
                                                           make-deletion-key make-deletion-resolver-key
                                                           make-deletion-name make-deletion-resolver-name]]
             [clojure.spec.alpha :as s]
-            [catchpocket.generate.core :as cg]
+            [datomic-gql-starter.catchpocket.generate.core :refer [datomic-to-lacinia]]
             [datomic-gql-starter.utils.fern :as f]))
 
 (def apis
@@ -46,7 +45,7 @@
 (s/def :query/operator #{'or 'and 'not})
 
 (defn make-arg-spec [entity]
-  (set (map rmv-ns (resolvers/all-fields entity))))
+  (set (map rmv-ns (all-fields entity))))
 
 (defn make-nested-spec [arg-spec]
   (s/map-of :query/operator arg-spec))
@@ -83,7 +82,7 @@
   []
   (mapv (fn [entity#]
           (let [input-name# (make-input-name entity#)
-                arg-types# (args-type  entity# cg/datomic-to-lacinia)
+                arg-types# (args-type  entity# datomic-to-lacinia)
                 _# (rmv-ns '_)]
             (vector `(def ~input-name#
                        {:fields (into {}
@@ -105,7 +104,7 @@
 
 (defn make-query [entity]
   (let [query-key# (make-query-key entity)
-        args (resolvers/query-args entity cg/datomic-to-lacinia)
+        args (resolvers/query-args entity datomic-to-lacinia)
         resolver (make-query-resolver-key entity)
         description ""
         result-type (make-result-type entity)]
@@ -138,7 +137,7 @@
 
 (defn make-update [entity]
   (let [update-key# (make-update-key entity)
-        args (resolvers/update-args entity cg/datomic-to-lacinia)
+        args (resolvers/update-args entity datomic-to-lacinia)
         resolver (make-update-resolver-key entity)
         result-type (make-result-type entity)]
     {update-key# {:args args :description "" :resolve resolver :type result-type}}))
@@ -165,7 +164,7 @@
 
 (defn make-deletion [entity]
   (let [update-key# (make-deletion-key entity)
-        args (resolvers/delete-args entity cg/datomic-to-lacinia)
+        args (resolvers/delete-args entity datomic-to-lacinia)
         resolver (make-deletion-resolver-key entity)
         result-type (make-result-type entity)]
     {update-key# {:args args :description "" :resolve resolver :type result-type}}))
@@ -211,11 +210,11 @@
               field
               (cond
                 (string? lacinia-type)
-                (resolvers/get-enum-value context entity arg-name value)
+                (get-enum-value context entity arg-name value)
                 (map? lacinia-type)
                 (let [entity (singular arg-name)]
                   (make-transaction-data context entity
-                    (args-type  entity cg/datomic-to-lacinia)
+                    (args-type  entity datomic-to-lacinia)
                     value))
                 :else value))
             (when (= lacinia-type :JavaUUID)
@@ -231,7 +230,7 @@
         tempids (:tempids result)
         db-after (:db-after result)]
     (mapv #(pull db-after '[*] (val %))
-      (remove #(not= entity (resolvers/dbid-to-ns db-after (val %))) tempids))))
+      (remove #(not= entity (dbid-to-ns db-after (val %))) tempids))))
 
 (defmacro make-insert-mutations-resolvers
   "insert-countries-resolver
@@ -243,7 +242,7 @@
           (let [
                 resolver-name# (make-insert-resolver-name entity#)
                 mutation-name# (make-insert-name entity#)
-                arg-types# (args-type  entity# cg/datomic-to-lacinia)
+                arg-types# (args-type  entity# datomic-to-lacinia)
                 _# (rmv-ns '_)]
             (vector
               `(defn ~resolver-name# [context# {data#  (make-args-name ~entity#)} ~_#]

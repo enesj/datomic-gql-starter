@@ -1,18 +1,17 @@
-(ns catchpocket.generate.queries
+(ns datomic-gql-starter.catchpocket.generate.queries
   (:require [clojure.tools.logging :as log]
-            [catchpocket.generate.names :as names]))
+            [datomic-gql-starter.catchpocket.generate.names :as names]))
 
 (defn- query-definition
-  [field-type parent-type {:attribute/keys [lacinia-name ident] :as attr-info} config]
-  (let []
-    {:type        parent-type
-     :args        {lacinia-name {:type        (list 'non-null field-type)
-                                 :description (format "The `%s` value of the entity to find" ident)}}
-     :resolve     [:stillsuit/query-by-unique-id
-                   #:stillsuit{:attribute    ident
-                               :datomic-type field-type
-                               :lacinia-type parent-type}]
-     :description (format "Find a single %s entity given its `%s` attribute." parent-type ident)}))
+  [field-type parent-type {:attribute/keys [lacinia-name ident]} config]
+  {:type        parent-type
+   :args        {lacinia-name {:type        (list 'non-null field-type)
+                               :description (format "The `%s` value of the entity to find" ident)}}
+   :resolve     [:stillsuit/query-by-unique-id
+                 #:stillsuit{:attribute    ident
+                             :datomic-type field-type
+                             :lacinia-type parent-type}]
+   :description (format "Find a single %s entity given its `%s` attribute." parent-type ident)})
 
 (defn attach-queries
   [schema entity-map config]
