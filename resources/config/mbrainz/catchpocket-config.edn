@@ -1,0 +1,45 @@
+{:catchpocket/datomic-uri "datomic:dev://localhost:4334/mbrainz",
+ :catchpocket/schema-file
+ "resources/config/mbrainz/stillsuit-config.edn",
+ :catchpocket/references
+ {:abstractRelease/artists
+  #:catchpocket{:reference-to :artist,
+                :backref-name :_abstract_releases},
+  :medium/tracks
+  #:catchpocket{:reference-to :track, :backref-name :_media},
+  :release/abstractRelease
+  #:catchpocket{:reference-to :abstractRelease,
+                :backref-name :_releases},
+  :release/artists
+  #:catchpocket{:reference-to :artist, :backref-name :_releases},
+  :release/labels
+  #:catchpocket{:reference-to :label, :backref-name :_releases},
+  :release/media
+  #:catchpocket{:reference-to :medium, :backref-name :_releases},
+  :track/artists
+  #:catchpocket{:reference-to :artist, :backref-name :_tracks}},
+ :catchpocket/enums
+ {:abstract_release_type
+  #:catchpocket.enum{:scan? true,
+                     :attributes #{:abstractRelease/type}},
+  :artist_country
+  #:catchpocket.enum{:scan? true, :attributes #{:artist/country}},
+  :artist_gender
+  #:catchpocket.enum{:scan? true, :attributes #{:artist/gender}},
+  :artist_type
+  #:catchpocket.enum{:scan? true, :attributes #{:artist/type}},
+  :label_country
+  #:catchpocket.enum{:scan? true, :attributes #{:label/country}},
+  :label_type
+  #:catchpocket.enum{:scan? true, :attributes #{:label/type}},
+  :medium_format
+  #:catchpocket.enum{:scan? true, :attributes #{:medium/format}},
+  :release_country
+  #:catchpocket.enum{:scan? true, :attributes #{:release/country}},
+  :release_language
+  #:catchpocket.enum{:scan? true, :attributes #{:release/language}},
+  :release_packaging
+  #:catchpocket.enum{:scan? true, :attributes #{:release/packaging}},
+  :release_script
+  #:catchpocket.enum{:scan? true, :attributes #{:release/script}}},
+ :stillsuit/compile? true}

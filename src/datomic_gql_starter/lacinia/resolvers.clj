@@ -1,5 +1,5 @@
 (ns datomic-gql-starter.lacinia.resolvers
-  (:require [db :refer [db d-with transact! q]]
+  (:require [db :refer [db d-with transact! q profile]]
             [inflections.core :refer [singular]]
             [cuerdas.core :as str]
             [datomic-gql-starter.lacinia.utils :refer  [enum-value query-ellipsis camel-keyword namespaced-keyword args-type]]
@@ -44,12 +44,13 @@
 
 
 (defn is-fulltext? [k entity db]
-  (let [field (keyword (str/join "/" [entity (name k)]))
-        fulltext? (q '[:find ?e
-                       :in $ ?field
-                       :where [?field :db/fulltext ?e]]
-                     db field)]
-    (when (seq fulltext?) (name field))))
+  (when-not (= profile :devlocal)
+    (let [field (keyword (str/join "/" [entity (name k)]))
+          fulltext? (q '[:find ?e
+                         :in $ ?field
+                         :where [?field :db/fulltext ?e]]
+                       db field)]
+      (when (seq fulltext?) (name field)))))
 
 (defn get-or-filter [k v entity context e]
   (let [val (mapv #(if (keyword? %)

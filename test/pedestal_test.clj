@@ -18,10 +18,10 @@
     [com.walmartlabs.lacinia.pedestal :refer [inject]]
     [clj-http.client :as client]
     [clojure.string :as str]
-    [dev.test-utils :refer [test-server-fixture
-                            send-request
-                            send-json-request
-                            send-json-string-request]]
+    [test-utils :refer [test-server-fixture
+                        send-request
+                        send-json-request
+                        send-json-string-request]]
     [clojure.spec.test.alpha :as stest])
   (:import (clojure.lang ExceptionInfo)))
 

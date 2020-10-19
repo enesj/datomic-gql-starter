@@ -1,0 +1,14 @@
+{:entities
+ ["country"
+  "artist"
+  "language"
+  "release"
+  "medium"
+  "label"
+  "track"
+  "abstractRelease"
+  "script"],
+ :queries [],
+ :inserts [],
+ :updates [],
+ :deletions []}

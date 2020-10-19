@@ -1,0 +1,18 @@
+{:catchpocket/datomic-uri "datomic:dev://localhost:4334/",
+ :catchpocket/schema-file
+ "resources/config/seattle/stillsuit-config.edn",
+ :catchpocket/references
+ {:community/neighborhood
+  #:catchpocket{:reference-to :neighborhood,
+                :backref-name :_communities},
+  :neighborhood/district
+  #:catchpocket{:reference-to :district,
+                :backref-name :_neighborhoods}},
+ :catchpocket/enums
+ {:community_orgtype
+  #:catchpocket.enum{:scan? true, :attributes #{:community/orgtype}},
+  :community_type
+  #:catchpocket.enum{:scan? true, :attributes #{:community/type}},
+  :district_region
+  #:catchpocket.enum{:scan? true, :attributes #{:district/region}}},
+ :stillsuit/compile? true}

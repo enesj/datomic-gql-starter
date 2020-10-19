@@ -1,0 +1,31 @@
+{:catchpocket/generated-at "Fri Oct 16 08:35:56 CEST 2020"
+ :catchpocket/version "0.1"
+ :enums {}
+ :interfaces {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
+ :mutations {}
+ :objects
+ {:Data
+  {:description "Entity containing fields with the namespace `:data`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :source
+                 {:description
+                  "Source of the data in a transaction.\n\n> datomic attribute: `:data/source`. Type `:db.type/string`."
+                  :resolve [:stillsuit/ref #:stillsuit{:attribute :data/source :lacinia-type String}]
+                  :type String}}
+   :implements  [:DatomicEntity]}
+  :Object
+  {:description "Entity containing fields with the namespace `:object`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :mean_radius
+                 {:description
+                  "Mean radius of an object.\n\n> datomic attribute: `:object/meanRadius`. Type `:db.type/double`."
+                  :resolve [:stillsuit/ref #:stillsuit{:attribute :object/meanRadius :lacinia-type Float}]
+                  :type Float}
+                 :name {:description
+                        "Name of a Solar System object.\n\n> datomic attribute: `:object/name`. Type `:db.type/string`."
+                        :resolve [:stillsuit/ref #:stillsuit{:attribute :object/name :lacinia-type String}]
+                        :type String}}
+   :implements  [:DatomicEntity]}}
+ :queries {}
+ :stillsuit/config #:stillsuit{:db-id-name :db_id}
+ :stillsuit/enum-map nil}

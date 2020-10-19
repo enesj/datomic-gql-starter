@@ -1,0 +1,21 @@
+{:catchpocket/generated-at "Fri Oct 16 08:29:58 CEST 2020"
+ :catchpocket/version "0.1"
+ :enums {}
+ :interfaces {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
+ :mutations {}
+ :objects
+ {:Person
+  {:description "Entity containing fields with the namespace `:person`"
+   :fields      {:db_id  {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :friend {:args        {:_composition {:type String} :_limit {:type :JavaLong}}
+                          :description "\n\n> datomic attribute: `:person/friend`. Type `:db.type/ref`."
+                          :resolve     [:stillsuit/ref
+                                        #:stillsuit{:attribute :person/friend :lacinia-type :DatomicEntity}]
+                          :type        (list (non-null :DatomicEntity))}
+                 :name   {:description "\n\n> datomic attribute: `:person/name`. Type `:db.type/string`."
+                          :resolve     [:stillsuit/ref #:stillsuit{:attribute :person/name :lacinia-type String}]
+                          :type        String}}
+   :implements  [:DatomicEntity]}}
+ :queries {}
+ :stillsuit/config #:stillsuit{:db-id-name :db_id}
+ :stillsuit/enum-map nil}

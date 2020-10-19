@@ -1,0 +1,847 @@
+{:catchpocket/generated-at "Fri Oct 16 21:55:59 CEST 2020"
+ :catchpocket/version "0.1"
+ :enums
+ {:abstract_release_type {:description "> Enum generated from datomic attribute `:abstractRelease/type`."
+                          :values      ({:description             "> Datomic value: `:release.type/album`"
+                                         :enum-value              :ALBUM
+                                         :stillsuit/datomic-value :release.type/album}
+                                        {:description             "> Datomic value: `:release.type/ep`"
+                                         :enum-value              :EP
+                                         :stillsuit/datomic-value :release.type/ep}
+                                        {:description             "> Datomic value: `:release.type/other`"
+                                         :enum-value              :OTHER
+                                         :stillsuit/datomic-value :release.type/other}
+                                        {:description             "> Datomic value: `:release.type/single`"
+                                         :enum-value              :SINGLE
+                                         :stillsuit/datomic-value :release.type/single})}
+  :artist_country
+  {:description "> Enum generated from datomic attribute `:artist/country`."
+   :values      ({:description "> Datomic value: `:country/AO`" :enum-value :AO :stillsuit/datomic-value :country/AO}
+                 {:description "> Datomic value: `:country/AR`" :enum-value :AR :stillsuit/datomic-value :country/AR}
+                 {:description "> Datomic value: `:country/AT`" :enum-value :AT :stillsuit/datomic-value :country/AT}
+                 {:description "> Datomic value: `:country/AU`" :enum-value :AU :stillsuit/datomic-value :country/AU}
+                 {:description "> Datomic value: `:country/BD`" :enum-value :BD :stillsuit/datomic-value :country/BD}
+                 {:description "> Datomic value: `:country/BE`" :enum-value :BE :stillsuit/datomic-value :country/BE}
+                 {:description "> Datomic value: `:country/BO`" :enum-value :BO :stillsuit/datomic-value :country/BO}
+                 {:description "> Datomic value: `:country/BR`" :enum-value :BR :stillsuit/datomic-value :country/BR}
+                 {:description "> Datomic value: `:country/BS`" :enum-value :BS :stillsuit/datomic-value :country/BS}
+                 {:description "> Datomic value: `:country/CA`" :enum-value :CA :stillsuit/datomic-value :country/CA}
+                 {:description "> Datomic value: `:country/CH`" :enum-value :CH :stillsuit/datomic-value :country/CH}
+                 {:description "> Datomic value: `:country/CL`" :enum-value :CL :stillsuit/datomic-value :country/CL}
+                 {:description "> Datomic value: `:country/CM`" :enum-value :CM :stillsuit/datomic-value :country/CM}
+                 {:description "> Datomic value: `:country/CU`" :enum-value :CU :stillsuit/datomic-value :country/CU}
+                 {:description "> Datomic value: `:country/CZ`" :enum-value :CZ :stillsuit/datomic-value :country/CZ}
+                 {:description "> Datomic value: `:country/DE`" :enum-value :DE :stillsuit/datomic-value :country/DE}
+                 {:description "> Datomic value: `:country/DK`" :enum-value :DK :stillsuit/datomic-value :country/DK}
+                 {:description "> Datomic value: `:country/DM`" :enum-value :DM :stillsuit/datomic-value :country/DM}
+                 {:description "> Datomic value: `:country/EE`" :enum-value :EE :stillsuit/datomic-value :country/EE}
+                 {:description "> Datomic value: `:country/EG`" :enum-value :EG :stillsuit/datomic-value :country/EG}
+                 {:description "> Datomic value: `:country/ES`" :enum-value :ES :stillsuit/datomic-value :country/ES}
+                 {:description "> Datomic value: `:country/FI`" :enum-value :FI :stillsuit/datomic-value :country/FI}
+                 {:description "> Datomic value: `:country/FR`" :enum-value :FR :stillsuit/datomic-value :country/FR}
+                 {:description "> Datomic value: `:country/GB`" :enum-value :GB :stillsuit/datomic-value :country/GB}
+                 {:description "> Datomic value: `:country/GD`" :enum-value :GD :stillsuit/datomic-value :country/GD}
+                 {:description "> Datomic value: `:country/GR`" :enum-value :GR :stillsuit/datomic-value :country/GR}
+                 {:description "> Datomic value: `:country/HK`" :enum-value :HK :stillsuit/datomic-value :country/HK}
+                 {:description "> Datomic value: `:country/HR`" :enum-value :HR :stillsuit/datomic-value :country/HR}
+                 {:description "> Datomic value: `:country/HU`" :enum-value :HU :stillsuit/datomic-value :country/HU}
+                 {:description "> Datomic value: `:country/IE`" :enum-value :IE :stillsuit/datomic-value :country/IE}
+                 {:description "> Datomic value: `:country/IL`" :enum-value :IL :stillsuit/datomic-value :country/IL}
+                 {:description "> Datomic value: `:country/IN`" :enum-value :IN :stillsuit/datomic-value :country/IN}
+                 {:description "> Datomic value: `:country/IQ`" :enum-value :IQ :stillsuit/datomic-value :country/IQ}
+                 {:description "> Datomic value: `:country/IR`" :enum-value :IR :stillsuit/datomic-value :country/IR}
+                 {:description "> Datomic value: `:country/IT`" :enum-value :IT :stillsuit/datomic-value :country/IT}
+                 {:description "> Datomic value: `:country/JM`" :enum-value :JM :stillsuit/datomic-value :country/JM}
+                 {:description "> Datomic value: `:country/JP`" :enum-value :JP :stillsuit/datomic-value :country/JP}
+                 {:description "> Datomic value: `:country/KE`" :enum-value :KE :stillsuit/datomic-value :country/KE}
+                 {:description "> Datomic value: `:country/LB`" :enum-value :LB :stillsuit/datomic-value :country/LB}
+                 {:description "> Datomic value: `:country/LV`" :enum-value :LV :stillsuit/datomic-value :country/LV}
+                 {:description "> Datomic value: `:country/MC`" :enum-value :MC :stillsuit/datomic-value :country/MC}
+                 {:description "> Datomic value: `:country/ME`" :enum-value :ME :stillsuit/datomic-value :country/ME}
+                 {:description "> Datomic value: `:country/MX`" :enum-value :MX :stillsuit/datomic-value :country/MX}
+                 {:description "> Datomic value: `:country/NL`" :enum-value :NL :stillsuit/datomic-value :country/NL}
+                 {:description "> Datomic value: `:country/NO`" :enum-value :NO :stillsuit/datomic-value :country/NO}
+                 {:description "> Datomic value: `:country/NZ`" :enum-value :NZ :stillsuit/datomic-value :country/NZ}
+                 {:description "> Datomic value: `:country/PA`" :enum-value :PA :stillsuit/datomic-value :country/PA}
+                 {:description "> Datomic value: `:country/PE`" :enum-value :PE :stillsuit/datomic-value :country/PE}
+                 {:description "> Datomic value: `:country/PL`" :enum-value :PL :stillsuit/datomic-value :country/PL}
+                 {:description "> Datomic value: `:country/PR`" :enum-value :PR :stillsuit/datomic-value :country/PR}
+                 {:description "> Datomic value: `:country/PT`" :enum-value :PT :stillsuit/datomic-value :country/PT}
+                 {:description "> Datomic value: `:country/RO`" :enum-value :RO :stillsuit/datomic-value :country/RO}
+                 {:description "> Datomic value: `:country/RS`" :enum-value :RS :stillsuit/datomic-value :country/RS}
+                 {:description "> Datomic value: `:country/RU`" :enum-value :RU :stillsuit/datomic-value :country/RU}
+                 {:description "> Datomic value: `:country/SE`" :enum-value :SE :stillsuit/datomic-value :country/SE}
+                 {:description "> Datomic value: `:country/SI`" :enum-value :SI :stillsuit/datomic-value :country/SI}
+                 {:description "> Datomic value: `:country/SK`" :enum-value :SK :stillsuit/datomic-value :country/SK}
+                 {:description "> Datomic value: `:country/SU`" :enum-value :SU :stillsuit/datomic-value :country/SU}
+                 {:description "> Datomic value: `:country/TR`" :enum-value :TR :stillsuit/datomic-value :country/TR}
+                 {:description "> Datomic value: `:country/TT`" :enum-value :TT :stillsuit/datomic-value :country/TT}
+                 {:description "> Datomic value: `:country/UA`" :enum-value :UA :stillsuit/datomic-value :country/UA}
+                 {:description "> Datomic value: `:country/US`" :enum-value :US :stillsuit/datomic-value :country/US}
+                 {:description "> Datomic value: `:country/UY`" :enum-value :UY :stillsuit/datomic-value :country/UY}
+                 {:description "> Datomic value: `:country/VE`" :enum-value :VE :stillsuit/datomic-value :country/VE}
+                 {:description "> Datomic value: `:country/XC`" :enum-value :XC :stillsuit/datomic-value :country/XC}
+                 {:description "> Datomic value: `:country/XW`" :enum-value :XW :stillsuit/datomic-value :country/XW}
+                 {:description "> Datomic value: `:country/ZA`" :enum-value :ZA :stillsuit/datomic-value :country/ZA}
+                 {:description "> Datomic value: `:country/ZW`" :enum-value :ZW :stillsuit/datomic-value :country/ZW})}
+  :artist_gender {:description "> Enum generated from datomic attribute `:artist/gender`."
+                  :values      ({:description             "> Datomic value: `:artist.gender/female`"
+                                 :enum-value              :FEMALE
+                                 :stillsuit/datomic-value :artist.gender/female}
+                                {:description             "> Datomic value: `:artist.gender/male`"
+                                 :enum-value              :MALE
+                                 :stillsuit/datomic-value :artist.gender/male}
+                                {:description             "> Datomic value: `:artist.gender/other`"
+                                 :enum-value              :OTHER
+                                 :stillsuit/datomic-value :artist.gender/other})}
+  :artist_type {:description "> Enum generated from datomic attribute `:artist/type`."
+                :values      ({:description             "> Datomic value: `:artist.type/group`"
+                               :enum-value              :GROUP
+                               :stillsuit/datomic-value :artist.type/group}
+                              {:description             "> Datomic value: `:artist.type/other`"
+                               :enum-value              :OTHER
+                               :stillsuit/datomic-value :artist.type/other}
+                              {:description             "> Datomic value: `:artist.type/person`"
+                               :enum-value              :PERSON
+                               :stillsuit/datomic-value :artist.type/person})}
+  :label_country
+  {:description "> Enum generated from datomic attribute `:label/country`."
+   :values      ({:description "> Datomic value: `:country/AR`" :enum-value :AR :stillsuit/datomic-value :country/AR}
+                 {:description "> Datomic value: `:country/AT`" :enum-value :AT :stillsuit/datomic-value :country/AT}
+                 {:description "> Datomic value: `:country/AU`" :enum-value :AU :stillsuit/datomic-value :country/AU}
+                 {:description "> Datomic value: `:country/BE`" :enum-value :BE :stillsuit/datomic-value :country/BE}
+                 {:description "> Datomic value: `:country/BR`" :enum-value :BR :stillsuit/datomic-value :country/BR}
+                 {:description "> Datomic value: `:country/CA`" :enum-value :CA :stillsuit/datomic-value :country/CA}
+                 {:description "> Datomic value: `:country/CH`" :enum-value :CH :stillsuit/datomic-value :country/CH}
+                 {:description "> Datomic value: `:country/CL`" :enum-value :CL :stillsuit/datomic-value :country/CL}
+                 {:description "> Datomic value: `:country/CU`" :enum-value :CU :stillsuit/datomic-value :country/CU}
+                 {:description "> Datomic value: `:country/CZ`" :enum-value :CZ :stillsuit/datomic-value :country/CZ}
+                 {:description "> Datomic value: `:country/DE`" :enum-value :DE :stillsuit/datomic-value :country/DE}
+                 {:description "> Datomic value: `:country/DK`" :enum-value :DK :stillsuit/datomic-value :country/DK}
+                 {:description "> Datomic value: `:country/EG`" :enum-value :EG :stillsuit/datomic-value :country/EG}
+                 {:description "> Datomic value: `:country/ES`" :enum-value :ES :stillsuit/datomic-value :country/ES}
+                 {:description "> Datomic value: `:country/FI`" :enum-value :FI :stillsuit/datomic-value :country/FI}
+                 {:description "> Datomic value: `:country/FR`" :enum-value :FR :stillsuit/datomic-value :country/FR}
+                 {:description "> Datomic value: `:country/GB`" :enum-value :GB :stillsuit/datomic-value :country/GB}
+                 {:description "> Datomic value: `:country/GR`" :enum-value :GR :stillsuit/datomic-value :country/GR}
+                 {:description "> Datomic value: `:country/HU`" :enum-value :HU :stillsuit/datomic-value :country/HU}
+                 {:description "> Datomic value: `:country/IE`" :enum-value :IE :stillsuit/datomic-value :country/IE}
+                 {:description "> Datomic value: `:country/IL`" :enum-value :IL :stillsuit/datomic-value :country/IL}
+                 {:description "> Datomic value: `:country/IN`" :enum-value :IN :stillsuit/datomic-value :country/IN}
+                 {:description "> Datomic value: `:country/IS`" :enum-value :IS :stillsuit/datomic-value :country/IS}
+                 {:description "> Datomic value: `:country/IT`" :enum-value :IT :stillsuit/datomic-value :country/IT}
+                 {:description "> Datomic value: `:country/JM`" :enum-value :JM :stillsuit/datomic-value :country/JM}
+                 {:description "> Datomic value: `:country/JP`" :enum-value :JP :stillsuit/datomic-value :country/JP}
+                 {:description "> Datomic value: `:country/KR`" :enum-value :KR :stillsuit/datomic-value :country/KR}
+                 {:description "> Datomic value: `:country/MX`" :enum-value :MX :stillsuit/datomic-value :country/MX}
+                 {:description "> Datomic value: `:country/MY`" :enum-value :MY :stillsuit/datomic-value :country/MY}
+                 {:description "> Datomic value: `:country/NG`" :enum-value :NG :stillsuit/datomic-value :country/NG}
+                 {:description "> Datomic value: `:country/NL`" :enum-value :NL :stillsuit/datomic-value :country/NL}
+                 {:description "> Datomic value: `:country/NO`" :enum-value :NO :stillsuit/datomic-value :country/NO}
+                 {:description "> Datomic value: `:country/NZ`" :enum-value :NZ :stillsuit/datomic-value :country/NZ}
+                 {:description "> Datomic value: `:country/PH`" :enum-value :PH :stillsuit/datomic-value :country/PH}
+                 {:description "> Datomic value: `:country/PL`" :enum-value :PL :stillsuit/datomic-value :country/PL}
+                 {:description "> Datomic value: `:country/PT`" :enum-value :PT :stillsuit/datomic-value :country/PT}
+                 {:description "> Datomic value: `:country/RO`" :enum-value :RO :stillsuit/datomic-value :country/RO}
+                 {:description "> Datomic value: `:country/RU`" :enum-value :RU :stillsuit/datomic-value :country/RU}
+                 {:description "> Datomic value: `:country/SE`" :enum-value :SE :stillsuit/datomic-value :country/SE}
+                 {:description "> Datomic value: `:country/SK`" :enum-value :SK :stillsuit/datomic-value :country/SK}
+                 {:description "> Datomic value: `:country/SU`" :enum-value :SU :stillsuit/datomic-value :country/SU}
+                 {:description "> Datomic value: `:country/TH`" :enum-value :TH :stillsuit/datomic-value :country/TH}
+                 {:description "> Datomic value: `:country/TR`" :enum-value :TR :stillsuit/datomic-value :country/TR}
+                 {:description "> Datomic value: `:country/US`" :enum-value :US :stillsuit/datomic-value :country/US}
+                 {:description "> Datomic value: `:country/UY`" :enum-value :UY :stillsuit/datomic-value :country/UY}
+                 {:description "> Datomic value: `:country/XE`" :enum-value :XE :stillsuit/datomic-value :country/XE}
+                 {:description "> Datomic value: `:country/XG`" :enum-value :XG :stillsuit/datomic-value :country/XG}
+                 {:description "> Datomic value: `:country/XW`" :enum-value :XW :stillsuit/datomic-value :country/XW}
+                 {:description "> Datomic value: `:country/YU`" :enum-value :YU :stillsuit/datomic-value :country/YU})}
+  :label_type {:description "> Enum generated from datomic attribute `:label/type`."
+               :values      ({:description             "> Datomic value: `:label.type/bootlegProduction`"
+                              :enum-value              :BOOTLEG_PRODUCTION
+                              :stillsuit/datomic-value :label.type/bootlegProduction}
+                             {:description             "> Datomic value: `:label.type/distributor`"
+                              :enum-value              :DISTRIBUTOR
+                              :stillsuit/datomic-value :label.type/distributor}
+                             {:description             "> Datomic value: `:label.type/holding`"
+                              :enum-value              :HOLDING
+                              :stillsuit/datomic-value :label.type/holding}
+                             {:description             "> Datomic value: `:label.type/originalProduction`"
+                              :enum-value              :ORIGINAL_PRODUCTION
+                              :stillsuit/datomic-value :label.type/originalProduction}
+                             {:description             "> Datomic value: `:label.type/production`"
+                              :enum-value              :PRODUCTION
+                              :stillsuit/datomic-value :label.type/production}
+                             {:description             "> Datomic value: `:label.type/publisher`"
+                              :enum-value              :PUBLISHER
+                              :stillsuit/datomic-value :label.type/publisher}
+                             {:description             "> Datomic value: `:label.type/reissueProduction`"
+                              :enum-value              :REISSUE_PRODUCTION
+                              :stillsuit/datomic-value :label.type/reissueProduction})}
+  :medium_format
+  {:description "> Enum generated from datomic attribute `:medium/format`."
+   :values
+   ({:description             "> Datomic value: `:medium.format/cartridge`"
+     :enum-value              :CARTRIDGE
+     :stillsuit/datomic-value :medium.format/cartridge}
+    {:description             "> Datomic value: `:medium.format/cassette`"
+     :enum-value              :CASSETTE
+     :stillsuit/datomic-value :medium.format/cassette}
+    {:description "> Datomic value: `:medium.format/cd`" :enum-value :CD :stillsuit/datomic-value :medium.format/cd}
+    {:description             "> Datomic value: `:medium.format/cd8cm`"
+     :enum-value              :CD8CM
+     :stillsuit/datomic-value :medium.format/cd8cm}
+    {:description "> Datomic value: `:medium.format/cdr`" :enum-value :CDR :stillsuit/datomic-value :medium.format/cdr}
+    {:description             "> Datomic value: `:medium.format/digitalMedia`"
+     :enum-value              :DIGITAL_MEDIA
+     :stillsuit/datomic-value :medium.format/digitalMedia}
+    {:description             "> Datomic value: `:medium.format/miniDisc`"
+     :enum-value              :MINI_DISC
+     :stillsuit/datomic-value :medium.format/miniDisc}
+    {:description             "> Datomic value: `:medium.format/other`"
+     :enum-value              :OTHER
+     :stillsuit/datomic-value :medium.format/other}
+    {:description             "> Datomic value: `:medium.format/reel`"
+     :enum-value              :REEL
+     :stillsuit/datomic-value :medium.format/reel}
+    {:description             "> Datomic value: `:medium.format/vinyl`"
+     :enum-value              :VINYL
+     :stillsuit/datomic-value :medium.format/vinyl}
+    {:description             "> Datomic value: `:medium.format/vinyl10`"
+     :enum-value              :VINYL10
+     :stillsuit/datomic-value :medium.format/vinyl10}
+    {:description             "> Datomic value: `:medium.format/vinyl12`"
+     :enum-value              :VINYL12
+     :stillsuit/datomic-value :medium.format/vinyl12}
+    {:description             "> Datomic value: `:medium.format/vinyl7`"
+     :enum-value              :VINYL7
+     :stillsuit/datomic-value :medium.format/vinyl7})}
+  :release_country
+  {:description "> Enum generated from datomic attribute `:release/country`."
+   :values      ({:description "> Datomic value: `:country/AR`" :enum-value :AR :stillsuit/datomic-value :country/AR}
+                 {:description "> Datomic value: `:country/AT`" :enum-value :AT :stillsuit/datomic-value :country/AT}
+                 {:description "> Datomic value: `:country/AU`" :enum-value :AU :stillsuit/datomic-value :country/AU}
+                 {:description "> Datomic value: `:country/BE`" :enum-value :BE :stillsuit/datomic-value :country/BE}
+                 {:description "> Datomic value: `:country/BO`" :enum-value :BO :stillsuit/datomic-value :country/BO}
+                 {:description "> Datomic value: `:country/BR`" :enum-value :BR :stillsuit/datomic-value :country/BR}
+                 {:description "> Datomic value: `:country/BS`" :enum-value :BS :stillsuit/datomic-value :country/BS}
+                 {:description "> Datomic value: `:country/BY`" :enum-value :BY :stillsuit/datomic-value :country/BY}
+                 {:description "> Datomic value: `:country/CA`" :enum-value :CA :stillsuit/datomic-value :country/CA}
+                 {:description "> Datomic value: `:country/CH`" :enum-value :CH :stillsuit/datomic-value :country/CH}
+                 {:description "> Datomic value: `:country/CL`" :enum-value :CL :stillsuit/datomic-value :country/CL}
+                 {:description "> Datomic value: `:country/CN`" :enum-value :CN :stillsuit/datomic-value :country/CN}
+                 {:description "> Datomic value: `:country/CO`" :enum-value :CO :stillsuit/datomic-value :country/CO}
+                 {:description "> Datomic value: `:country/CS`" :enum-value :CS :stillsuit/datomic-value :country/CS}
+                 {:description "> Datomic value: `:country/CU`" :enum-value :CU :stillsuit/datomic-value :country/CU}
+                 {:description "> Datomic value: `:country/CZ`" :enum-value :CZ :stillsuit/datomic-value :country/CZ}
+                 {:description "> Datomic value: `:country/DE`" :enum-value :DE :stillsuit/datomic-value :country/DE}
+                 {:description "> Datomic value: `:country/DK`" :enum-value :DK :stillsuit/datomic-value :country/DK}
+                 {:description "> Datomic value: `:country/EC`" :enum-value :EC :stillsuit/datomic-value :country/EC}
+                 {:description "> Datomic value: `:country/EG`" :enum-value :EG :stillsuit/datomic-value :country/EG}
+                 {:description "> Datomic value: `:country/ES`" :enum-value :ES :stillsuit/datomic-value :country/ES}
+                 {:description "> Datomic value: `:country/FI`" :enum-value :FI :stillsuit/datomic-value :country/FI}
+                 {:description "> Datomic value: `:country/FR`" :enum-value :FR :stillsuit/datomic-value :country/FR}
+                 {:description "> Datomic value: `:country/GB`" :enum-value :GB :stillsuit/datomic-value :country/GB}
+                 {:description "> Datomic value: `:country/GH`" :enum-value :GH :stillsuit/datomic-value :country/GH}
+                 {:description "> Datomic value: `:country/GR`" :enum-value :GR :stillsuit/datomic-value :country/GR}
+                 {:description "> Datomic value: `:country/HK`" :enum-value :HK :stillsuit/datomic-value :country/HK}
+                 {:description "> Datomic value: `:country/HR`" :enum-value :HR :stillsuit/datomic-value :country/HR}
+                 {:description "> Datomic value: `:country/HU`" :enum-value :HU :stillsuit/datomic-value :country/HU}
+                 {:description "> Datomic value: `:country/IE`" :enum-value :IE :stillsuit/datomic-value :country/IE}
+                 {:description "> Datomic value: `:country/IL`" :enum-value :IL :stillsuit/datomic-value :country/IL}
+                 {:description "> Datomic value: `:country/IN`" :enum-value :IN :stillsuit/datomic-value :country/IN}
+                 {:description "> Datomic value: `:country/IS`" :enum-value :IS :stillsuit/datomic-value :country/IS}
+                 {:description "> Datomic value: `:country/IT`" :enum-value :IT :stillsuit/datomic-value :country/IT}
+                 {:description "> Datomic value: `:country/JM`" :enum-value :JM :stillsuit/datomic-value :country/JM}
+                 {:description "> Datomic value: `:country/JP`" :enum-value :JP :stillsuit/datomic-value :country/JP}
+                 {:description "> Datomic value: `:country/KR`" :enum-value :KR :stillsuit/datomic-value :country/KR}
+                 {:description "> Datomic value: `:country/MX`" :enum-value :MX :stillsuit/datomic-value :country/MX}
+                 {:description "> Datomic value: `:country/MY`" :enum-value :MY :stillsuit/datomic-value :country/MY}
+                 {:description "> Datomic value: `:country/NG`" :enum-value :NG :stillsuit/datomic-value :country/NG}
+                 {:description "> Datomic value: `:country/NL`" :enum-value :NL :stillsuit/datomic-value :country/NL}
+                 {:description "> Datomic value: `:country/NO`" :enum-value :NO :stillsuit/datomic-value :country/NO}
+                 {:description "> Datomic value: `:country/NZ`" :enum-value :NZ :stillsuit/datomic-value :country/NZ}
+                 {:description "> Datomic value: `:country/PE`" :enum-value :PE :stillsuit/datomic-value :country/PE}
+                 {:description "> Datomic value: `:country/PH`" :enum-value :PH :stillsuit/datomic-value :country/PH}
+                 {:description "> Datomic value: `:country/PK`" :enum-value :PK :stillsuit/datomic-value :country/PK}
+                 {:description "> Datomic value: `:country/PL`" :enum-value :PL :stillsuit/datomic-value :country/PL}
+                 {:description "> Datomic value: `:country/PR`" :enum-value :PR :stillsuit/datomic-value :country/PR}
+                 {:description "> Datomic value: `:country/PT`" :enum-value :PT :stillsuit/datomic-value :country/PT}
+                 {:description "> Datomic value: `:country/RE`" :enum-value :RE :stillsuit/datomic-value :country/RE}
+                 {:description "> Datomic value: `:country/RO`" :enum-value :RO :stillsuit/datomic-value :country/RO}
+                 {:description "> Datomic value: `:country/RU`" :enum-value :RU :stillsuit/datomic-value :country/RU}
+                 {:description "> Datomic value: `:country/SE`" :enum-value :SE :stillsuit/datomic-value :country/SE}
+                 {:description "> Datomic value: `:country/SG`" :enum-value :SG :stillsuit/datomic-value :country/SG}
+                 {:description "> Datomic value: `:country/SI`" :enum-value :SI :stillsuit/datomic-value :country/SI}
+                 {:description "> Datomic value: `:country/SK`" :enum-value :SK :stillsuit/datomic-value :country/SK}
+                 {:description "> Datomic value: `:country/SU`" :enum-value :SU :stillsuit/datomic-value :country/SU}
+                 {:description "> Datomic value: `:country/TH`" :enum-value :TH :stillsuit/datomic-value :country/TH}
+                 {:description "> Datomic value: `:country/TR`" :enum-value :TR :stillsuit/datomic-value :country/TR}
+                 {:description "> Datomic value: `:country/TT`" :enum-value :TT :stillsuit/datomic-value :country/TT}
+                 {:description "> Datomic value: `:country/TW`" :enum-value :TW :stillsuit/datomic-value :country/TW}
+                 {:description "> Datomic value: `:country/US`" :enum-value :US :stillsuit/datomic-value :country/US}
+                 {:description "> Datomic value: `:country/UY`" :enum-value :UY :stillsuit/datomic-value :country/UY}
+                 {:description "> Datomic value: `:country/VE`" :enum-value :VE :stillsuit/datomic-value :country/VE}
+                 {:description "> Datomic value: `:country/XC`" :enum-value :XC :stillsuit/datomic-value :country/XC}
+                 {:description "> Datomic value: `:country/XE`" :enum-value :XE :stillsuit/datomic-value :country/XE}
+                 {:description "> Datomic value: `:country/XG`" :enum-value :XG :stillsuit/datomic-value :country/XG}
+                 {:description "> Datomic value: `:country/XW`" :enum-value :XW :stillsuit/datomic-value :country/XW}
+                 {:description "> Datomic value: `:country/YU`" :enum-value :YU :stillsuit/datomic-value :country/YU}
+                 {:description "> Datomic value: `:country/ZA`" :enum-value :ZA :stillsuit/datomic-value :country/ZA})}
+  :release_language
+  {:description "> Enum generated from datomic attribute `:release/language`."
+   :values ({:description "> Datomic value: `:language/amh`" :enum-value :AMH :stillsuit/datomic-value :language/amh}
+            {:description "> Datomic value: `:language/ara`" :enum-value :ARA :stillsuit/datomic-value :language/ara}
+            {:description "> Datomic value: `:language/bod`" :enum-value :BOD :stillsuit/datomic-value :language/bod}
+            {:description "> Datomic value: `:language/bos`" :enum-value :BOS :stillsuit/datomic-value :language/bos}
+            {:description "> Datomic value: `:language/cat`" :enum-value :CAT :stillsuit/datomic-value :language/cat}
+            {:description "> Datomic value: `:language/ces`" :enum-value :CES :stillsuit/datomic-value :language/ces}
+            {:description "> Datomic value: `:language/cym`" :enum-value :CYM :stillsuit/datomic-value :language/cym}
+            {:description "> Datomic value: `:language/dan`" :enum-value :DAN :stillsuit/datomic-value :language/dan}
+            {:description "> Datomic value: `:language/deu`" :enum-value :DEU :stillsuit/datomic-value :language/deu}
+            {:description "> Datomic value: `:language/ell`" :enum-value :ELL :stillsuit/datomic-value :language/ell}
+            {:description "> Datomic value: `:language/eng`" :enum-value :ENG :stillsuit/datomic-value :language/eng}
+            {:description "> Datomic value: `:language/est`" :enum-value :EST :stillsuit/datomic-value :language/est}
+            {:description "> Datomic value: `:language/eus`" :enum-value :EUS :stillsuit/datomic-value :language/eus}
+            {:description "> Datomic value: `:language/fas`" :enum-value :FAS :stillsuit/datomic-value :language/fas}
+            {:description "> Datomic value: `:language/fin`" :enum-value :FIN :stillsuit/datomic-value :language/fin}
+            {:description "> Datomic value: `:language/fra`" :enum-value :FRA :stillsuit/datomic-value :language/fra}
+            {:description "> Datomic value: `:language/gle`" :enum-value :GLE :stillsuit/datomic-value :language/gle}
+            {:description "> Datomic value: `:language/glg`" :enum-value :GLG :stillsuit/datomic-value :language/glg}
+            {:description "> Datomic value: `:language/gsw`" :enum-value :GSW :stillsuit/datomic-value :language/gsw}
+            {:description "> Datomic value: `:language/hau`" :enum-value :HAU :stillsuit/datomic-value :language/hau}
+            {:description "> Datomic value: `:language/haw`" :enum-value :HAW :stillsuit/datomic-value :language/haw}
+            {:description "> Datomic value: `:language/heb`" :enum-value :HEB :stillsuit/datomic-value :language/heb}
+            {:description "> Datomic value: `:language/hin`" :enum-value :HIN :stillsuit/datomic-value :language/hin}
+            {:description "> Datomic value: `:language/hrv`" :enum-value :HRV :stillsuit/datomic-value :language/hrv}
+            {:description "> Datomic value: `:language/hun`" :enum-value :HUN :stillsuit/datomic-value :language/hun}
+            {:description "> Datomic value: `:language/isl`" :enum-value :ISL :stillsuit/datomic-value :language/isl}
+            {:description "> Datomic value: `:language/ita`" :enum-value :ITA :stillsuit/datomic-value :language/ita}
+            {:description "> Datomic value: `:language/jpn`" :enum-value :JPN :stillsuit/datomic-value :language/jpn}
+            {:description "> Datomic value: `:language/lat`" :enum-value :LAT :stillsuit/datomic-value :language/lat}
+            {:description "> Datomic value: `:language/lav`" :enum-value :LAV :stillsuit/datomic-value :language/lav}
+            {:description "> Datomic value: `:language/mul`" :enum-value :MUL :stillsuit/datomic-value :language/mul}
+            {:description "> Datomic value: `:language/nld`" :enum-value :NLD :stillsuit/datomic-value :language/nld}
+            {:description "> Datomic value: `:language/nob`" :enum-value :NOB :stillsuit/datomic-value :language/nob}
+            {:description "> Datomic value: `:language/nor`" :enum-value :NOR :stillsuit/datomic-value :language/nor}
+            {:description "> Datomic value: `:language/pol`" :enum-value :POL :stillsuit/datomic-value :language/pol}
+            {:description "> Datomic value: `:language/por`" :enum-value :POR :stillsuit/datomic-value :language/por}
+            {:description "> Datomic value: `:language/qaa`" :enum-value :QAA :stillsuit/datomic-value :language/qaa}
+            {:description "> Datomic value: `:language/ron`" :enum-value :RON :stillsuit/datomic-value :language/ron}
+            {:description "> Datomic value: `:language/rus`" :enum-value :RUS :stillsuit/datomic-value :language/rus}
+            {:description "> Datomic value: `:language/slk`" :enum-value :SLK :stillsuit/datomic-value :language/slk}
+            {:description "> Datomic value: `:language/slv`" :enum-value :SLV :stillsuit/datomic-value :language/slv}
+            {:description "> Datomic value: `:language/som`" :enum-value :SOM :stillsuit/datomic-value :language/som}
+            {:description "> Datomic value: `:language/spa`" :enum-value :SPA :stillsuit/datomic-value :language/spa}
+            {:description "> Datomic value: `:language/sqi`" :enum-value :SQI :stillsuit/datomic-value :language/sqi}
+            {:description "> Datomic value: `:language/srp`" :enum-value :SRP :stillsuit/datomic-value :language/srp}
+            {:description "> Datomic value: `:language/swa`" :enum-value :SWA :stillsuit/datomic-value :language/swa}
+            {:description "> Datomic value: `:language/swe`" :enum-value :SWE :stillsuit/datomic-value :language/swe}
+            {:description "> Datomic value: `:language/tur`" :enum-value :TUR :stillsuit/datomic-value :language/tur}
+            {:description "> Datomic value: `:language/zho`" :enum-value :ZHO :stillsuit/datomic-value :language/zho})}
+  :release_packaging {:description "> Enum generated from datomic attribute `:release/packaging`."
+                      :values      ({:description "> Datomic value: `:release.packaging/cardboardPaperSleeve`"
+                                     :enum-value :CARDBOARD_PAPER_SLEEVE
+                                     :stillsuit/datomic-value :release.packaging/cardboardPaperSleeve}
+                                    {:description             "> Datomic value: `:release.packaging/jewelCase`"
+                                     :enum-value              :JEWEL_CASE
+                                     :stillsuit/datomic-value :release.packaging/jewelCase}
+                                    {:description             "> Datomic value: `:release.packaging/none`"
+                                     :enum-value              :NONE
+                                     :stillsuit/datomic-value :release.packaging/none}
+                                    {:description             "> Datomic value: `:release.packaging/other`"
+                                     :enum-value              :OTHER
+                                     :stillsuit/datomic-value :release.packaging/other})}
+  :release_script {:description "> Enum generated from datomic attribute `:release/script`."
+                   :values      ({:description             "> Datomic value: `:script/Arab`"
+                                  :enum-value              :ARAB
+                                  :stillsuit/datomic-value :script/Arab}
+                                 {:description             "> Datomic value: `:script/Cyrl`"
+                                  :enum-value              :CYRL
+                                  :stillsuit/datomic-value :script/Cyrl}
+                                 {:description             "> Datomic value: `:script/Grek`"
+                                  :enum-value              :GREK
+                                  :stillsuit/datomic-value :script/Grek}
+                                 {:description             "> Datomic value: `:script/Hant`"
+                                  :enum-value              :HANT
+                                  :stillsuit/datomic-value :script/Hant}
+                                 {:description             "> Datomic value: `:script/Hebr`"
+                                  :enum-value              :HEBR
+                                  :stillsuit/datomic-value :script/Hebr}
+                                 {:description             "> Datomic value: `:script/Jpan`"
+                                  :enum-value              :JPAN
+                                  :stillsuit/datomic-value :script/Jpan}
+                                 {:description             "> Datomic value: `:script/Latn`"
+                                  :enum-value              :LATN
+                                  :stillsuit/datomic-value :script/Latn})}}
+ :interfaces {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
+ :mutations {}
+ :objects
+ {:AbstractRelease
+  {:description "Entity containing fields with the namespace `:abstractrelease`"
+   :fields
+   {:_releases {:args        {:_composition    {:type String}
+                              :_limit          {:type :JavaLong}
+                              :abstractRelease {:type :AbstractReleaseInput}
+                              :artistCredit    {:type (list String)}
+                              :artists         {:type :ArtistInput}
+                              :barcode         {:type (list String)}
+                              :country         {:type (list release_country)}
+                              :day             {:type (list :JavaLong)}
+                              :gid             {:type (list :JavaUUID)}
+                              :labels          {:type :LabelInput}
+                              :language        {:type (list release_language)}
+                              :media           {:type :MediumInput}
+                              :month           {:type (list :JavaLong)}
+                              :name            {:type (list String)}
+                              :packaging       {:type (list release_packaging)}
+                              :script          {:type (list release_script)}
+                              :status          {:type (list String)}
+                              :year            {:type (list :JavaLong)}}
+                :description "Back-reference for the `:release/_abstractRelease` datomic attribute"
+                :resolve     [:stillsuit/ref
+                              #:stillsuit{:attribute    :release/_abstractRelease
+                               :lacinia-type (list (non-null :Release))}]
+                :type        (list (non-null :Release))}
+    :artist_credit
+    {:description
+     "The string represenation of the artist(s) to be credited on the abstract release\n\n> datomic attribute: `:abstractRelease/artistCredit`. Type `:db.type/string`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :abstractRelease/artistCredit :lacinia-type String}]
+     :type String}
+    :artists
+    {:args {:_composition {:type String}
+            :_limit       {:type :JavaLong}
+            :country      {:type (list artist_country)}
+            :endDay       {:type (list :JavaLong)}
+            :endMonth     {:type (list :JavaLong)}
+            :endYear      {:type (list :JavaLong)}
+            :gender       {:type (list artist_gender)}
+            :gid          {:type (list :JavaUUID)}
+            :name         {:type (list String)}
+            :sortName     {:type (list String)}
+            :startDay     {:type (list :JavaLong)}
+            :startMonth   {:type (list :JavaLong)}
+            :startYear    {:type (list :JavaLong)}
+            :type         {:type (list artist_type)}}
+     :description
+     "The set of artists contributing to the abstract release\n\n> datomic attribute: `:abstractRelease/artists`. Type `:db.type/ref`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :abstractRelease/artists :lacinia-type :Artist}]
+     :type (list (non-null :Artist))}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :gid
+    {:description
+     "The globally unique MusicBrainz ID for the abstract release\n\n> datomic attribute: `:abstractRelease/gid`. Type `:db.type/uuid`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :abstractRelease/gid :lacinia-type :JavaUUID}]
+     :type :JavaUUID}
+    :name {:description
+           "The name of the abstract release\n\n> datomic attribute: `:abstractRelease/name`. Type `:db.type/string`."
+           :resolve [:stillsuit/ref #:stillsuit{:attribute :abstractRelease/name :lacinia-type String}]
+           :type String}
+    :type
+    {:description
+     "Enum, one\n  of: :release.type/album, :release.type/single, :release.type/ep, :release.type/audiobook,\n  or :release.type/other\n\n> datomic attribute: `:abstractRelease/type`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :abstractRelease/type :lacinia-type :abstract_release_type}]
+     :type :abstract_release_type}}
+   :implements [:DatomicEntity]}
+  :Artist
+  {:description "Entity containing fields with the namespace `:artist`"
+   :fields
+   {:_abstract_releases {:args        {:_composition {:type String}
+                                       :_limit       {:type :JavaLong}
+                                       :artistCredit {:type (list String)}
+                                       :artists      {:type :ArtistInput}
+                                       :gid          {:type (list :JavaUUID)}
+                                       :name         {:type (list String)}
+                                       :type         {:type (list abstract_release_type)}}
+                         :description "Back-reference for the `:abstractRelease/_artists` datomic attribute"
+                         :resolve     [:stillsuit/ref
+                                       #:stillsuit{:attribute    :abstractRelease/_artists
+                                        :lacinia-type (list (non-null :AbstractRelease))}]
+                         :type        (list (non-null :AbstractRelease))}
+    :_releases {:args        {:_composition    {:type String}
+                              :_limit          {:type :JavaLong}
+                              :abstractRelease {:type :AbstractReleaseInput}
+                              :artistCredit    {:type (list String)}
+                              :artists         {:type :ArtistInput}
+                              :barcode         {:type (list String)}
+                              :country         {:type (list release_country)}
+                              :day             {:type (list :JavaLong)}
+                              :gid             {:type (list :JavaUUID)}
+                              :labels          {:type :LabelInput}
+                              :language        {:type (list release_language)}
+                              :media           {:type :MediumInput}
+                              :month           {:type (list :JavaLong)}
+                              :name            {:type (list String)}
+                              :packaging       {:type (list release_packaging)}
+                              :script          {:type (list release_script)}
+                              :status          {:type (list String)}
+                              :year            {:type (list :JavaLong)}}
+                :description "Back-reference for the `:release/_artists` datomic attribute"
+                :resolve     [:stillsuit/ref
+                              #:stillsuit{:attribute :release/_artists :lacinia-type (list (non-null :Release))}]
+                :type        (list (non-null :Release))}
+    :_tracks {:args        {:_composition {:type String}
+                            :_limit       {:type :JavaLong}
+                            :artistCredit {:type (list String)}
+                            :artists      {:type :ArtistInput}
+                            :duration     {:type (list :JavaLong)}
+                            :name         {:type (list String)}
+                            :position     {:type (list :JavaLong)}}
+              :description "Back-reference for the `:track/_artists` datomic attribute"
+              :resolve     [:stillsuit/ref
+                            #:stillsuit{:attribute :track/_artists :lacinia-type (list (non-null :Track))}]
+              :type        (list (non-null :Track))}
+    :country {:description
+              "The artist's country of origin\n\n> datomic attribute: `:artist/country`. Type `:db.type/ref`."
+              :resolve [:stillsuit/enum #:stillsuit{:attribute :artist/country :lacinia-type :artist_country}]
+              :type :artist_country}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :end_day
+    {:description
+     "The day the artist stopped actively recording\n\n> datomic attribute: `:artist/endDay`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/endDay :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :end_month
+    {:description
+     "The month the artist stopped actively recording\n\n> datomic attribute: `:artist/endMonth`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/endMonth :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :end_year
+    {:description
+     "The year the artist stopped actively recording\n\n> datomic attribute: `:artist/endYear`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/endYear :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :gender
+    {:description
+     "Enum, one of :artist.gender/male, :artist.gender/female, or :artist.gender/other.\n\n> datomic attribute: `:artist/gender`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :artist/gender :lacinia-type :artist_gender}]
+     :type :artist_gender}
+    :gid
+    {:description
+     "The globally unique MusicBrainz ID for an artist\n\n> datomic attribute: `:artist/gid`. Type `:db.type/uuid`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/gid :lacinia-type :JavaUUID}]
+     :type :JavaUUID}
+    :name {:description "The artist's name\n\n> datomic attribute: `:artist/name`. Type `:db.type/string`."
+           :resolve     [:stillsuit/ref #:stillsuit{:attribute :artist/name :lacinia-type String}]
+           :type        String}
+    :sort_name
+    {:description
+     "The artist's name for use in alphabetical sorting, e.g. Beatles, The\n\n> datomic attribute: `:artist/sortName`. Type `:db.type/string`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/sortName :lacinia-type String}]
+     :type String}
+    :start_day
+    {:description
+     "The day the artist started actively recording\n\n> datomic attribute: `:artist/startDay`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/startDay :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :start_month
+    {:description
+     "The month the artist started actively recording\n\n> datomic attribute: `:artist/startMonth`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/startMonth :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :start_year
+    {:description
+     "The year the artist started actively recording\n\n> datomic attribute: `:artist/startYear`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :artist/startYear :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :type
+    {:description
+     "Enum, one of :artist.type/person, :artist.type/other, :artist.type/group.\n\n> datomic attribute: `:artist/type`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :artist/type :lacinia-type :artist_type}]
+     :type :artist_type}}
+   :implements [:DatomicEntity]}
+  :Country
+  {:description "Entity containing fields with the namespace `:country`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :name
+                 {:description
+                  "The name of the country\n\n> datomic attribute: `:country/name`. Type `:db.type/string`, unique."
+                  :resolve [:stillsuit/ref #:stillsuit{:attribute :country/name :lacinia-type String}]
+                  :type String}}
+   :implements  [:DatomicEntity]}
+  :Label
+  {:description "Entity containing fields with the namespace `:label`"
+   :fields
+   {:_releases {:args        {:_composition    {:type String}
+                              :_limit          {:type :JavaLong}
+                              :abstractRelease {:type :AbstractReleaseInput}
+                              :artistCredit    {:type (list String)}
+                              :artists         {:type :ArtistInput}
+                              :barcode         {:type (list String)}
+                              :country         {:type (list release_country)}
+                              :day             {:type (list :JavaLong)}
+                              :gid             {:type (list :JavaUUID)}
+                              :labels          {:type :LabelInput}
+                              :language        {:type (list release_language)}
+                              :media           {:type :MediumInput}
+                              :month           {:type (list :JavaLong)}
+                              :name            {:type (list String)}
+                              :packaging       {:type (list release_packaging)}
+                              :script          {:type (list release_script)}
+                              :status          {:type (list String)}
+                              :year            {:type (list :JavaLong)}}
+                :description "Back-reference for the `:release/_labels` datomic attribute"
+                :resolve     [:stillsuit/ref
+                              #:stillsuit{:attribute :release/_labels :lacinia-type (list (non-null :Release))}]
+                :type        (list (non-null :Release))}
+    :country
+    {:description
+     "The country where the record label is located\n\n> datomic attribute: `:label/country`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :label/country :lacinia-type :label_country}]
+     :type :label_country}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :end_day {:description
+              "The day the label stopped business\n\n> datomic attribute: `:label/endDay`. Type `:db.type/long`."
+              :resolve [:stillsuit/ref #:stillsuit{:attribute :label/endDay :lacinia-type :JavaLong}]
+              :type :JavaLong}
+    :end_month {:description
+                "The month the label stopped business\n\n> datomic attribute: `:label/endMonth`. Type `:db.type/long`."
+                :resolve [:stillsuit/ref #:stillsuit{:attribute :label/endMonth :lacinia-type :JavaLong}]
+                :type :JavaLong}
+    :end_year {:description
+               "The year the label stopped business\n\n> datomic attribute: `:label/endYear`. Type `:db.type/long`."
+               :resolve [:stillsuit/ref #:stillsuit{:attribute :label/endYear :lacinia-type :JavaLong}]
+               :type :JavaLong}
+    :gid
+    {:description
+     "The globally unique MusicBrainz ID for the record label\n\n> datomic attribute: `:label/gid`. Type `:db.type/uuid`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :label/gid :lacinia-type :JavaUUID}]
+     :type :JavaUUID}
+    :name {:description "The name of the record label\n\n> datomic attribute: `:label/name`. Type `:db.type/string`."
+           :resolve     [:stillsuit/ref #:stillsuit{:attribute :label/name :lacinia-type String}]
+           :type        String}
+    :sort_name
+    {:description
+     "The name of the record label for use in alphabetical sorting\n\n> datomic attribute: `:label/sortName`. Type `:db.type/string`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :label/sortName :lacinia-type String}]
+     :type String}
+    :start_day {:description
+                "The day the label started business\n\n> datomic attribute: `:label/startDay`. Type `:db.type/long`."
+                :resolve [:stillsuit/ref #:stillsuit{:attribute :label/startDay :lacinia-type :JavaLong}]
+                :type :JavaLong}
+    :start_month
+    {:description
+     "The month the label started business\n\n> datomic attribute: `:label/startMonth`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :label/startMonth :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :start_year {:description
+                 "The year the label started business\n\n> datomic attribute: `:label/startYear`. Type `:db.type/long`."
+                 :resolve [:stillsuit/ref #:stillsuit{:attribute :label/startYear :lacinia-type :JavaLong}]
+                 :type :JavaLong}
+    :type
+    {:description
+     "Enum, one of :label.type/distributor, :label.type/holding,\n  :label.type/production, :label.type/originalProduction,\n  :label.type/bootlegProduction, :label.type/reissueProduction, or\n  :label.type/publisher.\n\n> datomic attribute: `:label/type`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :label/type :lacinia-type :label_type}]
+     :type :label_type}}
+   :implements [:DatomicEntity]}
+  :Language
+  {:description "Entity containing fields with the namespace `:language`"
+   :fields
+   {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :name
+    {:description
+     "The name of the written and spoken language\n\n> datomic attribute: `:language/name`. Type `:db.type/string`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :language/name :lacinia-type String}]
+     :type String}}
+   :implements [:DatomicEntity]}
+  :Medium
+  {:description "Entity containing fields with the namespace `:medium`"
+   :fields
+   {:_releases {:description "Back-reference for the `:release/_media` datomic attribute"
+                :resolve     [:stillsuit/ref #:stillsuit{:attribute :release/_media :lacinia-type :Release}]
+                :type        :Release}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :format
+    {:description
+     "The format of the medium. An enum with lots of possible values\n\n> datomic attribute: `:medium/format`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :medium/format :lacinia-type :medium_format}]
+     :type :medium_format}
+    :name
+    {:description
+     "The name of the medium itself, distinct from the name of the release\n\n> datomic attribute: `:medium/name`. Type `:db.type/string`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :medium/name :lacinia-type String}]
+     :type String}
+    :position
+    {:description
+     "The position of this medium in the release relative to the other media, i.e. disc 1\n\n> datomic attribute: `:medium/position`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :medium/position :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :track_count
+    {:description
+     "The total number of tracks on the medium\n\n> datomic attribute: `:medium/trackCount`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :medium/trackCount :lacinia-type :JavaLong}]
+     :type :JavaLong}
+    :tracks
+    {:args {:_composition {:type String}
+            :_limit       {:type :JavaLong}
+            :artistCredit {:type (list String)}
+            :artists      {:type :ArtistInput}
+            :duration     {:type (list :JavaLong)}
+            :name         {:type (list String)}
+            :position     {:type (list :JavaLong)}}
+     :description
+     "The set of tracks found on this medium\n\n> datomic attribute: `:medium/tracks`. Type `:db.type/ref`, is-component."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :medium/tracks :lacinia-type :Track}]
+     :type (list (non-null :Track))}}
+   :implements [:DatomicEntity]}
+  :Release
+  {:description "Entity containing fields with the namespace `:release`"
+   :fields
+   {:abstract_release
+    {:description
+     "This release is the physical manifestation of the\n  associated abstract release, e.g. the the 1984 US vinyl release of\n  \"The Wall\" by Columbia, as opposed to the 2000 US CD release of\n  \"The Wall\" by Capitol Records.\n\n> datomic attribute: `:release/abstractRelease`. Type `:db.type/ref`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :release/abstractRelease :lacinia-type :AbstractRelease}]
+     :type :AbstractRelease}
+    :artist_credit
+    {:description
+     "The string represenation of the artist(s) to be credited on the release\n\n> datomic attribute: `:release/artistCredit`. Type `:db.type/string`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :release/artistCredit :lacinia-type String}]
+     :type String}
+    :artists
+    {:args {:_composition {:type String}
+            :_limit       {:type :JavaLong}
+            :country      {:type (list artist_country)}
+            :endDay       {:type (list :JavaLong)}
+            :endMonth     {:type (list :JavaLong)}
+            :endYear      {:type (list :JavaLong)}
+            :gender       {:type (list artist_gender)}
+            :gid          {:type (list :JavaUUID)}
+            :name         {:type (list String)}
+            :sortName     {:type (list String)}
+            :startDay     {:type (list :JavaLong)}
+            :startMonth   {:type (list :JavaLong)}
+            :startYear    {:type (list :JavaLong)}
+            :type         {:type (list artist_type)}}
+     :description
+     "The set of artists contributing to the release\n\n> datomic attribute: `:release/artists`. Type `:db.type/ref`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :release/artists :lacinia-type :Artist}]
+     :type (list (non-null :Artist))}
+    :barcode {:description
+              "The barcode on the release packaging\n\n> datomic attribute: `:release/barcode`. Type `:db.type/string`."
+              :resolve [:stillsuit/ref #:stillsuit{:attribute :release/barcode :lacinia-type String}]
+              :type String}
+    :country
+    {:description
+     "The country where the recording was released\n\n> datomic attribute: `:release/country`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :release/country :lacinia-type :release_country}]
+     :type :release_country}
+    :day {:description "The day of the release\n\n> datomic attribute: `:release/day`. Type `:db.type/long`."
+          :resolve     [:stillsuit/ref #:stillsuit{:attribute :release/day :lacinia-type :JavaLong}]
+          :type        :JavaLong}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :gid
+    {:description
+     "The globally unique MusicBrainz ID for the release\n\n> datomic attribute: `:release/gid`. Type `:db.type/uuid`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :release/gid :lacinia-type :JavaUUID}]
+     :type :JavaUUID}
+    :labels
+    {:args {:_composition {:type String}
+            :_limit       {:type :JavaLong}
+            :country      {:type (list label_country)}
+            :endDay       {:type (list :JavaLong)}
+            :endMonth     {:type (list :JavaLong)}
+            :endYear      {:type (list :JavaLong)}
+            :gid          {:type (list :JavaUUID)}
+            :name         {:type (list String)}
+            :sortName     {:type (list String)}
+            :startDay     {:type (list :JavaLong)}
+            :startMonth   {:type (list :JavaLong)}
+            :startYear    {:type (list :JavaLong)}
+            :type         {:type (list label_type)}}
+     :description
+     "The label on which the recording was released\n\n> datomic attribute: `:release/labels`. Type `:db.type/ref`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :release/labels :lacinia-type :Label}]
+     :type (list (non-null :Label))}
+    :language {:description
+               "The language used in the release\n\n> datomic attribute: `:release/language`. Type `:db.type/ref`."
+               :resolve [:stillsuit/enum #:stillsuit{:attribute :release/language :lacinia-type :release_language}]
+               :type :release_language}
+    :media
+    {:args {:_composition {:type String}
+            :_limit       {:type :JavaLong}
+            :format       {:type (list medium_format)}
+            :name         {:type (list String)}
+            :position     {:type (list :JavaLong)}
+            :trackCount   {:type (list :JavaLong)}
+            :tracks       {:type :TrackInput}}
+     :description
+     "The various media (CDs, vinyl records, cassette tapes, etc.) included in the release.\n\n> datomic attribute: `:release/media`. Type `:db.type/ref`, is-component."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :release/media :lacinia-type :Medium}]
+     :type (list (non-null :Medium))}
+    :month {:description "The month of the release\n\n> datomic attribute: `:release/month`. Type `:db.type/long`."
+            :resolve     [:stillsuit/ref #:stillsuit{:attribute :release/month :lacinia-type :JavaLong}]
+            :type        :JavaLong}
+    :name {:description "The name of the release\n\n> datomic attribute: `:release/name`. Type `:db.type/string`."
+           :resolve     [:stillsuit/ref #:stillsuit{:attribute :release/name :lacinia-type String}]
+           :type        String}
+    :packaging
+    {:description
+     "The type of packaging used in the release, an enum, one\n  of: :release.packaging/jewelCase, :release.packaging/slimJewelCase, :release.packaging/digipak, :release.packaging/other\n  , :release.packaging/keepCase, :release.packaging/none,\n  or :release.packaging/cardboardPaperSleeve\n\n> datomic attribute: `:release/packaging`. Type `:db.type/ref`."
+     :resolve [:stillsuit/enum #:stillsuit{:attribute :release/packaging :lacinia-type :release_packaging}]
+     :type :release_packaging}
+    :script {:description
+             "The script used in the release\n\n> datomic attribute: `:release/script`. Type `:db.type/ref`."
+             :resolve [:stillsuit/enum #:stillsuit{:attribute :release/script :lacinia-type :release_script}]
+             :type :release_script}
+    :status {:description "The status of the release\n\n> datomic attribute: `:release/status`. Type `:db.type/string`."
+             :resolve     [:stillsuit/ref #:stillsuit{:attribute :release/status :lacinia-type String}]
+             :type        String}
+    :year {:description "The year of the release\n\n> datomic attribute: `:release/year`. Type `:db.type/long`."
+           :resolve     [:stillsuit/ref #:stillsuit{:attribute :release/year :lacinia-type :JavaLong}]
+           :type        :JavaLong}}
+   :implements [:DatomicEntity]}
+  :Script
+  {:description "Entity containing fields with the namespace `:script`"
+   :fields
+   {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :name
+    {:description
+     "Name of written character set, e.g. Hebrew, Latin, Cyrillic\n\n> datomic attribute: `:script/name`. Type `:db.type/string`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :script/name :lacinia-type String}]
+     :type String}}
+   :implements [:DatomicEntity]}
+  :Track
+  {:description "Entity containing fields with the namespace `:track`"
+   :fields
+   {:_media {:description "Back-reference for the `:medium/_tracks` datomic attribute"
+             :resolve     [:stillsuit/ref #:stillsuit{:attribute :medium/_tracks :lacinia-type :Medium}]
+             :type        :Medium}
+    :artist_credit
+    {:description
+     "The artists who contributed to the track\n\n> datomic attribute: `:track/artistCredit`. Type `:db.type/string`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :track/artistCredit :lacinia-type String}]
+     :type String}
+    :artists {:args {:_composition {:type String}
+                     :_limit       {:type :JavaLong}
+                     :country      {:type (list artist_country)}
+                     :endDay       {:type (list :JavaLong)}
+                     :endMonth     {:type (list :JavaLong)}
+                     :endYear      {:type (list :JavaLong)}
+                     :gender       {:type (list artist_gender)}
+                     :gid          {:type (list :JavaUUID)}
+                     :name         {:type (list String)}
+                     :sortName     {:type (list String)}
+                     :startDay     {:type (list :JavaLong)}
+                     :startMonth   {:type (list :JavaLong)}
+                     :startYear    {:type (list :JavaLong)}
+                     :type         {:type (list artist_type)}}
+              :description
+              "The artists who contributed to the track\n\n> datomic attribute: `:track/artists`. Type `:db.type/ref`."
+              :resolve [:stillsuit/ref #:stillsuit{:attribute :track/artists :lacinia-type :Artist}]
+              :type (list (non-null :Artist))}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :duration {:description
+               "The duration of the track in msecs\n\n> datomic attribute: `:track/duration`. Type `:db.type/long`."
+               :resolve [:stillsuit/ref #:stillsuit{:attribute :track/duration :lacinia-type :JavaLong}]
+               :type :JavaLong}
+    :name {:description "The track name\n\n> datomic attribute: `:track/name`. Type `:db.type/string`."
+           :resolve     [:stillsuit/ref #:stillsuit{:attribute :track/name :lacinia-type String}]
+           :type        String}
+    :position
+    {:description
+     "The position of the track relative to the other tracks on the medium\n\n> datomic attribute: `:track/position`. Type `:db.type/long`."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :track/position :lacinia-type :JavaLong}]
+     :type :JavaLong}}
+   :implements [:DatomicEntity]}}
+ :queries {}
+ :stillsuit/config #:stillsuit{:db-id-name :db_id}
+ :stillsuit/enum-map nil}

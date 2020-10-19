@@ -1,0 +1,5 @@
+{:entities ["district" "neighborhood" "community"],
+ :queries [],
+ :inserts [],
+ :updates [],
+ :deletions []}

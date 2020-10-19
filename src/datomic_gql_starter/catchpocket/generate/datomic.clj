@@ -1,6 +1,6 @@
 (ns datomic-gql-starter.catchpocket.generate.datomic
   (:require [clojure.tools.logging :as log]
-            [db :refer [q pull]]
+            [db :refer [q pull profile]]
             [datomic-gql-starter.lacinia.utils :refer [query-ellipsis]]
             [cuerdas.core :as str]
             [datomic-gql-starter.catchpocket.generate.names :as names]
@@ -110,14 +110,17 @@
   Return a seq of {::datomic-value :foo/bar ::attribute :x/foo ::description \"docstring\"}
   maps, where :description is the docstring for enum references."
   [db attributes]
-  (let [vals (q '[:find ?value ?doc
+  (let [api-pull (if (= profile :devlocal)
+                   (symbol "datomic.client.api/pull")
+                   (symbol "datomic.api/pull"))
+        vals (q '[:find ?value ?doc
                   :in $ [?attribute ...]
                   :where
                   [_ ?attribute ?v]
                   (or-join [?v ?doc ?value]
                            ;; Ident enum
                            (and
-                            [(datomic.api/pull $ '[:db/id] ?v) ?entid]
+                            [(api-pull $ '[:db/id] ?v) ?entid]
                             [(:db/id ?entid) ?v-id]
                             [?v-id :db/ident ?value]
                             [(get-else $ ?v-id :db/doc :none) ?doc])

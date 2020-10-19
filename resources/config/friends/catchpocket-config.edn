@@ -1,0 +1,8 @@
+{:catchpocket/datomic-uri "local-dev",
+ :catchpocket/schema-file
+ "resources/config/friends/stillsuit-config.edn",
+ :catchpocket/references
+ #:person{:friend
+          #:catchpocket{:reference-to nil, :backref-name :_people}},
+ :catchpocket/enums {},
+ :stillsuit/compile? true}

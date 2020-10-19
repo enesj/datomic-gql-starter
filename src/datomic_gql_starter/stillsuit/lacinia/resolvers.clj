@@ -104,7 +104,7 @@
   :resolve [:stillsuit/ref {:stillsuit/attribute :artist/_country}]"
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
-  (fn [context args entity]
+  (fn ref-res-handler [context args entity]
     (let [val (sd/get-ref-attribute entity attribute args context)]
          (if-not (:error val)
            (let [value     (ensure-type val lacinia-type)

@@ -1,6 +1,6 @@
-{:catchpocket/datomic-uri "datomic:dev://localhost:4334/merkdo",
+{:catchpocket/datomic-uri "datomic:free://localhost:4334/merkdo",
  :catchpocket/schema-file
- "resources/config/merkdo/stillsuit-congfig.edn",
+ "resources/config/merkdo/stillsuit-config.edn",
  :catchpocket/references
  {:account/brand-group
   #:catchpocket{:reference-to :brand-group, :backref-name :_accounts},
@@ -22,9 +22,11 @@
   :currency/country
   #:catchpocket{:reference-to :country, :backref-name :_currencies},
   :exchange-rate/from
-  #:catchpocket{:reference-to nil, :backref-name :_exchange_rates},
+  #:catchpocket{:reference-to :currency,
+                :backref-name :_exchange_rates},
   :exchange-rate/to
-  #:catchpocket{:reference-to nil, :backref-name :_exchange_rates},
+  #:catchpocket{:reference-to :currency,
+                :backref-name :_exchange_rates},
   :transaction/account
   #:catchpocket{:reference-to :account, :backref-name :_transactions},
   :transaction/conto

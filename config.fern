@@ -13,8 +13,9 @@
  db-name                "mbrainz"
  secret "enes"
  access-key "enes"
- db-dev                     (fern/lit concat "datomic:dev://localhost:4334/" @db-name)
- db-free                    (fern/lit concat "datomic:free://localhost:4334/" @db-name)
+ db-dev                     (fern/lit concat "datomic:dev://localhost:" @db-port "/" )
+ db-free                    (fern/lit concat "datomic:free://localhost:" @db-port "/" )
+ db-port 4334
  max-results 1000
 
 ;files

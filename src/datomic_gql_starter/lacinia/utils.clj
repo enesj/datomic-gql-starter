@@ -56,15 +56,15 @@
     ffirst))
 
 (defn dbid-to-ns [db dbid]
-  (->> (q '[:find   ?ns
-            :in $ ?e
-            :where
-            [?e ?a]
-            [?a :db/unique]
-            [?a :db/ident ?v]
-            [(namespace ?v) ?ns]]
-         db dbid)
-    ffirst))
+  (when dbid (->> (q '[:find ?ns
+                       :in $ ?e
+                       :where
+                       [?e ?a]
+                       [?a :db/unique]
+                       [?a :db/ident ?v]
+                       [(namespace ?v) ?ns]]
+                    db dbid)
+               ffirst)))
 
 (defn find-ref
   [entity]
@@ -184,8 +184,8 @@
   "Generates :catchpocket/enums part of 'catchpocket-config.edn'"
   [enums]
   (let [enum-keys (mapv snake-keyword enums)
-        enum-vals  (mapv #(hash-map :catchpocket.enum/attributes (hash-set %)
-                            :catchpocket.enum/scan? true) enums)]
+        enum-vals (mapv #(hash-map :catchpocket.enum/attributes (hash-set %)
+                           :catchpocket.enum/scan? true) enums)]
     (into (sorted-map)
       (zipmap enum-keys enum-vals))))
 
@@ -223,8 +223,8 @@
                    db attr)
                ffirst
                datomic-to-lacinia)]
-    [(if  (= (name type) "ref") (ref-type attr) type)
-     (when  (= (name type) "ref") (attr refs-enums))]))
+    (when type [(if (= (name type) "ref") (ref-type attr) type)
+                (when (= (name type) "ref") (attr refs-enums))])))
 
 (def attr-type (memoize get-attr-type))
 

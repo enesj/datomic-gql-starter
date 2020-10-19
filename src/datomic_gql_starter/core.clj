@@ -7,7 +7,7 @@
             [io.pedestal.http :as http]
             [datomic-gql-starter.stillsuit.core :as stillsuit]
             [datomic-gql-starter.stillsuit.lib.util :as u]
-            [db :refer [conn]]
+            [db :refer [conn] :as db]
             [datomic-gql-starter.lacinia.generate :as generate]
             [datomic-gql-starter.utils.fern :refer [ stillsuit-conf]]))
 

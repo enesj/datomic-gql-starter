@@ -1,0 +1,37 @@
+{:catchpocket/generated-at "Fri Oct 16 08:28:38 CEST 2020"
+ :catchpocket/version "0.1"
+ :enums {}
+ :interfaces {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
+ :mutations {}
+ :objects
+ {:Group
+  {:description "Entity containing fields with the namespace `:group`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :name  {:description "\n\n> datomic attribute: `:group/name`. Type `:db.type/string`, unique."
+                         :resolve     [:stillsuit/ref #:stillsuit{:attribute :group/name :lacinia-type String}]
+                         :type        String}}
+   :implements  [:DatomicEntity]}
+  :Role
+  {:description "Entity containing fields with the namespace `:role`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :name  {:description "\n\n> datomic attribute: `:role/name`. Type `:db.type/string`, unique."
+                         :resolve     [:stillsuit/ref #:stillsuit{:attribute :role/name :lacinia-type String}]
+                         :type        String}}
+   :implements  [:DatomicEntity]}
+  :RoleInGroup
+  {:description "Entity containing fields with the namespace `:roleingroup`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :name  {:description "\n\n> datomic attribute: `:roleInGroup/name`. Type `:db.type/string`, unique."
+                         :resolve     [:stillsuit/ref #:stillsuit{:attribute :roleInGroup/name :lacinia-type String}]
+                         :type        String}}
+   :implements  [:DatomicEntity]}
+  :User
+  {:description "Entity containing fields with the namespace `:user`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :name  {:description "\n\n> datomic attribute: `:user/name`. Type `:db.type/string`, unique."
+                         :resolve     [:stillsuit/ref #:stillsuit{:attribute :user/name :lacinia-type String}]
+                         :type        String}}
+   :implements  [:DatomicEntity]}}
+ :queries {}
+ :stillsuit/config #:stillsuit{:db-id-name :db_id}
+ :stillsuit/enum-map nil}

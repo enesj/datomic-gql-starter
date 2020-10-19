@@ -1,0 +1,6 @@
+{:catchpocket/datomic-uri "local-dev",
+ :catchpocket/schema-file
+ "resources/config/movies/stillsuit-config.edn",
+ :catchpocket/references {},
+ :catchpocket/enums {},
+ :stillsuit/compile? true}

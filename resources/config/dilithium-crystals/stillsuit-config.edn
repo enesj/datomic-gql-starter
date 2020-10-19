@@ -1,0 +1,30 @@
+{:catchpocket/generated-at "Fri Oct 16 08:31:08 CEST 2020"
+ :catchpocket/version "0.1"
+ :enums {}
+ :interfaces {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
+ :mutations {}
+ :objects
+ {:Item
+  {:description "Entity containing fields with the namespace `:item`"
+   :fields      {:count       {:description "\n\n> datomic attribute: `:item/count`. Type `:db.type/long`."
+                               :resolve     [:stillsuit/ref #:stillsuit{:attribute :item/count :lacinia-type :JavaLong}]
+                               :type        :JavaLong}
+                 :db_id       {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :description {:description "\n\n> datomic attribute: `:item/description`. Type `:db.type/string`."
+                               :resolve     [:stillsuit/ref
+                                             #:stillsuit{:attribute :item/description :lacinia-type String}]
+                               :type        String}
+                 :id          {:description "\n\n> datomic attribute: `:item/id`. Type `:db.type/string`, unique."
+                               :resolve     [:stillsuit/ref #:stillsuit{:attribute :item/id :lacinia-type String}]
+                               :type        String}}
+   :implements  [:DatomicEntity]}
+  :Tx
+  {:description "Entity containing fields with the namespace `:tx`"
+   :fields      {:db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :error {:description "\n\n> datomic attribute: `:tx/error`. Type `:db.type/boolean`."
+                         :resolve     [:stillsuit/ref #:stillsuit{:attribute :tx/error :lacinia-type Boolean}]
+                         :type        Boolean}}
+   :implements  [:DatomicEntity]}}
+ :queries {}
+ :stillsuit/config #:stillsuit{:db-id-name :db_id}
+ :stillsuit/enum-map nil}

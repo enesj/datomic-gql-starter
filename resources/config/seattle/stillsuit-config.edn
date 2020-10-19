@@ -1,0 +1,151 @@
+{:catchpocket/generated-at "Tue May 19 21:36:19 CEST 2020"
+ :catchpocket/version "0.1"
+ :enums
+ {:community_orgtype {:description "> Enum generated from datomic attribute `:community/orgtype`."
+                      :values      ({:description             "> Datomic value: `:community.orgtype/commercial`"
+                                     :enum-value              :COMMERCIAL
+                                     :stillsuit/datomic-value :community.orgtype/commercial}
+                                    {:description             "> Datomic value: `:community.orgtype/community`"
+                                     :enum-value              :COMMUNITY
+                                     :stillsuit/datomic-value :community.orgtype/community}
+                                    {:description             "> Datomic value: `:community.orgtype/nonprofit`"
+                                     :enum-value              :NONPROFIT
+                                     :stillsuit/datomic-value :community.orgtype/nonprofit}
+                                    {:description             "> Datomic value: `:community.orgtype/personal`"
+                                     :enum-value              :PERSONAL
+                                     :stillsuit/datomic-value :community.orgtype/personal})}
+  :community_type {:description "> Enum generated from datomic attribute `:community/type`."
+                   :values      ({:description             "> Datomic value: `:community.type/blog`"
+                                  :enum-value              :BLOG
+                                  :stillsuit/datomic-value :community.type/blog}
+                                 {:description             "> Datomic value: `:community.type/email-list`"
+                                  :enum-value              :EMAIL_LIST
+                                  :stillsuit/datomic-value :community.type/email-list}
+                                 {:description             "> Datomic value: `:community.type/facebook-page`"
+                                  :enum-value              :FACEBOOK_PAGE
+                                  :stillsuit/datomic-value :community.type/facebook-page}
+                                 {:description             "> Datomic value: `:community.type/myspace`"
+                                  :enum-value              :MYSPACE
+                                  :stillsuit/datomic-value :community.type/myspace}
+                                 {:description             "> Datomic value: `:community.type/ning`"
+                                  :enum-value              :NING
+                                  :stillsuit/datomic-value :community.type/ning}
+                                 {:description             "> Datomic value: `:community.type/twitter`"
+                                  :enum-value              :TWITTER
+                                  :stillsuit/datomic-value :community.type/twitter}
+                                 {:description             "> Datomic value: `:community.type/website`"
+                                  :enum-value              :WEBSITE
+                                  :stillsuit/datomic-value :community.type/website}
+                                 {:description             "> Datomic value: `:community.type/wiki`"
+                                  :enum-value              :WIKI
+                                  :stillsuit/datomic-value :community.type/wiki})}
+  :district_region
+  {:description "> Enum generated from datomic attribute `:district/region`."
+   :values      ({:description "> Datomic value: `:region/e`" :enum-value :E :stillsuit/datomic-value :region/e}
+                 {:description "> Datomic value: `:region/ne`" :enum-value :NE :stillsuit/datomic-value :region/ne}
+                 {:description "> Datomic value: `:region/nw`" :enum-value :NW :stillsuit/datomic-value :region/nw}
+                 {:description "> Datomic value: `:region/se`" :enum-value :SE :stillsuit/datomic-value :region/se}
+                 {:description "> Datomic value: `:region/sw`" :enum-value :SW :stillsuit/datomic-value :region/sw}
+                 {:description "> Datomic value: `:region/w`" :enum-value :W :stillsuit/datomic-value :region/w})}}
+ :interfaces {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
+ :mutations {}
+ :objects
+ {:Community
+  {:description "Entity containing fields with the namespace `:community`"
+   :fields      {:category
+                 {:args {:_composition {:type String} :_limit {:type :JavaLong}}
+                  :description
+                  "All community categories\n\n> datomic attribute: `:community/category`. Type `:db.type/string`."
+                  :resolve [:stillsuit/ref #:stillsuit{:attribute :community/category :lacinia-type String}]
+                  :type (list (non-null String))}
+                 :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+                 :name {:description
+                        "A community's name\n\n> datomic attribute: `:community/name`. Type `:db.type/string`."
+                        :resolve [:stillsuit/ref #:stillsuit{:attribute :community/name :lacinia-type String}]
+                        :type String}
+                 :neighborhood
+                 {:description
+                  "A community's neighborhood\n\n> datomic attribute: `:community/neighborhood`. Type `:db.type/ref`."
+                  :resolve [:stillsuit/ref #:stillsuit{:attribute :community/neighborhood :lacinia-type :Neighborhood}]
+                  :type :Neighborhood}
+                 :orgtype
+                 {:description
+                  "A community orgtype enum value\n\n> datomic attribute: `:community/orgtype`. Type `:db.type/ref`."
+                  :resolve [:stillsuit/enum #:stillsuit{:attribute :community/orgtype :lacinia-type :community_orgtype}]
+                  :type :community_orgtype}
+                 :type {:description
+                        "Community type enum values\n\n> datomic attribute: `:community/type`. Type `:db.type/ref`."
+                        :resolve [:stillsuit/enum #:stillsuit{:attribute :community/type :lacinia-type :community_type}]
+                        :type (list (non-null :community_type))}
+                 :url {:description
+                       "A community's url\n\n> datomic attribute: `:community/url`. Type `:db.type/string`."
+                       :resolve [:stillsuit/ref #:stillsuit{:attribute :community/url :lacinia-type String}]
+                       :type String}}
+   :implements  [:DatomicEntity]}
+  :District
+  {:description "Entity containing fields with the namespace `:district`"
+   :fields
+   {:_neighborhoods {:args        {:_composition {:type String}
+                                   :_limit       {:type :JavaLong}
+                                   :district     {:type :DistrictInput}
+                                   :name         {:type (list String)}}
+                     :description "Back-reference for the `:neighborhood/_district` datomic attribute"
+                     :resolve     [:stillsuit/ref
+                                   #:stillsuit{:attribute    :neighborhood/_district
+                                    :lacinia-type (list (non-null :Neighborhood))}]
+                     :type        (list (non-null :Neighborhood))}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :name
+    {:description
+     "A unique district name (upsertable)\n\n> datomic attribute: `:district/name`. Type `:db.type/string`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :district/name :lacinia-type String}]
+     :type String}
+    :region {:description
+             "A district region enum value\n\n> datomic attribute: `:district/region`. Type `:db.type/ref`."
+             :resolve [:stillsuit/enum #:stillsuit{:attribute :district/region :lacinia-type :district_region}]
+             :type :district_region}}
+   :implements [:DatomicEntity]}
+  :Neighborhood
+  {:description "Entity containing fields with the namespace `:neighborhood`"
+   :fields
+   {:_communities {:args        {:_composition {:type String}
+                                 :_limit       {:type :JavaLong}
+                                 :category     {:type (list String)}
+                                 :name         {:type (list String)}
+                                 :neighborhood {:type :NeighborhoodInput}
+                                 :orgtype      {:type (list community_orgtype)}
+                                 :type         {:type (list community_type)}
+                                 :url          {:type (list String)}}
+                   :description "Back-reference for the `:community/_neighborhood` datomic attribute"
+                   :resolve     [:stillsuit/ref
+                                 #:stillsuit{:attribute    :community/_neighborhood
+                                  :lacinia-type (list (non-null :Community))}]
+                   :type        (list (non-null :Community))}
+    :db_id {:description "Unique :db/id value for a datomic entity" :type :JavaLong}
+    :district {:description
+               "A neighborhood's district\n\n> datomic attribute: `:neighborhood/district`. Type `:db.type/ref`."
+               :resolve [:stillsuit/ref #:stillsuit{:attribute :neighborhood/district :lacinia-type :District}]
+               :type :District}
+    :name
+    {:description
+     "A unique neighborhood name (upsertable)\n\n> datomic attribute: `:neighborhood/name`. Type `:db.type/string`, unique."
+     :resolve [:stillsuit/ref #:stillsuit{:attribute :neighborhood/name :lacinia-type String}]
+     :type String}}
+   :implements [:DatomicEntity]}}
+ :queries
+ {:District     {:args        {:name {:description "The `:district/name` value of the entity to find"
+                                      :type        (non-null String)}}
+                 :description "Find a single :District entity given its `:district/name` attribute."
+                 :resolve     [:stillsuit/query-by-unique-id
+                               #:stillsuit{:attribute :district/name :datomic-type String :lacinia-type :District}]
+                 :type        :District}
+  :Neighborhood {:args        {:name {:description "The `:neighborhood/name` value of the entity to find"
+                                      :type        (non-null String)}}
+                 :description "Find a single :Neighborhood entity given its `:neighborhood/name` attribute."
+                 :resolve     [:stillsuit/query-by-unique-id
+                               #:stillsuit{:attribute    :neighborhood/name
+                                :datomic-type String
+                                :lacinia-type :Neighborhood}]
+                 :type        :Neighborhood}}
+ :stillsuit/config #:stillsuit{:db-id-name :db_id}
+ :stillsuit/enum-map nil}
