@@ -1,11 +1,10 @@
 (ns datomic-gql-starter.lacinia.utils
-  (:require
-    [db :refer [db q]]
-    [cuerdas.core :as str]
-    [datomic-gql-starter.utils.fern :as f :refer [catchpocket-conf]]
-    [datomic-gql-starter.catchpocket.lib.config :as cf]
-    [inflections.core :refer [singular plural]]
-    [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [cuerdas.core :as str]
+            [datomic-gql-starter.catchpocket.lib.config :as cf]
+            [datomic-gql-starter.utils.fern :as f :refer [catchpocket-conf]]
+            [db :refer [db q]]
+            [inflections.core :refer [plural singular]]))
 
 (def remove-ns-rules '[[(remove-ns ?ns)
                         (not [(clojure.string/starts-with? ?ns "db")])

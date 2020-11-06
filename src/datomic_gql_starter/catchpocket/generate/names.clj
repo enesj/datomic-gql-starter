@@ -1,6 +1,6 @@
 (ns datomic-gql-starter.catchpocket.generate.names
-  (:require [cuerdas.core :as str]
-            [clojure.tools.logging :as log]))
+  (:require [clojure.tools.logging :as log]
+            [cuerdas.core :as str]))
 
 (def all-name-styles
   "Set of every possible `style` value for the `(keyword-part->type)` function"

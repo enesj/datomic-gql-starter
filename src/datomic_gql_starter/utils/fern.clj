@@ -1,6 +1,6 @@
 (ns datomic-gql-starter.utils.fern
-  (:require [fern.easy :as fe]
-            [fern :as f]
+  (:require [fern :as f]
+            [fern.easy :as fe]
             [mem-files.core :as mem-files]))
 
 (defmethod fern/literal 'concat

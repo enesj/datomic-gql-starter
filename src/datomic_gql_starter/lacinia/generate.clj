@@ -1,21 +1,20 @@
 (ns datomic-gql-starter.lacinia.generate
-  (:require [inflections.core :as inflections :refer [plural singular]]
-            [db :refer [d-with transact! pull d-db]]
-            [datomic-gql-starter.lacinia.utils :refer [camel-keyword rmv-ns resolve-symbol make-list all-entities all-fields get-enum-value dbid-to-ns args-type]]
+  (:require [clojure.spec.alpha :as s]
+            [datomic-gql-starter.catchpocket.generate.core
+             :refer
+             [datomic-to-lacinia]]
             [datomic-gql-starter.lacinia.resolvers :as resolvers]
-            [datomic-gql-starter.utils.make-names :refer [make-result-type make-args-name
-                                                          make-input-name make-input-key
-                                                          make-query-key make-query-name
-                                                          make-query-resolver-key make-query-resolver-name
-                                                          make-insert-key make-insert-name
-                                                          make-insert-resolver-key make-insert-resolver-name
-                                                          make-update-key make-update-name
-                                                          make-update-resolver-name make-update-resolver-key
-                                                          make-deletion-key make-deletion-resolver-key
-                                                          make-deletion-name make-deletion-resolver-name]]
-            [clojure.spec.alpha :as s]
-            [datomic-gql-starter.catchpocket.generate.core :refer [datomic-to-lacinia]]
-            [datomic-gql-starter.utils.fern :as f]))
+            [datomic-gql-starter.lacinia.utils
+             :refer
+             [all-entities all-fields args-type camel-keyword dbid-to-ns get-enum-value make-list resolve-symbol rmv-ns]]
+            [datomic-gql-starter.utils.fern :as f]
+            [datomic-gql-starter.utils.make-names
+             :refer
+             [make-args-name make-deletion-key make-deletion-name make-deletion-resolver-key make-deletion-resolver-name make-input-key make-input-name
+              make-insert-key make-insert-name make-insert-resolver-key make-insert-resolver-name make-query-key make-query-name make-query-resolver-key
+              make-query-resolver-name make-result-type make-update-key make-update-name make-update-resolver-key make-update-resolver-name]]
+            [db :refer [d-db d-with pull transact!]]
+            [inflections.core :as inflections :refer [plural singular]]))
 
 (def apis
   (let [api-conf (f/get-conf :api-conf)

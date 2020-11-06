@@ -1,9 +1,9 @@
 (ns datomic-gql-starter.stillsuit.lib.util
   "A collection of utility functions."
-  (:require [clojure.walk :as walk]
+  (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [clojure.tools.reader.edn :as edn]
-            [clojure.java.io :as io])
+            [clojure.walk :as walk])
   (:import (clojure.lang IPersistentMap)
            (java.io IOException PushbackReader)))
 

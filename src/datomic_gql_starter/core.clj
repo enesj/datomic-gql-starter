@@ -1,17 +1,15 @@
 (ns datomic-gql-starter.core
   (:require [clojure.tools.logging :as log]
-            [datomic-gql-starter.lacinia.make-config-files :as config-files]
             [clojure.tools.namespace.repl :refer [refresh-all]]
             [com.walmartlabs.lacinia.pedestal :as lacinia-pedestal]
-            [mount.core :refer [defstate] :as mount]
-            [io.pedestal.http :as http]
+            [datomic-gql-starter.lacinia.generate :as generate]
+            [datomic-gql-starter.lacinia.make-config-files :as config-files]
             [datomic-gql-starter.stillsuit.core :as stillsuit]
             [datomic-gql-starter.stillsuit.lib.util :as u]
-            [db :refer [conn] :as db]
-            [datomic-gql-starter.lacinia.generate :as generate]
-            [datomic-gql-starter.utils.fern :refer [ stillsuit-conf]]))
-
-
+            [datomic-gql-starter.utils.fern :refer [stillsuit-conf]]
+            [db :as db :refer [conn]]
+            [io.pedestal.http :as http]
+            [mount.core :as mount :refer [defstate]]))
 
 (defn service-map
   [schema connection]

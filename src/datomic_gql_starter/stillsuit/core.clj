@@ -6,16 +6,16 @@
   Note that this namespace constitutes the entirety of the public API; all the other
   namespaces in stillsuit can be considered to be implementation details and may change
   over time."
-  (:require [datomic-gql-starter.stillsuit.lacinia.queries :as sq]
-            [datomic-gql-starter.stillsuit.lacinia.scalars :as ss]
-            [datomic-gql-starter.stillsuit.lacinia.resolvers :as sr]
-            [datomic-gql-starter.stillsuit.lacinia.enums :as se]
-            [datomic-gql-starter.stillsuit.lib.util :as slu]
+  (:require [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia :as lacinia]
             [com.walmartlabs.lacinia.schema :as schema]
-            [clojure.tools.logging :as log]
-            [db :refer [d-db]]
-            [com.walmartlabs.lacinia.util :as util]))
+            [com.walmartlabs.lacinia.util :as util]
+            [datomic-gql-starter.stillsuit.lacinia.enums :as se]
+            [datomic-gql-starter.stillsuit.lacinia.queries :as sq]
+            [datomic-gql-starter.stillsuit.lacinia.resolvers :as sr]
+            [datomic-gql-starter.stillsuit.lacinia.scalars :as ss]
+            [datomic-gql-starter.stillsuit.lib.util :as slu]
+            [db :refer [d-db]]))
 
 (defn- make-app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."

@@ -1,10 +1,10 @@
 (ns datomic-gql-starter.catchpocket.generate.datomic
   (:require [clojure.tools.logging :as log]
-            [db :refer [q pull profile]]
-            [datomic-gql-starter.lacinia.utils :refer [query-ellipsis]]
             [cuerdas.core :as str]
             [datomic-gql-starter.catchpocket.generate.names :as names]
-            [datomic-gql-starter.catchpocket.lib.util :as util]))
+            [datomic-gql-starter.catchpocket.lib.util :as util]
+            [datomic-gql-starter.lacinia.utils :refer [query-ellipsis]]
+            [db :refer [profile pull q]]))
 
 (defn namespace-to-type [kw]
   (-> kw str/camel str/capital keyword))

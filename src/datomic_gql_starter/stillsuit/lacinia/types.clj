@@ -1,8 +1,8 @@
 (ns datomic-gql-starter.stillsuit.lacinia.types
   "Implementation functions relating to lacinia types."
-  (:require [datomic-gql-starter.stillsuit.datomic.core :as datomic]
+  (:require [clojure.tools.logging :as log]
             [cuerdas.core :as str]
-            [clojure.tools.logging :as log]))
+            [datomic-gql-starter.stillsuit.datomic.core :as datomic]))
 
 (defn lacinia-type
   "Given an entity, infer its lacinia type."

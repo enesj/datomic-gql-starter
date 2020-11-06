@@ -1,6 +1,6 @@
 (ns datomic-gql-starter.utils.make-names
   (:require [cuerdas.core :as str]
-            [datomic-gql-starter.lacinia.utils :refer [pascal-keyword make-list]]
+            [datomic-gql-starter.lacinia.utils :refer [make-list pascal-keyword]]
             [inflections.core :refer [plural]]))
 
 (defn make-input-key

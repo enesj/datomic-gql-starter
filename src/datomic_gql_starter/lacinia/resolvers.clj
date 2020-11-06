@@ -1,15 +1,21 @@
 (ns datomic-gql-starter.lacinia.resolvers
-  (:require [db :refer [db d-with transact! q profile]]
-            [inflections.core :refer [singular]]
-            [cuerdas.core :as str]
-            [datomic-gql-starter.lacinia.utils :refer  [enum-value query-ellipsis camel-keyword namespaced-keyword args-type]]
-            [datomic-gql-starter.utils.make-names :refer [make-input-key]]
-            [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
-            [datomic-gql-starter.utils.fern :refer [max-results]]
+  (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
-            [expound.alpha :as expound]
             [clojure.zip :as z]
-            [clojure.set :as set]))
+            [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
+            [cuerdas.core :as str]
+            [datomic-gql-starter.lacinia.utils
+             :refer
+             [args-type
+              camel-keyword
+              enum-value
+              namespaced-keyword
+              query-ellipsis]]
+            [datomic-gql-starter.utils.fern :refer [max-results]]
+            [datomic-gql-starter.utils.make-names :refer [make-input-key]]
+            [db :refer [d-with db profile q transact!]]
+            [expound.alpha :as expound]
+            [inflections.core :refer [singular]]))
 
 (set! s/*explain-out* expound/printer)
 
@@ -217,6 +223,7 @@
 
 (defn make-query-resolver [db context entity values]
   (let [[errors rules] (get-rules db context entity values '?e)]
+    (def rules-test rules)
     (if errors
       (resolve-as nil {:message errors :status 404})
       (let [rules (vector (into (vector '(any ?e)) rules))

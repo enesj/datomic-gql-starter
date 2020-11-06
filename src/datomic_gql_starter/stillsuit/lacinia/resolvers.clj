@@ -1,11 +1,11 @@
 (ns datomic-gql-starter.stillsuit.lacinia.resolvers
   "Implementation functions for stillsuit resolvers."
-  (:require [datomic-gql-starter.stillsuit.datomic.core :as sd]
+  (:require [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia.resolve :as resolve]
-            [clojure.tools.logging :as log]
+            [com.walmartlabs.lacinia.schema :as schema]
             [cuerdas.core :as str]
-            [datomic-gql-starter.utils.fern :refer [max-results]]
-            [com.walmartlabs.lacinia.schema :as schema]))
+            [datomic-gql-starter.stillsuit.datomic.core :as sd]
+            [datomic-gql-starter.utils.fern :refer [max-results]]))
 
 (defn graphql-field->datomic-attribute
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in

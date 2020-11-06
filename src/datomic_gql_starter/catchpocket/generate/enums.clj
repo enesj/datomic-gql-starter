@@ -1,9 +1,9 @@
 (ns datomic-gql-starter.catchpocket.generate.enums
-  (:require [datomic-gql-starter.catchpocket.generate.datomic :as dt]
-            [clojure.set :as set]
-            [datomic-gql-starter.catchpocket.lib.util :as util]
+  (:require [clojure.set :as set]
             [cuerdas.core :as str]
-            [datomic-gql-starter.catchpocket.generate.names :as names]))
+            [datomic-gql-starter.catchpocket.generate.datomic :as dt]
+            [datomic-gql-starter.catchpocket.generate.names :as names]
+            [datomic-gql-starter.catchpocket.lib.util :as util]))
 
 ;; http://lacinia.readthedocs.io/en/latest/enums.html
 

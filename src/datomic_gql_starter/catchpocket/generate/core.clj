@@ -1,15 +1,15 @@
 (ns datomic-gql-starter.catchpocket.generate.core
-  (:require [datomic-gql-starter.catchpocket.generate.datomic :as datomic]
-            [datomic-gql-starter.catchpocket.generate.enums :as enums]
-            [datomic-gql-starter.catchpocket.lib.config :refer [default-config]]
+  (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
-            [clojure.java.io :as io]
-            [zprint.core :as zp]
-            [datomic-gql-starter.catchpocket.lib.util :as util]
-            [datomic-gql-starter.stillsuit.lib.util :as su]
             [cuerdas.core :as cstr]
+            [datomic-gql-starter.catchpocket.generate.datomic :as datomic]
+            [datomic-gql-starter.catchpocket.generate.enums :as enums]
             [datomic-gql-starter.catchpocket.generate.names :as names]
-            [datomic-gql-starter.lacinia.resolvers :as resolvers]))
+            [datomic-gql-starter.catchpocket.lib.config :refer [default-config]]
+            [datomic-gql-starter.catchpocket.lib.util :as util]
+            [datomic-gql-starter.lacinia.resolvers :as resolvers]
+            [datomic-gql-starter.stillsuit.lib.util :as su]
+            [zprint.core :as zp]))
 
 (def lacinia-base {:interfaces
                    {:DatomicEntity

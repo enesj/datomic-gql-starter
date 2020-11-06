@@ -1,10 +1,14 @@
 (ns datomic-gql-starter.lacinia.make-config-files
-  (:require [db :refer [db conn db-uri]]
+  (:require [clojure.java.io :as io]
             [datomic-gql-starter.catchpocket.generate.core :as g]
             [datomic-gql-starter.catchpocket.lib.config :as cf]
-            [datomic-gql-starter.lacinia.utils :refer [all-entities refs-enums get-refs-enums]]
-            [datomic-gql-starter.utils.fern :refer [catchpocket-conf stillsuit-conf root-dir api-conf]]
-            [clojure.java.io :as io]))
+            [datomic-gql-starter.lacinia.utils
+             :refer
+             [all-entities get-refs-enums refs-enums]]
+            [datomic-gql-starter.utils.fern
+             :refer
+             [api-conf catchpocket-conf root-dir stillsuit-conf]]
+            [db :refer [conn db db-uri]]))
 
 
 (defn make-catchpocket-config

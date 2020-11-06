@@ -2,12 +2,12 @@
   "Implementation functions for dealing with datomic interactions."
   (:require [clojure.tools.logging :as log]
             [cuerdas.core :as str]
-            [inflections.core :refer [singular]]
-            [datomic-gql-starter.lacinia.utils :as utils]
             [datomic-gql-starter.catchpocket.generate.core :as cgc]
             [datomic-gql-starter.catchpocket.generate.datomic :as cgd]
-            [db :refer [pull d-db q]]
-            [datomic-gql-starter.lacinia.resolvers :as resolvers])
+            [datomic-gql-starter.lacinia.resolvers :as resolvers]
+            [datomic-gql-starter.lacinia.utils :as utils]
+            [db :refer [d-db pull q]]
+            [inflections.core :refer [singular]])
   (:import (java.util UUID)))
 
 (defn find-ident [attr db]

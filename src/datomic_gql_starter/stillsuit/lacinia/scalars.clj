@@ -3,13 +3,13 @@
 
   The intent here is to provide transformers for all of datomic's primitive values,
   though we ignore some oddball types like `:db.type/uri`."
-  (:require [clojure.tools.logging :as log]
-            [clojure.edn :as edn]
-            [clojure.string :as str])
-  (:import (java.util Date UUID)
-           (java.time OffsetDateTime LocalDateTime ZoneOffset Instant)
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
+            [clojure.tools.logging :as log])
+  (:import (clojure.lang Keyword)
+           (java.time Instant LocalDateTime OffsetDateTime ZoneOffset)
            (java.time.format DateTimeFormatter)
-           (clojure.lang Keyword)))
+           (java.util Date UUID)))
 
 (defn parse-edn
   "Parse the incoming string as EDN."

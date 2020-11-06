@@ -1,11 +1,11 @@
 (ns datomic-gql-starter.stillsuit.lacinia.queries
   "Implementation functions for creating top-level stillsuit queries."
-  (:require [com.walmartlabs.lacinia.resolve :as resolve]
+  (:require [clojure.tools.logging :as log]
+            [com.walmartlabs.lacinia.resolve :as resolve]
+            [com.walmartlabs.lacinia.schema :as schema]
             [datomic-gql-starter.stillsuit.datomic.core :as datomic]
-            [clojure.tools.logging :as log]
-            [db :refer [d-db]]
             [datomic-gql-starter.stillsuit.lacinia.types :as types]
-            [com.walmartlabs.lacinia.schema :as schema])
+            [db :refer [d-db]])
   (:import (com.walmartlabs.lacinia.resolve ResolverResult)))
 
 (defn stillsuit-entity-id-query
