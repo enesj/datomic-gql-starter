@@ -25,8 +25,7 @@
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/tools.namespace "1.0.0" :exclusions [org.clojure/tools.reader]]
                  [org.clojure/tools.logging "0.4.1"]
-                 [me.dryewo/mem-files "0.1.1"]
-                 [hawk "0.2.11"]]
+                 [me.dryewo/mem-files "0.1.1"]]
 
   :min-lein-version "2.8.1"
 

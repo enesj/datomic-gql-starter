@@ -1,9 +1,0 @@
-{:catchpocket/generated-at "Fri Oct 16 08:33:06 CEST 2020"
- :catchpocket/version      "0.1"
- :enums                    {}
- :interfaces               {:DatomicEntity {:fields {:dbId {:description "Base type for datomic entities" :type ID}}}}
- :mutations                {}
- :objects                  {}
- :queries                  {}
- :stillsuit/config         #:stillsuit{:db-id-name :db_id}
- :stillsuit/enum-map       nil}

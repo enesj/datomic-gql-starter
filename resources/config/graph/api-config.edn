@@ -1,5 +1,0 @@
-{:entities ["role" "roleInGroup" "user" "group"],
- :queries [],
- :inserts [],
- :updates [],
- :deletions []}

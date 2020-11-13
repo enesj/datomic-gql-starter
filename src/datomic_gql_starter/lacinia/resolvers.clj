@@ -223,7 +223,7 @@
 
 (defn make-query-resolver [db context entity values]
   (let [[errors rules] (get-rules db context entity values '?e)]
-    (def rules-test rules)
+    (tap>  rules)
     (if errors
       (resolve-as nil {:message errors :status 404})
       (let [rules (vector (into (vector '(any ?e)) rules))
@@ -258,12 +258,10 @@
         preview (:_preview values)
         query-result (make-query-resolver db context entity values)]
     (if updates
-      (let [tx-data  (make-update-tx-data query-result updates entity)]
-        (if preview
-          (let [db-after  (:db-after (d-with tx-data db))]
-            (make-query-resolver db-after context entity values))
-          (let [db-after  (:db-after (transact! tx-data))]
-            (make-query-resolver db-after context entity values))))
+      (let [tx-data  (make-update-tx-data query-result updates entity)
+            db-after (if preview (:db-after (d-with tx-data db))
+                                 (:db-after (transact! tx-data)))]
+        (make-query-resolver db-after context entity values))
       query-result)))
 
 
@@ -272,9 +270,8 @@
   (let [preview (:_preview values)
         query-result (make-query-resolver db context entity values)
         db-ids (map :db/id query-result)
-        tx-data  (mapv  #(vector :db/retractEntity %)   db-ids)]
-       (if preview
-         (let [db-after  (:db-after (d-with tx-data db))]
-              (make-query-resolver db-after context entity values))
-         (let [db-after  (:db-after (transact! tx-data))]
-              (make-query-resolver db-after context entity values)))))
+        tx-data (mapv #(vector :db/retractEntity %) db-ids)]
+    (if preview
+        (d-with tx-data db)
+        (transact! tx-data))
+    []))

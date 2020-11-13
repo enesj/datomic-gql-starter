@@ -1,6 +1,0 @@
-{:catchpocket/datomic-uri "local-dev",
- :catchpocket/schema-file
- "resources/config/dilithium-crystals/stillsuit-config.edn",
- :catchpocket/references {},
- :catchpocket/enums {},
- :stillsuit/compile? true}

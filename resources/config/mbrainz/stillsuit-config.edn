@@ -455,7 +455,7 @@
                          :description "Back-reference for the `:abstractRelease/_artists` datomic attribute"
                          :resolve     [:stillsuit/ref
                                        #:stillsuit{:attribute    :abstractRelease/_artists
-                                        :lacinia-type (list (non-null :AbstractRelease))}]
+																									 :lacinia-type (list (non-null :AbstractRelease))}]
                          :type        (list (non-null :AbstractRelease))}
     :_releases {:args        {:_composition    {:type String}
                               :_limit          {:type :JavaLong}

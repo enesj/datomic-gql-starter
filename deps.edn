@@ -1,49 +1,31 @@
 {:paths ["src" "resources"]
 
  :deps
-  {org.clojure/clojure {:mvn/version "1.10.1"},
-   org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"},
-   mount/mount {:mvn/version "0.1.16"},
-   org.clojure/tools.logging {:mvn/version "0.4.1"},
-   org.clojure/tools.cli {:mvn/version "0.4.2"},
-   com.walmartlabs/lacinia-pedestal {:mvn/version "0.13.0", :exclusions [com.walmartlabs/lacinia com.walmartlabs/lacinia org.slf4j/slf4j-api org.flatland/ordered org.clojure/tools.reader]},
-   vincit/venia {:mvn/version "0.2.5"},
-   zprint/zprint {:mvn/version "0.5.3"},
-   org.clojure/tools.namespace {:mvn/version "1.0.0", :exclusions [org.clojure/tools.reader]},
-   com.walmartlabs/lacinia {:mvn/version "0.36.0", :exclusions [org.clojure/tools.logging]},
-   com.cognitect/fern {:mvn/version "0.1.5"},
-   org.apache.logging.log4j/log4j-core {:mvn/version "2.11.1"},
-   hawk/hawk {:mvn/version "0.2.11"},
-   stylefruits/gniazdo {:mvn/version "1.1.3", :exclusions [org.eclipse.jetty.websocket/websocket-api org.eclipse.jetty/jetty-http]},
-   funcool/cuerdas {:mvn/version "2.1.0"},
-   me.dryewo/mem-files {:mvn/version "0.1.1"},
-   org.clojure/core.rrb-vector {:mvn/version "0.0.13"},
-   clj-http/clj-http {:mvn/version "3.10.1"},
-   expound/expound {:mvn/version "0.8.4"},
-   inflections/inflections {:mvn/version "0.13.2", :exclusions [commons-codec/commons-codec]}}
+				{clj-http/clj-http                         {:mvn/version "3.10.1"},
+				 com.cognitect/fern                        {:mvn/version "0.1.5"},
+				 com.walmartlabs/lacinia-pedestal          {:mvn/version "0.13.0", :exclusions [com.walmartlabs/lacinia com.walmartlabs/lacinia org.slf4j/slf4j-api org.flatland/ordered org.clojure/tools.reader]},
+				 com.walmartlabs/lacinia                   {:mvn/version "0.36.0", :exclusions [org.clojure/tools.logging]},
+				 expound/expound                           {:mvn/version "0.8.4"},
+				 funcool/cuerdas                           {:mvn/version "2.1.0"},
+				 inflections/inflections                   {:mvn/version "0.13.2", :exclusions [commons-codec/commons-codec]},
+				 me.dryewo/mem-files                       {:mvn/version "0.1.1"},
+				 mount/mount                               {:mvn/version "0.1.16"},
+				 org.apache.logging.log4j/log4j-core       {:mvn/version "2.11.1"},
+				 org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"},
+				 org.clojure/clojure                       {:mvn/version "1.10.1"},
+				 org.clojure/core.rrb-vector               {:mvn/version "0.0.13"},
+				 org.clojure/tools.namespace               {:mvn/version "1.0.0", :exclusions [org.clojure/tools.reader]},
+				 org.clojure/tools.logging                 {:mvn/version "0.4.1"},
+				 org.clojure/tools.cli                     {:mvn/version "0.4.2"},
+				 stylefruits/gniazdo                       {:mvn/version "1.1.3", :exclusions [org.eclipse.jetty.websocket/websocket-api org.eclipse.jetty/jetty-http]},
+				 vincit/venia                              {:mvn/version "0.2.5"},
+				 zprint/zprint                             {:mvn/version "0.5.3"}}
 
  :aliases
- {:client {:extra-deps {com.datomic/client-pro {:mvn/version "0.9.41",
-                                                :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12 org.eclipse.jetty/jetty-client org.eclipse.jetty/jetty-http org.eclipse.jetty/jetty-util]}}
-           :extra-paths ["src" "src.client"]}
-  :peer {:extra-deps  {com.datomic/datomic-pro {:mvn/version "1.0.6202",
-                                                :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12]}}
-         :extra-paths ["src" "src.peer"]}
-  :devlocal {:extra-deps {com.datomic/dev-local {:mvn/version "0.9.203"}}
-             :extra-paths ["src" "src.devlocal"]}
-  :rebl        ;; for JDK 11+
-  {:extra-deps {com.cognitect/rebl          {:mvn/version "0.9.242"}
-                org.openjfx/javafx-fxml     {:mvn/version "15-ea+6"}
-                org.openjfx/javafx-controls {:mvn/version "15-ea+6"}
-                org.openjfx/javafx-swing    {:mvn/version "15-ea+6"}
-                org.openjfx/javafx-base     {:mvn/version "15-ea+6"}
-                org.openjfx/javafx-web      {:mvn/version "15-ea+6"}}
-   :extra-paths ["test"]
-   :main-opts ["-m" "cognitect.rebl"]}
-  :reveal
-  {:extra-deps {vlaaad/reveal {:mvn/version "1.0.137"}}
-   :main-opts ["-m" "vlaaad.reveal" "repl"]}
-  :reveal-nrepl {:extra-deps {vlaaad/reveal {:mvn/version "1.0.137"}
-                              nrepl/nrepl   {:mvn/version "0.8.3"}}
-                 :main-opts  ["-m" "nrepl.cmdline" "--middleware" "[vlaaad.reveal.nrepl/middleware]"]}}}
+				{:peer         {:extra-deps  {com.datomic/datomic-pro {:mvn/version "1.0.6202", :exclusions [org.slf4j/slf4j-nop org.slf4j/slf4j-log4j12]}}
+												:extra-paths ["src" "src.peer"]}
+				 :devlocal     {:extra-deps  {com.datomic/dev-local {:mvn/version "0.9.203"}}
+												:extra-paths ["src" "src.devlocal"]}
+				 :reveal-nrepl {:extra-deps {vlaaad/reveal {:mvn/version "1.0.137"}, nrepl/nrepl {:mvn/version "0.8.3"}}
+												:main-opts  ["-m" "nrepl.cmdline" "--middleware" "[vlaaad.reveal.nrepl/middleware]"]}}}
 

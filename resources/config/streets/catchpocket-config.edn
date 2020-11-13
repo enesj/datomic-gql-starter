@@ -1,6 +1,0 @@
-{:catchpocket/datomic-uri "local-dev:streets",
- :catchpocket/schema-file
- "resources/config/streets/stillsuit-config.edn",
- :catchpocket/references {},
- :catchpocket/enums {},
- :stillsuit/compile? true}
