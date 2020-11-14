@@ -69,11 +69,11 @@
   [entity]
   (keyword (str/camel (str "insert-" (plural entity)))))
 
-(defn make-insert-name
+(defn make-insert-resolver-name
   [entity]
   (symbol (str "insert-" (str/capital (plural entity)))))
 
-(defn make-insert-resolver-name
+(defn make-insert-name
   [entity]
   (symbol (str "insert-" (plural entity))))
 

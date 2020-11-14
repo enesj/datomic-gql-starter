@@ -22,22 +22,6 @@
                    :mutations
                    {}})
 
-(def datomic-to-lacinia
-  {:db.type/string  'String
-   :db.type/boolean 'Boolean
-   :db.type/long    :JavaLong
-   :db.type/keyword :ClojureKeyword
-   :db.type/bigint  :JavaBigInt
-   :db.type/float   'Float
-   :db.type/double  'Float
-   :db.type/bigdec  :JavaBigDec
-   :db.type/ref     ::ref
-   :db.type/instant ::instant
-   :db.type/uuid    :JavaUUID
-   :db.type/uri     'String
-   :db.type/bytes   'String
-   ;; These types are usable as :catchpocket/lacinia-field-type values
-   :Int             'Int})
 
 (defn- get-ref-type [field {:keys [:stillsuit/datomic-entity-type]}]
   (if-let [override-type (-> field :catchpocket/reference-to datomic/namespace-to-type)]
@@ -65,7 +49,7 @@
                                         base-type datomic-override (:attribute/ident field))
                              datomic-override)
                            base-type)
-        primitive        (get datomic-to-lacinia field-type)]
+        primitive        (get su/datomic-to-lacinia field-type)]
     (cond
       (= primitive ::instant)
       (get-instant-type config)
@@ -98,7 +82,7 @@
                   #:stillsuit{:attribute    (:attribute/ident field)
                               :lacinia-type lacinia-type}]}
        (when (= cardinality :db.cardinality/many)
-         {:args (resolvers/query-args (cstr/camel (name lacinia-type)) datomic-to-lacinia)})
+         {:args (resolvers/query-args (cstr/camel (name lacinia-type)) su/datomic-to-lacinia)})
        (when doc
          {:description doc})))))
 
@@ -190,7 +174,7 @@
 
                       :description (format "Back-reference for the `%s` datomic attribute" datomic-ref)}
                 (when-not is-component?
-                  {:args (resolvers/query-args (cstr/camel (name to-type)) datomic-to-lacinia)})))))
+                  {:args (resolvers/query-args (cstr/camel (name to-type)) su/datomic-to-lacinia)})))))
 
 (defn generate-edn [base-schema ent-map enums config]
   (log/infof "Generating lacinia schema for %d entity types..." (count ent-map))

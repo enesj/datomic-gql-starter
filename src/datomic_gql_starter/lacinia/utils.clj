@@ -15,40 +15,6 @@
                         (not [(clojure.string/starts-with? ?ns "deprecated")])]])
 
 
-(defn send-request
-  "Sends a GraphQL request to the server and returns the response.
-  From lacinia-pedestal 'test_utils.clj'"
-  ([query]
-   (send-request :get query))
-  ([method query]
-   (send-request method query nil))
-  ([method query vars]
-   (-> {:method method
-        :url "http://localhost:8888/graphql"
-        :throw-exceptions false}
-     (cond->
-       (= method :get)
-       (assoc-in [:query-params :query] query)
-       (= method :post)
-       (assoc-in [:headers "Content-Type"] "application/graphql")
-       (= method :post-json)
-       (->
-         (assoc-in [:headers "Content-Type"] "application/json")
-         (assoc :method :post
-                :body query))
-       ;; :post-bad is like :post, but without setting the content type
-       (#{:post :post-bad} method)
-       (assoc :body query
-              :method :post)
-       vars
-       (assoc-in [:query-params :variables] (cheshire/generate-string vars)))
-     client/request
-     (update :body #(try
-                      (cheshire/parse-string % true)
-                      (catch Exception t
-                        %))))))
-
-
 (defn query-ellipsis [x]
   (if (coll? (first x))
     (mapv first x)

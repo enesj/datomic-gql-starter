@@ -6,6 +6,7 @@
             [datomic-gql-starter.catchpocket.generate.datomic :as cgd]
             [datomic-gql-starter.lacinia.resolvers :as resolvers]
             [datomic-gql-starter.lacinia.utils :as utils]
+            [datomic-gql-starter.stillsuit.lib.util :refer [datomic-to-lacinia]]
             [db :refer [d-db pull q]]
             [inflections.core :refer [singular]])
   (:import (java.util UUID)))
@@ -28,7 +29,7 @@
 
 (defn get-sub-entity
   [attribute]
-  (if (second (utils/get-attr-type attribute cgc/datomic-to-lacinia))
+  (if (second (utils/get-attr-type attribute datomic-to-lacinia))
       (singular (name attribute))
       (namespace attribute)))
 
@@ -50,7 +51,7 @@
         [errors filter-rules] (when args (resolvers/get-rules db context sub-entity args '?e))
         rules (vector (into rule filter-rules))
         cardinality (get-cardinality attribute)
-        type (utils/get-attr-type direct-attribute cgc/datomic-to-lacinia)]
+        type (utils/get-attr-type direct-attribute datomic-to-lacinia)]
     (if-not errors
         (if (= :ref (second type))
           (if (= cardinality :db.cardinality/one)

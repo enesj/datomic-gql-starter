@@ -1,37 +1,7 @@
 (ns datomic-gql-starter.examples.queries
   "Examples of queries for 'mbrainz' database "
   (:require [clojure.test :refer :all]
-            [datomic-gql-starter.lacinia.utils :as utils]
-            [venia.core :as v]))
-
-
-(comment
-  (require '[vlaaad.reveal :as reveal])
-  (add-tap (reveal/ui)))
-
-(defn composition-to-string [query]
-  "Converts the value of '_composition' argument to string "
-  (let [composition? (get-in query [0 1 :_composition])]
-    (if composition?
-      (update-in query [0 1 :_composition]
-        #(when % (str %)))
-      query)))
-
-(defn make-gql-query [clojure-data-query]
-  "Generates graphql query string from Clojure data"
-  (v/graphql-query {:venia/queries clojure-data-query}))
-
-(defn run-query [gql-query]
-  "Sends a GraphQL request to the server and returns data from the response."
-  (-> gql-query
-    composition-to-string
-    make-gql-query
-    utils/send-request
-    :body
-    :data
-    first
-    val))
-
+            [datomic-gql-starter.utils.test :refer [send-request composition-to-string make-gql-query run-query]]))
 
 (def artist-by-start-year
   "Find artists that has startYear 1959"
@@ -307,6 +277,19 @@
 
 
 
+(comment
+
+  (run-query releases-by-artist)
+  (run-query artist-no-start-year)
+  (composition-to-string artist-by-start-years-two)
+  (composition-to-string artist-no-start-year)
+  (->  artist-composition-with-or-and composition-to-string make-gql-query)
+  (->  artist-composition-complex composition-to-string make-gql-query)
+  (->  artist-composition-complex composition-to-string make-gql-query send-request))
+
+(comment
+  (require '[vlaaad.reveal :as reveal])
+  (add-tap (reveal/ui)))
 
 
 

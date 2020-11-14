@@ -1,34 +1,7 @@
 (ns datomic-gql-starter.examples.mutations
-  "Examples of mutations for 'mbrainz' database "
+  "Examples of mutations for 'mbrainz' database."
   (:require [clojure.test :refer :all]
-            [datomic-gql-starter.lacinia.utils :as utils]
-            [venia.core :as v]))
-
-
-(defn composition-to-string [query]
-  "Converts the value of '_composition' argument to string "
-  (let [composition? (get-in query [0 1 :_composition])]
-    (if composition?
-      (update-in query [0 1 :_composition]
-        #(when % (str %)))
-      query)))
-
-(defn make-gql-mutation [clojure-data-query]
-  "Generates graphql query string from Clojure data"
-  (v/graphql-query {:venia/operation {:operation/type :mutation
-                                      :operation/name ""}
-                    :venia/queries   clojure-data-query}))
-
-(defn run-mutation [query-data]
-  "Sends a GraphQL request to the server and returns data from the response."
-  (-> query-data
-    composition-to-string
-    make-gql-mutation
-    utils/send-request
-    :body
-    :data
-    first
-    val))
+            [datomic-gql-starter.utils.test :refer [send-request composition-to-string make-gql-mutation run-mutation]]))
 
 (def update-artist-start-day
   "All mutations have one special parameter ':_preview'. When this parameter is set to 'true' mutation will
@@ -140,3 +113,14 @@
      :end_day
      :name
      :country]]])
+
+(comment
+  (run-mutation update-artist-start-day)
+  (run-mutation update-artist-add-start-day)
+  (run-mutation insert-releases-artists)
+  (run-mutation delete-labels)
+  (composition-to-string update-artist-start-day)
+  (composition-to-string delete-labels)
+  (->  update-artist-start-day composition-to-string make-gql-mutation)
+  (->  update-artist-add-start-day composition-to-string make-gql-mutation)
+  (->  insert-releases-artists composition-to-string make-gql-mutation send-request))

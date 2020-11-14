@@ -8,12 +8,15 @@
              :refer
              [args-type
               camel-keyword
+              dbid-to-ns
               enum-value
+              get-enum-value
               namespaced-keyword
               query-ellipsis]]
+            [datomic-gql-starter.stillsuit.lib.util :refer [datomic-to-lacinia]]
             [datomic-gql-starter.utils.fern :refer [max-results]]
             [datomic-gql-starter.utils.make-names :refer [make-input-key]]
-            [db :refer [d-with db profile q transact!]]
+            [db :refer [d-with db profile q pull transact!]]
             [expound.alpha :as expound]
             [inflections.core :refer [singular]]))
 
@@ -223,7 +226,7 @@
 
 (defn make-query-resolver [db context entity values]
   (let [[errors rules] (get-rules db context entity values '?e)]
-    (tap>  rules)
+    (tap>  [values rules])
     (if errors
       (resolve-as nil {:message errors :status 404})
       (let [rules (vector (into (vector '(any ?e)) rules))
@@ -233,6 +236,7 @@
                          :where (any ?e)]
                       db rules)
             modified-results (query-ellipsis results)]
+        (tap> [:results results])
         (take limit modified-results)))))
 
 (defn make-update-tx-data
@@ -257,6 +261,7 @@
   (let [updates (:_update values)
         preview (:_preview values)
         query-result (make-query-resolver db context entity values)]
+    (tap> [:update values])
     (if updates
       (let [tx-data  (make-update-tx-data query-result updates entity)
             db-after (if preview (:db-after (d-with tx-data db))
@@ -264,6 +269,39 @@
         (make-query-resolver db-after context entity values))
       query-result)))
 
+(defn make-insert-tx-data [context entity arg-types data]
+  (for [values data]
+    (into {}
+      (for [[field lacinia-type] arg-types]
+        (let [arg (keyword (name field))
+              value (arg values)
+              arg-name (name arg)]
+          (if value
+            (vector
+              field
+              (cond
+                (string? lacinia-type)
+                (get-enum-value context entity arg-name value)
+                (map? lacinia-type)
+                (let [entity (singular arg-name)]
+                  (make-insert-tx-data context entity
+                    (args-type  entity datomic-to-lacinia)
+                    value))
+                :else value))
+            (when (= lacinia-type :JavaUUID)
+              (vector field  (java.util.UUID/randomUUID)))))))))
+
+(defn make-insert-resolver [db context entity arg-types data preview]
+  (let [
+        tx-data (make-insert-tx-data context entity arg-types data)
+        result (if preview
+                 (d-with tx-data db)
+                 (transact! tx-data))
+        tempids (:tempids result)
+        db-after (:db-after result)]
+    (tap> [:insert data preview])
+    (mapv #(pull db-after '[*] (val %))
+      (remove #(not= entity (dbid-to-ns db-after (val %))) tempids))))
 
 (defn make-deletion-resolver
   [db context entity values]

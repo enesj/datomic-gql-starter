@@ -5,7 +5,7 @@
 
 (def cfg {:server-type :dev-local
           :system      "samples"
-          :storage-dir "C:\\projects\\backend\\datomic-gql-starter\\data"})
+          :storage-dir "C:\\projects\\backend\\datomic-gql-starter\\test\\resources\\data"})
 
 (def conn (d/connect (d/client cfg) {:db-name (f/fern-e 'db-name)}))
 

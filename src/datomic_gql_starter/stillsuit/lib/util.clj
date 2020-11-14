@@ -7,6 +7,23 @@
   (:import (clojure.lang IPersistentMap)
            (java.io IOException PushbackReader)))
 
+(def datomic-to-lacinia
+  {:db.type/string  'String
+   :db.type/boolean 'Boolean
+   :db.type/long    :JavaLong
+   :db.type/keyword :ClojureKeyword
+   :db.type/bigint  :JavaBigInt
+   :db.type/float   'Float
+   :db.type/double  'Float
+   :db.type/bigdec  :JavaBigDec
+   :db.type/ref     ::ref
+   :db.type/instant ::instant
+   :db.type/uuid    :JavaUUID
+   :db.type/uri     'String
+   :db.type/bytes   'String
+   ;; These types are usable as :catchpocket/lacinia-field-type values
+   :Int             'Int})
+
 ;; Cheerfully copied from the lacinia tutorial
 (defn simplify
   "Converts all ordered maps nested within the map into standard hash maps, and
