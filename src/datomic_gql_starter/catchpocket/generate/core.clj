@@ -1,6 +1,5 @@
 (ns datomic-gql-starter.catchpocket.generate.core
   (:require [clojure.java.io :as io]
-            [clojure.tools.logging :as log]
             [cuerdas.core :as cstr]
             [datomic-gql-starter.catchpocket.generate.datomic :as datomic]
             [datomic-gql-starter.catchpocket.generate.enums :as enums]
@@ -25,14 +24,9 @@
 
 (defn- get-ref-type [field {:keys [:stillsuit/datomic-entity-type]}]
   (if-let [override-type (-> field :catchpocket/reference-to datomic/namespace-to-type)]
-    (do
-      (log/tracef "Using type %s as return type for field %s" override-type (:attribute/ident field))
-      override-type)
+      override-type
     ;; Else no entity found
-    (do
-      (log/warnf "No reference type found for field %s, using %s" (:attribute/ident field)
-                 datomic-entity-type)
-      datomic-entity-type)))
+      datomic-entity-type))
 
 (defn- get-instant-type [config]
   (if-let [instant-type (:catchpocket/instant-type config)]
@@ -44,10 +38,7 @@
   (let [base-type        (:attribute/field-type field)
         datomic-override (:attribute/meta-lacinia-type field)
         field-type       (if datomic-override
-                           (do
-                             (log/infof "Overriding type '%s' with type '%s' for attribute '%s'"
-                                        base-type datomic-override (:attribute/ident field))
-                             datomic-override)
+                           datomic-override
                            base-type)
         primitive        (get su/datomic-to-lacinia field-type)]
     (cond
@@ -64,8 +55,7 @@
       datomic-override
 
       :else
-      (log/warnf "Skipping unknown field %s with type %s."
-                 (:attribute/ident field) field-type))))
+      (println "Skipping unknown field %s with type %s." (:attribute/ident field) field-type))))
 
 
 
@@ -91,7 +81,6 @@
         full-type (if (= cardinality :db.cardinality/many)
                     (list 'list (list 'non-null enum-type))
                     enum-type)]
-    (log/tracef "Using enum type %s for field %s" full-type ident)
     (merge
      {:type    full-type
       :resolve [:stillsuit/enum
@@ -114,17 +103,13 @@
                                 (make-enum-field field enum-type)
                                 (make-single-field field config))
                    final-name (if meta-lacinia-name
-                                (do
-                                  (log/infof "Overriding lacinia name '%s' as '%s' for attribute '%s'"
-                                             lacinia-name meta-lacinia-name ident)
-                                  meta-lacinia-name)
+                                meta-lacinia-name
                                 lacinia-name)]
              :when field-def]
          [final-name field-def])
        (into {})))
 
 (defn- make-object [object enums field-defs config]
-  (log/debugf "Found entity type %s" object)
   {:description (format "Entity containing fields with the namespace `%s`"
                         (-> object str cstr/lower))
    :implements  [:DatomicEntity]
@@ -134,7 +119,6 @@
 
 (defn- create-objects
   [ent-map enums config]
-  ;(println "ent-map" ent-map)
   (->> (for [[object field-defs] ent-map]
          [object (make-object object enums field-defs config)])
        (into {})))
@@ -147,10 +131,7 @@
         field-def field-defs
         :let [datomic-override (:attribute/meta-backref-name field-def)
               backref          (if datomic-override
-                                 (do
-                                   (log/infof "Using backref name '%s' from datomic metadata on '%s'"
-                                              datomic-override (:attribute/ident field-def))
-                                   datomic-override)
+                                 datomic-override
                                  (:catchpocket/backref-name field-def))]
         :when backref
         :let [from-type   (or (-> field-def :catchpocket/reference-to datomic/namespace-to-type)
@@ -164,8 +145,6 @@
   (let [plural-type (if is-component?
                       to-type
                       (list 'list (list 'non-null to-type)))]
-    (log/tracef "Generating back-reference %s from type %s to type %s for attribute %s"
-                backref from-type plural-type datomic-ref)
     (assoc-in objects [from-type :fields backref]
               (merge {:type        plural-type
                       :resolve     [:stillsuit/ref
@@ -177,7 +156,6 @@
                   {:args (resolvers/query-args (cstr/camel (name to-type)) su/datomic-to-lacinia)})))))
 
 (defn generate-edn [base-schema ent-map enums config]
-  (log/infof "Generating lacinia schema for %d entity types..." (count ent-map))
   (let [objects   (create-objects ent-map enums config)
         backrefs  (find-backrefs ent-map)
         decorated (reduce add-backref objects backrefs)]
@@ -218,11 +196,9 @@
                     (zp/zprint-str schema zprint-width (or zprint-config default-zprint-config))
                     (pr-str schema))]
     (io/make-parents schema-file)
-    (log/infof "Saving schema to %s..." schema-file)
     (spit schema-file content)))
 
 (defn generate-and-write! [{:keys [:catchpocket/datomic-uri] :as config} conn db]
-  (log/infof "Connecting to %s..." datomic-uri)
   (let [generated (generate config db)]
     (write-file! generated config))
-  (log/info "Finished generation."))
+  (println "Finished generation."))

@@ -11,7 +11,6 @@
     [com.walmartlabs.lacinia.util :as util]
     [com.walmartlabs.lacinia.schema :as schema]
     [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
-    [gniazdo.core :as g]
     [io.pedestal.log :as log]
     [cheshire.core :as cheshire]))
 
@@ -131,6 +130,3 @@
     first
     val))
 
-(comment
-  (require '[vlaaad.reveal :as reveal])
-  (add-tap (reveal/ui)))

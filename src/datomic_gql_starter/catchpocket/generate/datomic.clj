@@ -1,6 +1,5 @@
 (ns datomic-gql-starter.catchpocket.generate.datomic
-  (:require [clojure.tools.logging :as log]
-            [cuerdas.core :as str]
+  (:require [cuerdas.core :as str]
             [datomic-gql-starter.catchpocket.generate.names :as names]
             [datomic-gql-starter.catchpocket.lib.util :as util]
             [datomic-gql-starter.lacinia.utils :refer [query-ellipsis]]
@@ -90,7 +89,6 @@
         ai      (attr-info attr-ent l-type config)]
     (if (contains? (:catchpocket/skip config) ident)
       (do
-        (log/infof "Skipping datomic attribute %s" ident)
         accum)
       (update accum l-type #(set-add % ai)))))
 
@@ -98,7 +96,6 @@
   "Produce an entity map - a map of lacinia type names to a set of attribute maps,
   where each attribute map corresponds to one datomic attribute as returned by (attr-info)."
   [db config]
-  (log/info "Scanning datomic attributes...")
   (let [attr-ents (attr-entities db)]
     (reduce (partial add-attr config) {} attr-ents)))
 
@@ -129,10 +126,6 @@
                             [(identity ?v) ?value]
                             [(ground :none) ?doc]))]
                  db attributes)]
-    (log/infof "Found %d possible enum values for attribute%s %s."
-               (count vals)
-               (if (> (count attributes) 1) "s" "")
-               (util/oxford attributes))
     (for [[value doc] vals
           attribute   attributes]
       (merge

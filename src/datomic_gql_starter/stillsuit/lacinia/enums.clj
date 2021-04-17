@@ -1,6 +1,5 @@
 (ns datomic-gql-starter.stillsuit.lacinia.enums
-  "Implementation functions related to translating enum values between lacinia and stillsuit."
-  (:require [clojure.tools.logging :as log]))
+  "Implementation functions related to translating enum values between lacinia and stillsuit.")
 
 (defn make-enum-map
   "Look through a decorated lacinia schema, scanning its enum values. For each enum description,

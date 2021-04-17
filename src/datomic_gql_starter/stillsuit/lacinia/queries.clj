@@ -1,7 +1,6 @@
 (ns datomic-gql-starter.stillsuit.lacinia.queries
   "Implementation functions for creating top-level stillsuit queries."
-  (:require [clojure.tools.logging :as log]
-            [com.walmartlabs.lacinia.resolve :as resolve]
+  (:require [com.walmartlabs.lacinia.resolve :as resolve]
             [com.walmartlabs.lacinia.schema :as schema]
             [datomic-gql-starter.stillsuit.datomic.core :as datomic]
             [datomic-gql-starter.stillsuit.lacinia.types :as types]
@@ -23,7 +22,6 @@
     (if-let [db (some-> connection d-db)]
       (let [ent      (datomic/get-entity-by-eid db eid)
             ent-type (types/lacinia-type ent config connection)]
-        (log/infof "Entity" ent)
         (when (some? ent)
           (resolve/resolve-as
            (schema/tag-with-type ent ent-type))))

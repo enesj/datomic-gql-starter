@@ -1,7 +1,6 @@
 (ns datomic-gql-starter.stillsuit.lacinia.resolvers
   "Implementation functions for stillsuit resolvers."
-  (:require [clojure.tools.logging :as log]
-            [com.walmartlabs.lacinia.resolve :as resolve]
+  (:require [com.walmartlabs.lacinia.resolve :as resolve]
             [com.walmartlabs.lacinia.schema :as schema]
             [cuerdas.core :as str]
             [datomic-gql-starter.stillsuit.datomic.core :as sd]
@@ -29,7 +28,6 @@
   (let [attr-kw (graphql-field->datomic-attribute entity graphql-field-name options connection)
         value   (get entity attr-kw)]
     ;#p [attr-kw graphql-field-name]
-    (log/tracef "Resolved graphql field '%s' as %s, value %s" graphql-field-name attr-kw value)
     value))
 
 (defn- entity-sort
@@ -89,10 +87,7 @@
   [{:stillsuit/keys [entity-filter] :as opts} context entity-set]
   (let [referenced-filter (get-in context [:stillsuit/entity-filters entity-filter])
         filter-fn         (if-not (fn? referenced-filter)
-                            (do
-                              (when entity-filter
-                                (log/warnf "Referenced entity-filter %s not found!" entity-filter))
-                              (constantly true))
+                            (constantly true)
                             referenced-filter)]
     (->> entity-set
          (remove nil?)
@@ -135,8 +130,9 @@
                      (get attr-map value))]
       ;(println [value mapped attr-map])
       (when (and (some? value) (nil? mapped))
-        (log/warnf "Unable to find mapping for datomic enum value %s for type %s, attribute %s!"
-                   value lacinia-type attribute))
+        (println (str "Unable to find mapping for datomic enum value " value lacinia-type
+                      " for type " attribute ", attribute %s!")))
+
       (resolve/resolve-as
        (when (or (some? mapped) (some? value))
          (schema/tag-with-type (or mapped value) lacinia-type))))))

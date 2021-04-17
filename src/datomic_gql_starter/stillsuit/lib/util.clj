@@ -1,7 +1,6 @@
 (ns datomic-gql-starter.stillsuit.lib.util
   "A collection of utility functions."
   (:require [clojure.java.io :as io]
-            [clojure.tools.logging :as log]
             [clojure.tools.reader.edn :as edn]
             [clojure.walk :as walk])
   (:import (clojure.lang IPersistentMap)
@@ -50,11 +49,11 @@
     (with-open [r (io/reader filename)]
       (edn/read {:readers *data-readers*} (PushbackReader. r)))
     (catch IOException e
-      (log/errorf "Couldn't open file '%s': %s" filename (.getMessage e))
+      (println (str "Couldn't open file " filename ":" (.getMessage e)))
       nil)
     ;; This is the undocumented exception clojure.edn throws if it gets an error parsing an edn file
     (catch RuntimeException e
-      (log/errorf "Error parsing edn file '%s': %s" filename (.getMessage e))
+      (println "Error parsing edn file " filename ":" (.getMessage e))
       nil)))
 
 (defn load-edn-resource

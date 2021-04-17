@@ -1,6 +1,5 @@
 (ns datomic-gql-starter.catchpocket.generate.names
-  (:require [clojure.tools.logging :as log]
-            [cuerdas.core :as str]))
+  (:require [cuerdas.core :as str]))
 
 (def all-name-styles
   "Set of every possible `style` value for the `(keyword-part->type)` function"
@@ -10,10 +9,7 @@
   "Transform a keyword from sausage-case to another style."
   [kw style]
   (if-not (all-name-styles style)
-    (do
-      (log/errorf "Unknown keyword-conversion style %s, returning untransformed value '%s'!"
-                  style kw)
-      kw)
+    kw
     (let [capitalize? (#{:Snake_Case :CamelCase :camelCase} style)
           underjoin?  (#{:Snake_Case :snake_case :SNAKE_CASE} style)
           up-first?   (#{:Snake_Case :CamelCase} style)
@@ -68,12 +64,8 @@
       (keyword-part->type kw query-cf)
 
       (ifn? query-cf)
-      (query-cf kw)
+      (query-cf kw))))
 
-      :else
-      (do
-        (log/errorf "Unknown query-name parameter %s, returning original value %s" query-cf kw)
-        kw))))
 
 (defn db-id-name
   "Return the lacinia name for the :db/id datomic field, which is used in the interface definition

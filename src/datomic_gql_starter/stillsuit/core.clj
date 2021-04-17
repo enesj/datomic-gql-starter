@@ -6,8 +6,7 @@
   Note that this namespace constitutes the entirety of the public API; all the other
   namespaces in stillsuit can be considered to be implementation details and may change
   over time."
-  (:require [clojure.tools.logging :as log]
-            [com.walmartlabs.lacinia :as lacinia]
+  (:require [com.walmartlabs.lacinia :as lacinia]
             [com.walmartlabs.lacinia.schema :as schema]
             [com.walmartlabs.lacinia.util :as util]
             [datomic-gql-starter.stillsuit.lacinia.enums :as se]
@@ -54,8 +53,6 @@
   For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/#_stillsuit_enums)."
   [app-context lacinia-type lacinia-enum-keyword]
   (let [value (get-in app-context [:stillsuit/enum-map lacinia-type :stillsuit/lacinia-to-datomic lacinia-enum-keyword])]
-    (when (nil? value)
-      (log/infof "Unable to find datomic enum equivalent for lacinia enum value %s!" lacinia-enum-keyword))
     value))
 
 (defn connection
@@ -129,8 +126,6 @@
         compiled     (if (:stillsuit/compile? opts)
                        (schema/compile uncompiled compile-opts)
                        uncompiled)]
-    (when (:stillsuit/trace? opts)
-      (log/spy :trace uncompiled))
     {:stillsuit/schema      compiled
      :stillsuit/app-context (make-app-context context schema connection
                                               enum-map entity-filters opts)}))

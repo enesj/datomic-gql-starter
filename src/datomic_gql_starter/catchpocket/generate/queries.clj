@@ -1,6 +1,5 @@
 (ns datomic-gql-starter.catchpocket.generate.queries
-  (:require [clojure.tools.logging :as log]
-            [datomic-gql-starter.catchpocket.generate.names :as names]))
+  (:require [datomic-gql-starter.catchpocket.generate.names :as names]))
 
 (defn- query-definition
   [field-type parent-type {:attribute/keys [lacinia-name ident]} config]
@@ -30,9 +29,6 @@
                          :when (or (nil? whitelist) (contains? whitelist qname))
                          :when (or (nil? blacklist) (not (contains? blacklist qname)))
                          :let [qdef (query-definition field-type parent-type attr-info config)]]
-                     (do
-                       (log/debugf "Generating top-level query %s from unique attribute %s"
-                                   qname attr-ident)
-                       [qname qdef]))
+                     [qname qdef])
         queries    (into {} query-defs)]
     (update schema :queries merge queries)))

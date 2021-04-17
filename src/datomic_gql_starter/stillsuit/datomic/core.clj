@@ -1,7 +1,6 @@
 (ns datomic-gql-starter.stillsuit.datomic.core
   "Implementation functions for dealing with datomic interactions."
-  (:require [clojure.tools.logging :as log]
-            [cuerdas.core :as str]
+  (:require [cuerdas.core :as str]
             [datomic-gql-starter.catchpocket.generate.core :as cgc]
             [datomic-gql-starter.catchpocket.generate.datomic :as cgd]
             [datomic-gql-starter.lacinia.resolvers :as resolvers]
@@ -96,10 +95,7 @@
                 :db.type/int #(Integer/parseInt %)
                 :db.type/keyword keyword
                 :db.type/uuid #(UUID/fromString %)
-                (do
-                  (log/errorf "Unknown datomic type %s encountered, returning '%s' as string"
-                              datomic-type input)
-                  identity))]
+                identity)]
     (xform input)))
 
 
@@ -114,12 +110,7 @@
     (if-let [coerced (if (string? value)
                        (coerce-to-datomic-type value (:db/ident (:db/valueType attr-ent)))
                        value)]
-      (pull db '[*] [attribute-ident coerced])
-      ;; Else coercion failed
-      (log/warnf "Unable to coerce input '%s' to type %s in (get-entity-by-unique-attribute %s)"
-                 value attr-ent attribute-ident))
-    ;; Else atttribute not found
-    (log/warnf "Attribute %s not found in (get-entity-by-unique-attribute)" attribute-ident)))
+      (pull db '[*] [attribute-ident coerced]))))
 
 (defn guess-entity-ns
   "Given a random entity, iterate through its attributes and look for one that is marked
@@ -137,6 +128,4 @@
                                   (some unique))]
     (if (some? unique-attribute)
       (namespace unique-attribute)
-      (do (log/warnf "Could not find unique attribute for:\n\n Field resolution probably won't work!!")
-                     ;(d/touch entity))
-          nil))))
+      nil)))
