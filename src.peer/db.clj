@@ -1,6 +1,7 @@
 (ns db
   (:require [datomic-gql-starter.utils.fern :as f]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [datomic-gql-starter.utils.fern :as f]))
 (def profile :peer)
 
 (def db-uri (str f/db-link-peer f/db-name))

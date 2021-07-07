@@ -1,21 +1,28 @@
 {:paths ["src" "resources"]
 
  :deps
-        {clj-http/clj-http                         {:mvn/version "3.10.1"},
-         com.cognitect/fern                        {:mvn/version "0.1.5"},
-         com.walmartlabs/lacinia-pedestal          {:mvn/version "0.13.0", :exclusions [com.walmartlabs/lacinia org.flatland/ordered org.clojure/tools.reader]},
-         com.walmartlabs/lacinia                   {:mvn/version "0.36.0",},
-         expound/expound                           {:mvn/version "0.8.4"},
-         funcool/cuerdas                           {:mvn/version "2.1.0"},
-         inflections/inflections                   {:mvn/version "0.13.2", :exclusions [commons-codec/commons-codec]},
-         me.dryewo/mem-files                       {:mvn/version "0.1.1"},
-         mount/mount                               {:mvn/version "0.1.16"},
-         org.clojure/clojure                       {:mvn/version "1.10.1"},
-         org.clojure/core.rrb-vector               {:mvn/version "0.0.13"},
-         org.clojure/tools.namespace               {:mvn/version "1.0.0", :exclusions [org.clojure/tools.reader]},
-         org.clojure/tools.cli                     {:mvn/version "0.4.2"},
-         vincit/venia                              {:mvn/version "0.2.5"},
-         zprint/zprint                             {:mvn/version "0.5.3"}}
+        {clj-http/clj-http                {:mvn/version "3.10.1"},
+         com.cognitect/fern               {:mvn/version "0.1.5"},
+         com.walmartlabs/lacinia-pedestal {:mvn/version "0.13.0", :exclusions [com.walmartlabs/lacinia org.flatland/ordered org.clojure/tools.reader]},
+         com.walmartlabs/lacinia          {:mvn/version "0.36.0",},
+         expound/expound                  {:mvn/version "0.8.4"},
+         funcool/cuerdas                  {:mvn/version "2.1.0"},
+         inflections/inflections          {:mvn/version "0.13.2", :exclusions [commons-codec/commons-codec]},
+         me.dryewo/mem-files              {:mvn/version "0.1.1"},
+         mount/mount                      {:mvn/version "0.1.16"},
+         org.clojure/clojure              {:mvn/version "1.10.1"},
+         org.clojure/core.rrb-vector      {:mvn/version "0.0.13"},
+         org.clojure/tools.namespace      {:mvn/version "1.0.0", :exclusions [org.clojure/tools.reader]},
+         org.clojure/tools.cli            {:mvn/version "0.4.2"},
+         vincit/venia                     {:mvn/version "0.2.5"},
+         zprint/zprint                    {:mvn/version "0.5.3"}
+         hodur/engine                     {:mvn/version "0.1.6"}
+         hodur/spec-schema                {:mvn/version "0.1.5"}
+         hodur/lacinia-schema             {:mvn/version "0.1.2"}
+         hodur/datomic-schema             {:mvn/version "0.1.0"}
+         hodur/graphviz-schema            {:mvn/version "0.1.0"}}
+
+ ;com.clojure-goes-fast/clj-async-profiler  {:mvn/version "0.5.0"}}
 
  :aliases
         {:peer     {:extra-deps  {com.datomic/datomic-pro {:mvn/version "1.0.6242",}}

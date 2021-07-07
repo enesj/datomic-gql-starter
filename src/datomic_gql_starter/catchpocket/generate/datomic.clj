@@ -107,17 +107,14 @@
   Return a seq of {::datomic-value :foo/bar ::attribute :x/foo ::description \"docstring\"}
   maps, where :description is the docstring for enum references."
   [db attributes]
-  (let [api-pull (if (= profile :devlocal)
-                   (symbol "datomic.client.api/pull")
-                   (symbol "datomic.api/pull"))
-        vals (q '[:find ?value ?doc
+  (let [vals (q '[:find ?value ?doc
                   :in $ [?attribute ...]
                   :where
                   [_ ?attribute ?v]
                   (or-join [?v ?doc ?value]
                            ;; Ident enum
                            (and
-                            [(api-pull $ '[:db/id] ?v) ?entid]
+                            [(db/pull $ '[:db/id] ?v) ?entid]
                             [(:db/id ?entid) ?v-id]
                             [?v-id :db/ident ?value]
                             [(get-else $ ?v-id :db/doc :none) ?doc])
@@ -126,6 +123,7 @@
                             [(identity ?v) ?value]
                             [(ground :none) ?doc]))]
                  db attributes)]
+
     (for [[value doc] vals
           attribute   attributes]
       (merge

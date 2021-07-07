@@ -42,10 +42,10 @@
                            base-type)
         primitive        (get su/datomic-to-lacinia field-type)]
     (cond
-      (= primitive ::instant)
+      (= primitive ::su/instant)
       (get-instant-type config)
 
-      (= primitive ::ref)
+      (= primitive ::su/ref)
       (get-ref-type field config)
 
       (or (keyword? primitive) (symbol? primitive))
